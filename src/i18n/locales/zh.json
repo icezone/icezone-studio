@@ -1,0 +1,43 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "confirm": "确认",
+    "back": "返回",
+    "or": "或"
+  },
+  "auth": {
+    "login": "登录",
+    "signup": "注册",
+    "signOut": "退出登录",
+    "email": "邮箱",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "••••••••",
+    "signingIn": "登录中...",
+    "creatingAccount": "创建账号中...",
+    "signInTitle": "登录",
+    "signInSubtitle": "登录到你的账号",
+    "signUpTitle": "注册",
+    "signUpSubtitle": "创建新账号",
+    "continueWithGoogle": "使用 Google 登录",
+    "noAccount": "还没有账号？",
+    "hasAccount": "已有账号？",
+    "checkEmail": "查看邮箱",
+    "checkEmailMessage": "我们已发送确认链接到 <strong>{{email}}</strong>。",
+    "backToLogin": "返回登录",
+    "passwordMismatch": "两次密码不一致",
+    "passwordTooShort": "密码至少需要 6 个字符"
+  },
+  "dashboard": {
+    "title": "我的项目",
+    "empty": "你的项目将会显示在这里。"
+  },
+  "nav": {
+    "myProjects": "我的项目",
+    "appName": "Storyboard Copilot"
+  }
+}
