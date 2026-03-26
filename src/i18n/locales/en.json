@@ -1,0 +1,43 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "or": "or"
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign up",
+    "signOut": "Sign out",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "••••••••",
+    "signingIn": "Signing in...",
+    "creatingAccount": "Creating account...",
+    "signInTitle": "Login",
+    "signInSubtitle": "Sign in to your account",
+    "signUpTitle": "Sign up",
+    "signUpSubtitle": "Create a new account",
+    "continueWithGoogle": "Continue with Google",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "checkEmail": "Check your email",
+    "checkEmailMessage": "We've sent a confirmation link to <strong>{{email}}</strong>.",
+    "backToLogin": "Back to login",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters"
+  },
+  "dashboard": {
+    "title": "My Projects",
+    "empty": "Your projects will appear here."
+  },
+  "nav": {
+    "myProjects": "My Projects",
+    "appName": "Storyboard Copilot"
+  }
+}
