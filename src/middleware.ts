@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 // Routes accessible without auth
 const publicRoutes = ['/login', '/signup', '/callback'];
 // Routes that always require auth
-const protectedRoutes = ['/dashboard', '/canvas'];
+const protectedRoutes = ['/dashboard', '/canvas', '/settings', '/billing'];
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
