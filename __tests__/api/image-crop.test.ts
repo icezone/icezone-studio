@@ -1,6 +1,7 @@
+// @vitest-environment node
 import { describe, it, expect } from 'vitest'
 import sharp from 'sharp'
-import { POST } from '../../app/api/image/crop/route'
+import { POST } from '../../src/app/api/image/crop/route'
 import { NextRequest } from 'next/server'
 
 async function createTestImage(width: number, height: number): Promise<Buffer> {

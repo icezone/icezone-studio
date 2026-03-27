@@ -62,7 +62,7 @@ vi.mock('@/lib/supabase/server', () => ({
   getAuthUser: async () => mock.getAuthUser(),
 }))
 
-import { POST } from '../../app/api/ai/image/generate/route'
+import { POST } from '../../src/app/api/ai/image/generate/route'
 import { NextRequest } from 'next/server'
 
 function makeRequest(body: unknown, url = 'http://localhost/api/ai/image/generate') {

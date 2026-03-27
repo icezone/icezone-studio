@@ -62,7 +62,7 @@ vi.mock('@/lib/supabase/server', () => ({
   getAuthUser: async () => mock.getAuthUser(),
 }))
 
-import { GET } from '../../app/api/jobs/[id]/route'
+import { GET } from '../../src/app/api/jobs/[id]/route'
 import { NextRequest } from 'next/server'
 
 function makeRequest(jobId: string) {

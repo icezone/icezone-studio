@@ -50,7 +50,7 @@ describe('POST /api/assets/upload', () => {
     vi.mocked(createClient).mockResolvedValue(createMockSupabase() as never);
     vi.mocked(getAuthUser).mockResolvedValue(null);
 
-    const { POST } = await import('../../app/api/assets/upload/route');
+    const { POST } = await import('../../src/app/api/assets/upload/route');
 
     const formData = new FormData();
     formData.append('projectId', 'project-123');
@@ -74,7 +74,7 @@ describe('POST /api/assets/upload', () => {
     vi.mocked(createClient).mockResolvedValue(createMockSupabase() as never);
     vi.mocked(getAuthUser).mockResolvedValue(mockUser as never);
 
-    const { POST } = await import('../../app/api/assets/upload/route');
+    const { POST } = await import('../../src/app/api/assets/upload/route');
 
     const formData = new FormData();
     formData.append('projectId', 'project-123');
@@ -94,7 +94,7 @@ describe('POST /api/assets/upload', () => {
     vi.mocked(createClient).mockResolvedValue(createMockSupabase() as never);
     vi.mocked(getAuthUser).mockResolvedValue(mockUser as never);
 
-    const { POST } = await import('../../app/api/assets/upload/route');
+    const { POST } = await import('../../src/app/api/assets/upload/route');
 
     const formData = new FormData();
     formData.append('projectId', 'project-123');
@@ -119,7 +119,7 @@ describe('POST /api/assets/upload', () => {
     vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
     vi.mocked(getAuthUser).mockResolvedValue(mockUser as never);
 
-    const { POST } = await import('../../app/api/assets/upload/route');
+    const { POST } = await import('../../src/app/api/assets/upload/route');
 
     const formData = new FormData();
     formData.append('projectId', 'project-123');

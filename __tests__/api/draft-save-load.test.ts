@@ -53,7 +53,7 @@ vi.mock('@/lib/supabase/server', () => ({
   },
 }))
 
-import { GET, PUT } from '../../app/api/projects/[id]/draft/route'
+import { GET, PUT } from '../../src/app/api/projects/[id]/draft/route'
 
 const UUID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
 

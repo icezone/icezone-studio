@@ -1,8 +1,9 @@
+// @vitest-environment node
 import { describe, it, expect } from 'vitest'
 import sharp from 'sharp'
-import { POST as splitPOST } from '../../app/api/image/split/route'
-import { POST as cropPOST } from '../../app/api/image/crop/route'
-import { POST as metadataPOST } from '../../app/api/image/metadata/route'
+import { POST as splitPOST } from '../../src/app/api/image/split/route'
+import { POST as cropPOST } from '../../src/app/api/image/crop/route'
+import { POST as metadataPOST } from '../../src/app/api/image/metadata/route'
 import { NextRequest } from 'next/server'
 
 async function createTestImage(width: number, height: number): Promise<Buffer> {

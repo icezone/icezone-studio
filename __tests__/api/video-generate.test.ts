@@ -103,7 +103,7 @@ vi.mock('@/server/video/index', () => ({}))
 // ---------------------------------------------------------------------------
 // Import route under test
 // ---------------------------------------------------------------------------
-import { POST } from '../../app/api/ai/video/generate/route'
+import { POST } from '../../src/app/api/ai/video/generate/route'
 
 function makeRequest(body: unknown) {
   return new Request('http://localhost/api/ai/video/generate', {
