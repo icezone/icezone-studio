@@ -6,7 +6,13 @@
     "delete": "Delete",
     "confirm": "Confirm",
     "back": "Back",
-    "or": "or"
+    "or": "or",
+    "create": "Create",
+    "rename": "Rename",
+    "open": "Open",
+    "edit": "Edit",
+    "settings": "Settings",
+    "error": "Something went wrong"
   },
   "auth": {
     "login": "Login",
@@ -34,10 +40,44 @@
   },
   "dashboard": {
     "title": "My Projects",
-    "empty": "Your projects will appear here."
+    "empty": "No projects yet. Click \"New Project\" to get started.",
+    "newProject": "New Project",
+    "creating": "Creating...",
+    "projectNamePlaceholder": "Untitled Project",
+    "lastEdited": "Last edited",
+    "openCanvas": "Open Canvas",
+    "deleteProject": "Delete Project",
+    "deleteConfirm": "Delete \"{{name}}\"? This cannot be undone.",
+    "deleteSuccess": "Project deleted",
+    "createError": "Failed to create project",
+    "loadError": "Failed to load projects",
+    "renameProject": "Rename",
+    "newProjectName": "New project name"
   },
   "nav": {
     "myProjects": "My Projects",
+    "settings": "Settings",
     "appName": "Storyboard Copilot"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "apiKeys": "API Keys",
+    "apiKeysDesc": "Configure your own API keys (BYOK)",
+    "addApiKey": "Add API Key",
+    "apiKeyName": "Name",
+    "apiKeyValue": "API Key",
+    "apiKeyProvider": "Provider",
+    "saveKey": "Save",
+    "deleteKey": "Delete",
+    "keyAdded": "API Key saved",
+    "keyDeleted": "API Key deleted",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "language": "Language",
+    "langZh": "中文",
+    "langEn": "English"
   }
 }

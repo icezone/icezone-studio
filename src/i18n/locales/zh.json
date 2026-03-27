@@ -6,7 +6,13 @@
     "delete": "删除",
     "confirm": "确认",
     "back": "返回",
-    "or": "或"
+    "or": "或",
+    "create": "创建",
+    "rename": "重命名",
+    "open": "打开",
+    "edit": "编辑",
+    "settings": "设置",
+    "error": "出错了"
   },
   "auth": {
     "login": "登录",
@@ -34,10 +40,44 @@
   },
   "dashboard": {
     "title": "我的项目",
-    "empty": "你的项目将会显示在这里。"
+    "empty": "还没有项目，点击「新建项目」开始创建。",
+    "newProject": "新建项目",
+    "creating": "创建中...",
+    "projectNamePlaceholder": "未命名项目",
+    "lastEdited": "最后编辑",
+    "openCanvas": "打开画布",
+    "deleteProject": "删除项目",
+    "deleteConfirm": "确定要删除「{{name}}」吗？此操作不可撤销。",
+    "deleteSuccess": "项目已删除",
+    "createError": "创建项目失败",
+    "loadError": "加载项目失败",
+    "renameProject": "重命名",
+    "newProjectName": "新项目名称"
   },
   "nav": {
     "myProjects": "我的项目",
+    "settings": "设置",
     "appName": "Storyboard Copilot"
+  },
+  "settings": {
+    "title": "设置",
+    "profile": "个人信息",
+    "apiKeys": "API Key",
+    "apiKeysDesc": "配置自定义 API Key（BYOK）",
+    "addApiKey": "添加 API Key",
+    "apiKeyName": "名称",
+    "apiKeyValue": "API Key",
+    "apiKeyProvider": "服务商",
+    "saveKey": "保存",
+    "deleteKey": "删除",
+    "keyAdded": "API Key 已保存",
+    "keyDeleted": "API Key 已删除",
+    "theme": "主题",
+    "themeLight": "浅色",
+    "themeDark": "深色",
+    "themeSystem": "跟随系统",
+    "language": "语言",
+    "langZh": "中文",
+    "langEn": "English"
   }
 }
