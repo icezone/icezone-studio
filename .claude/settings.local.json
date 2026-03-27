@@ -27,7 +27,10 @@
       "Bash(gh pr:*)",
       "Bash(node --input-type=module -e \":*)",
       "Bash(git -C D:/storyboard-copilot-web worktree list)",
-      "Bash(git -C D:/storyboard-copilot-web log --oneline ws/auth-shell)"
+      "Bash(git -C D:/storyboard-copilot-web log --oneline ws/auth-shell)",
+      "Bash(ls D:/storyboard-copilot-web/app/\\\\\\(auth\\\\\\)/)",
+      "Bash(ls:*)",
+      "Bash(grep -r proxy D:/storyboard-copilot-web/node_modules/next/dist/shared/lib/router/utils/*.js)"
     ]
   }
 }

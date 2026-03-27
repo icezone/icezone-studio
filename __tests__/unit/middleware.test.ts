@@ -33,7 +33,7 @@ vi.mock('next/server', async () => {
   };
 });
 
-describe('middleware', () => {
+describe('proxy (auth routing)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://test.supabase.co');
@@ -42,20 +42,20 @@ describe('middleware', () => {
 
   it('should allow access to public routes without auth', async () => {
     mockGetUser.mockResolvedValueOnce({ data: { user: null }, error: null });
-    const { middleware } = await import('../../src/middleware');
+    const { proxy } = await import('../../src/proxy');
     const { NextResponse } = await import('next/server');
     const request = new NextRequest('http://localhost:3000/login');
-    await middleware(request);
+    await proxy(request);
     expect(NextResponse.redirect).not.toHaveBeenCalled();
   });
 
   it('should redirect unauthenticated users from protected routes to /login', async () => {
     mockGetUser.mockResolvedValueOnce({ data: { user: null }, error: null });
     vi.resetModules();
-    const { middleware } = await import('../../src/middleware');
+    const { proxy } = await import('../../src/proxy');
     const { NextResponse } = await import('next/server');
     const request = new NextRequest('http://localhost:3000/dashboard');
-    await middleware(request);
+    await proxy(request);
     expect(NextResponse.redirect).toHaveBeenCalled();
   });
 
@@ -65,10 +65,10 @@ describe('middleware', () => {
       error: null,
     });
     vi.resetModules();
-    const { middleware } = await import('../../src/middleware');
+    const { proxy } = await import('../../src/proxy');
     const { NextResponse } = await import('next/server');
     const request = new NextRequest('http://localhost:3000/dashboard');
-    await middleware(request);
+    await proxy(request);
     expect(NextResponse.redirect).not.toHaveBeenCalled();
   });
 
@@ -78,10 +78,10 @@ describe('middleware', () => {
       error: null,
     });
     vi.resetModules();
-    const { middleware } = await import('../../src/middleware');
+    const { proxy } = await import('../../src/proxy');
     const { NextResponse } = await import('next/server');
     const request = new NextRequest('http://localhost:3000/login');
-    await middleware(request);
+    await proxy(request);
     expect(NextResponse.redirect).toHaveBeenCalled();
   });
 });

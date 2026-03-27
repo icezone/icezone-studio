@@ -6,7 +6,7 @@ const publicRoutes = ['/login', '/signup', '/callback'];
 // Routes that always require auth
 const protectedRoutes = ['/dashboard', '/canvas', '/settings', '/billing'];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });

@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
+import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -16,27 +18,21 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     const { error } = await signIn(email, password);
-    if (error) {
-      setError(error.message);
-    }
+    if (error) setError(error.message);
     setLoading(false);
   };
 
   const handleGoogleLogin = async () => {
     setError(null);
     const { error } = await signInWithOAuth('google');
-    if (error) {
-      setError(error.message);
-    }
+    if (error) setError(error.message);
   };
 
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-foreground">Login</h1>
-        <p className="mt-2 text-sm text-foreground/60">
-          Sign in to your account
-        </p>
+        <h1 className="text-2xl font-bold text-foreground">{t('auth.signInTitle')}</h1>
+        <p className="mt-2 text-sm text-foreground/60">{t('auth.signInSubtitle')}</p>
       </div>
 
       {error && (
@@ -48,7 +44,7 @@ export default function LoginPage() {
       <form onSubmit={handleEmailLogin} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-foreground">
-            Email
+            {t('auth.email')}
           </label>
           <input
             id="email"
@@ -57,12 +53,12 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             className="mt-1 block w-full rounded-md border border-foreground/20 bg-background px-3 py-2 text-foreground placeholder:text-foreground/40 focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/40"
-            placeholder="you@example.com"
+            placeholder={t('auth.emailPlaceholder')}
           />
         </div>
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-foreground">
-            Password
+            {t('auth.password')}
           </label>
           <input
             id="password"
@@ -71,7 +67,7 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
             className="mt-1 block w-full rounded-md border border-foreground/20 bg-background px-3 py-2 text-foreground placeholder:text-foreground/40 focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/40"
-            placeholder="••••••••"
+            placeholder={t('auth.passwordPlaceholder')}
           />
         </div>
         <button
@@ -79,7 +75,7 @@ export default function LoginPage() {
           disabled={loading}
           className="w-full rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:bg-foreground/90 disabled:opacity-50"
         >
-          {loading ? 'Signing in...' : 'Sign in'}
+          {loading ? t('auth.signingIn') : t('auth.login')}
         </button>
       </form>
 
@@ -88,21 +84,22 @@ export default function LoginPage() {
           <div className="w-full border-t border-foreground/10" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="bg-background px-2 text-foreground/40">or</span>
+          <span className="bg-background px-2 text-foreground/40">{t('common.or')}</span>
         </div>
       </div>
 
       <button
+        type="button"
         onClick={handleGoogleLogin}
         className="w-full rounded-md border border-foreground/20 bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
       >
-        Continue with Google
+        {t('auth.continueWithGoogle')}
       </button>
 
       <p className="text-center text-sm text-foreground/60">
-        Don&apos;t have an account?{' '}
+        {t('auth.noAccount')}{' '}
         <Link href="/signup" className="font-medium text-foreground hover:underline">
-          Sign up
+          {t('auth.signup')}
         </Link>
       </p>
     </div>

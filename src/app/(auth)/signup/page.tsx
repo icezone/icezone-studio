@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
+import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 
 export default function SignupPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -18,12 +20,11 @@ export default function SignupPage() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth.passwordMismatch'));
       return;
     }
-
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError(t('auth.passwordTooShort'));
       return;
     }
 
@@ -40,12 +41,13 @@ export default function SignupPage() {
   if (success) {
     return (
       <div className="space-y-4 text-center">
-        <h1 className="text-2xl font-bold text-foreground">Check your email</h1>
-        <p className="text-sm text-foreground/60">
-          We&apos;ve sent a confirmation link to <strong>{email}</strong>.
-        </p>
+        <h1 className="text-2xl font-bold text-foreground">{t('auth.checkEmail')}</h1>
+        <p
+          className="text-sm text-foreground/60"
+          dangerouslySetInnerHTML={{ __html: t('auth.checkEmailMessage', { email }) }}
+        />
         <Link href="/login" className="text-sm font-medium text-foreground hover:underline">
-          Back to login
+          {t('auth.backToLogin')}
         </Link>
       </div>
     );
@@ -54,10 +56,8 @@ export default function SignupPage() {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-foreground">Sign up</h1>
-        <p className="mt-2 text-sm text-foreground/60">
-          Create a new account
-        </p>
+        <h1 className="text-2xl font-bold text-foreground">{t('auth.signUpTitle')}</h1>
+        <p className="mt-2 text-sm text-foreground/60">{t('auth.signUpSubtitle')}</p>
       </div>
 
       {error && (
@@ -69,7 +69,7 @@ export default function SignupPage() {
       <form onSubmit={handleSignup} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-foreground">
-            Email
+            {t('auth.email')}
           </label>
           <input
             id="email"
@@ -78,12 +78,12 @@ export default function SignupPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             className="mt-1 block w-full rounded-md border border-foreground/20 bg-background px-3 py-2 text-foreground placeholder:text-foreground/40 focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/40"
-            placeholder="you@example.com"
+            placeholder={t('auth.emailPlaceholder')}
           />
         </div>
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-foreground">
-            Password
+            {t('auth.password')}
           </label>
           <input
             id="password"
@@ -93,12 +93,12 @@ export default function SignupPage() {
             required
             minLength={6}
             className="mt-1 block w-full rounded-md border border-foreground/20 bg-background px-3 py-2 text-foreground placeholder:text-foreground/40 focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/40"
-            placeholder="••••••••"
+            placeholder={t('auth.passwordPlaceholder')}
           />
         </div>
         <div>
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground">
-            Confirm Password
+            {t('auth.confirmPassword')}
           </label>
           <input
             id="confirmPassword"
@@ -108,7 +108,7 @@ export default function SignupPage() {
             required
             minLength={6}
             className="mt-1 block w-full rounded-md border border-foreground/20 bg-background px-3 py-2 text-foreground placeholder:text-foreground/40 focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/40"
-            placeholder="••••••••"
+            placeholder={t('auth.passwordPlaceholder')}
           />
         </div>
         <button
@@ -116,14 +116,14 @@ export default function SignupPage() {
           disabled={loading}
           className="w-full rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:bg-foreground/90 disabled:opacity-50"
         >
-          {loading ? 'Creating account...' : 'Create account'}
+          {loading ? t('auth.creatingAccount') : t('auth.signup')}
         </button>
       </form>
 
       <p className="text-center text-sm text-foreground/60">
-        Already have an account?{' '}
+        {t('auth.hasAccount')}{' '}
         <Link href="/login" className="font-medium text-foreground hover:underline">
-          Sign in
+          {t('auth.login')}
         </Link>
       </p>
     </div>
