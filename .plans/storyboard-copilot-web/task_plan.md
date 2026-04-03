@@ -1,8 +1,8 @@
 # storyboard-copilot-web - 主计划
 
-> 状态: IN_PROGRESS
+> 状态: PHASE_4_COMPLETE / 待后续迭代
 > 创建: 2026-03-25
-> 更新: 2026-03-25
+> 更新: 2026-04-03
 > 团队: storyboard-copilot-web (auth-dev, image-dev, db-dev, canvas-dev, ai-dev, video-dev, reviewer)
 > 决策记录: .plans/storyboard-copilot-web/decisions.md
 
@@ -29,65 +29,84 @@
 
 ---
 
-## 3. 阶段概览
+## 3. 阶段概览（全部已合并到 main）
 
-### Phase 0（当前：Wave 1 并行进行）
+### Phase 0 ✅
 
-| 工作流 | Agent | worktree | 状态 |
-|--------|-------|----------|------|
-| A: Auth + App Shell | auth-dev | D:/ws-auth-shell | in_progress |
-| F: 图片处理 API | image-dev | D:/ws-image-processing | in_progress |
+| 工作流 | Agent | 状态 | 合并提交 |
+|--------|-------|------|---------|
+| A: Auth + App Shell + i18n | auth-dev | **DONE** | f86d022 → f200201 |
+| F: 图片处理 API (sharp) | image-dev | **DONE** | acdf2bf → c76fd61 |
 
-### Phase 1（Wave 1 同步：DB先行；Wave 2：C跟进）
+### Phase 1 ✅
 
-| 工作流 | Agent | worktree | 状态 |
-|--------|-------|----------|------|
-| B: DB Schema + 持久化 | db-dev | D:/ws-project-persistence | done |
-| C: 画布 + 节点 | canvas-dev | D:/ws-canvas-nodes | in_progress |
+| 工作流 | Agent | 状态 | 合并提交 |
+|--------|-------|------|---------|
+| B: DB Schema + 持久化 API | db-dev | **DONE** | cbf60cb → 7db96ab |
+| C: 画布 + 节点系统 | canvas-dev | **DONE** | 3548371 → da1b88c |
 
-### Phase 2（Wave 2：D先行；Wave 3：E跟进）
+### Phase 2 ✅
 
-| 工作流 | Agent | worktree | 状态 |
-|--------|-------|----------|------|
-| D: 服务端 AI Provider | ai-dev | D:/ws-ai-providers | in_progress |
-| E: 服务端视频 Provider | video-dev | D:/ws-video-providers | blocked（等D的KIE Common） |
+| 工作流 | Agent | 状态 | 合并提交 |
+|--------|-------|------|---------|
+| D: 服务端 AI Provider | ai-dev | **DONE** | d8e92e6 → 5e8d792 |
+| E: 服务端视频 Provider | video-dev | **DONE** | 7f3abd2 → 8cb4778 |
+
+### Phase 3 ✅
+
+| 工作流 | 状态 | 合并提交 |
+|--------|------|---------|
+| 功能性 Dashboard + 设置页 + App Shell 优化 | **DONE** | 3da1832 |
+| API Key 管理 + 中间件路由保护 | **DONE** | 1f920da |
+| Landing Page（cinematic dark SaaS）| **DONE** | d021937 → dc2884c |
+
+### Phase 4 ✅
+
+| 工作流 | 状态 | 合并提交 |
+|--------|------|---------|
+| CI (GitHub Actions) + proxy 迁移 + i18n 完整覆盖 + E2E 骨架 | **DONE** | 35d4a18 |
+| Vercel 部署配置 + E2E dashboard 测试 | **DONE** | 1e1cbec |
+| E2E 测试修复（auth/dashboard selector + signup 校验）| **DONE** | e73c0db |
 
 ---
 
 ## 4. 任务汇总
 
-| # | 任务 | 负责人 | 状态 | 计划文件 |
+| # | 任务 | 负责人 | 状态 | 进度文件 |
 |---|------|--------|------|----------|
-| T-A | Phase 0 - Auth + App Shell | auth-dev | in_progress | .plans/storyboard-copilot-web/auth-dev/task_plan.md |
-| T-F | Phase 0 - 图片处理 API | image-dev | in_progress | .plans/storyboard-copilot-web/image-dev/task_plan.md |
-| T-B | Phase 1 - DB Schema + 持久化 | db-dev | in_progress | .plans/storyboard-copilot-web/db-dev/task_plan.md |
-| T-C | Phase 1 - 画布 + 节点 | canvas-dev | blocked | .plans/storyboard-copilot-web/canvas-dev/task_plan.md |
-| T-D | Phase 2 - AI Provider | ai-dev | blocked | .plans/storyboard-copilot-web/ai-dev/task_plan.md |
-| T-E | Phase 2 - 视频 Provider | video-dev | blocked | .plans/storyboard-copilot-web/video-dev/task_plan.md |
+| T-A | Phase 0 - Auth + App Shell | auth-dev | ✅ DONE | .plans/storyboard-copilot-web/auth-dev/progress.md |
+| T-F | Phase 0 - 图片处理 API | image-dev | ✅ DONE | .plans/storyboard-copilot-web/image-dev/progress.md |
+| T-B | Phase 1 - DB Schema + 持久化 | db-dev | ✅ DONE | .plans/storyboard-copilot-web/db-dev/progress.md |
+| T-C | Phase 1 - 画布 + 节点 | canvas-dev | ✅ DONE | .plans/storyboard-copilot-web/canvas-dev/task_plan.md |
+| T-D | Phase 2 - AI Provider | ai-dev | ✅ DONE | .plans/storyboard-copilot-web/ai-dev/progress.md |
+| T-E | Phase 2 - 视频 Provider | video-dev | ✅ DONE | .plans/storyboard-copilot-web/video-dev/progress.md |
 
 ---
 
-## 5. 并行策略
+## 5. 分支状态（2026-04-03 清理后）
 
-```
-Wave 1（同时启动）: auth-dev + image-dev + db-dev
-Wave 2（B完成后）:  canvas-dev + ai-dev
-Wave 3（D完成后）:  video-dev
-```
-
-### 解锁条件
-
-- canvas-dev 解锁：db-dev 完成 B.2（项目 CRUD API）+ B.3（草稿 API）
-- ai-dev 解锁：db-dev 完成 B.1（含 005_ai_jobs.sql）
-- video-dev 解锁：ai-dev 完成 D.1（AI Provider 接口）+ D.3（KIE 共享基础设施）
+- **远程分支**：仅 `origin/main`，所有功能分支已删除
+- **本地分支**：仅 `main`
+- **Worktree**：仅主仓库 `D:/storyboard-copilot-web`，所有 agent worktree 已删除
 
 ---
 
-## 6. 当前阶段
+## 6. 当前 main 构建状态
 
-Wave 1 正在并行开发中：
-- auth-dev → Phase 0 工作流 A（脚手架 + 认证 + Shell）
-- image-dev → Phase 0 工作流 F（sharp 图片处理 API）
-- db-dev → Phase 1 工作流 B（数据库 schema + 持久化）
+- ✅ tsc --noEmit 零错误
+- ✅ vitest run 全部通过
+- ✅ npm run build 成功
+- ✅ GitHub Actions CI 通过（类型检查 + Lint + 单元测试 + 构建）
+- 🔄 E2E 测试修复中（最新 run: 23945073920，awaiting result）
 
-下一里程碑：Wave 1 三个 agent 各自提 PR，合并后解锁 Wave 2。
+---
+
+## 7. 下一步迭代方向
+
+优先级排序供参考：
+
+1. **支付集成**（PayPal + Alipay + WeChat Pay）— billing 工作流 G
+2. **画布端到端联调**（前端节点 ↔ 后端 AI/视频 API）
+3. **图片上传节点功能完善**（Supabase Storage 对接）
+4. **Realtime 视频进度推送**（Supabase Realtime → `ai_jobs` 变化订阅）
+5. **用户配额与限流**
