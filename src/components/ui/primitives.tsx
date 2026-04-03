@@ -4,6 +4,7 @@ import {
   forwardRef,
   isValidElement,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -47,7 +48,7 @@ interface UiCheckboxProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 
   onCheckedChange?: (checked: boolean) => void;
 }
 
-interface UiSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {}
+type UiSelectProps = SelectHTMLAttributes<HTMLSelectElement>;
 
 interface UiSelectOption {
   value: string;
@@ -207,7 +208,8 @@ export function UiSelect({ className = '', children, ...props }: UiSelectProps) 
   } = props;
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const hiddenSelectRef = useRef<HTMLSelectElement | null>(null);
-  const listboxIdRef = useRef(`ui-select-${Math.random().toString(36).slice(2, 10)}`);
+  const generatedId = useId();
+  const listboxId = `ui-select-${generatedId.replace(/:/g, '')}`;
   const [isOpen, setIsOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<{ left: number; top: number; width: number }>({
     left: 0,
@@ -256,6 +258,7 @@ export function UiSelect({ className = '', children, ...props }: UiSelectProps) 
 
   useEffect(() => {
     if (!isControlled) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUncontrolledValue(initialValue);
     }
   }, [initialValue, isControlled]);
@@ -302,7 +305,7 @@ export function UiSelect({ className = '', children, ...props }: UiSelectProps) 
         return;
       }
 
-      const menuElement = document.getElementById(listboxIdRef.current);
+      const menuElement = document.getElementById(listboxId);
       if (menuElement?.contains(target ?? null)) {
         return;
       }
@@ -391,7 +394,7 @@ export function UiSelect({ className = '', children, ...props }: UiSelectProps) 
         aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        aria-controls={listboxIdRef.current}
+        aria-controls={listboxId}
         disabled={disabled}
         className={`group inline-flex h-8 w-full items-center justify-between rounded-[6px] border border-[color:var(--ui-border-soft)] bg-[var(--ui-surface-field)] px-3 text-left text-xs font-medium text-text-dark outline-none transition-[border-color,background-color,box-shadow,color] hover:border-[color:var(--ui-border-strong)] focus-visible:border-accent focus-visible:shadow-[0_0_0_2px_rgba(var(--accent-rgb),0.12)] disabled:cursor-not-allowed disabled:opacity-55 ${className}`}
         onClick={() => {
@@ -414,7 +417,7 @@ export function UiSelect({ className = '', children, ...props }: UiSelectProps) 
       {shouldRenderMenu && typeof document !== 'undefined'
         ? createPortal(
             <div
-              id={listboxIdRef.current}
+              id={listboxId}
               role="listbox"
               aria-label={ariaLabel}
               className={`fixed z-[140] overflow-hidden rounded-[6px] border border-[color:var(--ui-border-soft)] bg-[var(--ui-surface-panel)] p-1 shadow-[var(--ui-shadow-panel)] transition-[opacity,transform] ease-out ${

@@ -727,7 +727,7 @@ export const VideoParamsControls = memo(({
                 <div className="rounded-lg border border-[rgba(255,255,255,0.08)] bg-bg-dark/65 px-3 py-2">
                   <div className="mb-2 text-xs font-medium text-text-dark">{t('node.videoGen.klingElements')}</div>
                   <KlingElementsEditor
-                    elements={(klingElements as any[]) ?? []}
+                    elements={(klingElements as Parameters<typeof KlingElementsEditor>[0]['elements']) ?? []}
                     incomingImages={incomingImages}
                     onChange={(elements) => onKlingElementsChange?.(elements)}
                   />

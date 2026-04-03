@@ -80,9 +80,9 @@ export async function getRuntimeDiagnostics(): Promise<
       const osInfo = parseOsInfo(userAgent);
 
       let appVersion = 'unknown';
-      let resolvedOsName = osInfo.osName;
-      let resolvedOsVersion = osInfo.osVersion;
-      let resolvedOsBuild = 'unknown';
+      const resolvedOsName = osInfo.osName;
+      const resolvedOsVersion = osInfo.osVersion;
+      const resolvedOsBuild = 'unknown';
       // Web version: read app version from env; OS info from user-agent.
       appVersion = (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_APP_VERSION) ? process.env.NEXT_PUBLIC_APP_VERSION : 'web';
 
