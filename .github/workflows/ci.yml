@@ -51,9 +51,14 @@ jobs:
     needs: check
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     env:
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+      # Fall back to placeholders so the Next.js server can start even without
+      # real secrets. Tests that require real auth are skipped via test.skip()
+      # unless E2E_TEST_EMAIL / E2E_TEST_PASSWORD are also set.
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder' }}
+      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY || 'ci-placeholder-encryption-key-32ch' }}
+      E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+      E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
 
     steps:
       - name: Checkout
