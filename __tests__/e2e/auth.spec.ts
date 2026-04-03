@@ -34,7 +34,7 @@ test.describe('Auth flow', () => {
     await page.goto('/login')
     await page.locator('#email').fill('not-an-email')
     await page.locator('#password').fill('password123')
-    await page.getByRole('button', { name: /login|sign in|登录/i }).click()
+    await page.locator('button[type="submit"]').click()
     // Native HTML5 validation or custom error should trigger
     const emailInput = page.locator('#email')
     const validity = await emailInput.evaluate((el) => (el as HTMLInputElement).validity.valid)

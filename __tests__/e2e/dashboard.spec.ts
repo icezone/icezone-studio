@@ -11,9 +11,9 @@ test.describe('Dashboard (authenticated)', () => {
   test.beforeEach(async ({ page }) => {
     // Sign in before each test
     await page.goto('/login')
-    await page.getByPlaceholder(/email/i).fill(E2E_EMAIL!)
-    await page.getByPlaceholder(/password/i).fill(E2E_PASSWORD!)
-    await page.getByRole('button', { name: /login|sign in/i }).click()
+    await page.locator('#email').fill(E2E_EMAIL!)
+    await page.locator('#password').fill(E2E_PASSWORD!)
+    await page.locator('button[type="submit"]').click()
     await page.waitForURL('**/dashboard')
   })
 
