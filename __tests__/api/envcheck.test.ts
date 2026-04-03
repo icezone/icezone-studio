@@ -3,8 +3,6 @@ import { describe, it, expect } from 'vitest'
 
 describe('env', () => {
   it('should be node', () => {
-    // If jsdom, window will exist and have jsdom-specific properties
-    const isJsdom = typeof window !== 'undefined' && typeof (window as unknown as { _jsdom: unknown })['_jsdom'] !== 'undefined';
     const hasWindow = typeof window !== 'undefined';
     console.log('hasWindow:', hasWindow);
     console.log('File === global.File:', File === globalThis.File);

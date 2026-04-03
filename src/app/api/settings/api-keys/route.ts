@@ -4,7 +4,6 @@ import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypt
 import { z } from 'zod'
 
 const SUPPORTED_PROVIDERS = ['kie', 'ppio', 'grsai', 'fal', 'openai', 'anthropic'] as const
-type Provider = (typeof SUPPORTED_PROVIDERS)[number]
 
 function getEncryptionKey(): Buffer {
   const secret = process.env.ENCRYPTION_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? 'dev-fallback-key'

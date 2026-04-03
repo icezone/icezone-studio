@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createClient, getAuthUser } from '@/lib/supabase/server';
-import { z } from 'zod';
 
 const ALLOWED_MIME_TYPES = [
   'image/jpeg',
