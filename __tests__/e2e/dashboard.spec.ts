@@ -23,7 +23,7 @@ test.describe('Dashboard (authenticated)', () => {
     // .count() doesn't auto-wait, so use toBeVisible() on an .or() locator instead
     const projectCard = page.locator('[data-testid="project-card"]')
     const emptyMsg = page.getByText(/no projects|还没有项目/i)
-    await expect(projectCard.or(emptyMsg)).toBeVisible({ timeout: 10_000 })
+    await expect(projectCard.or(emptyMsg).first()).toBeVisible({ timeout: 10_000 })
   })
 
   test('can create a new project and navigate to canvas', async ({ page }) => {
