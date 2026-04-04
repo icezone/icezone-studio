@@ -20,3 +20,24 @@ export const viewportSchema = z.object({
   y: z.number(),
   zoom: z.number().positive(),
 })
+
+// ─── Template schemas ────────────────────────────────────────────────
+
+export const createTemplateSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().max(2000).optional().default(''),
+  tags: z.array(z.string().max(50)).max(20).optional().default([]),
+  thumbnailUrl: z.string().url().optional(),
+  templateData: z.object({
+    version: z.number().int().positive(),
+    nodes: z.array(z.object({}).passthrough()),
+    edges: z.array(z.object({}).passthrough()),
+    metadata: z.object({}).passthrough(),
+  }),
+})
+
+export const publishTemplateSchema = z.object({
+  description: z.string().max(2000).optional(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
+  thumbnailUrl: z.string().url().optional(),
+})

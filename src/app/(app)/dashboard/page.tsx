@@ -203,6 +203,13 @@ export default function DashboardPage() {
     setDeleteTarget(null);
   }
 
+  async function handleCreateFromTemplate(_templateKey: string) {
+    // Create a new project, then navigate to canvas where template will be loaded
+    // For now, just create a blank project — template loading from official presets
+    // will be handled in canvas via TemplateLibrary
+    await handleCreate();
+  }
+
   async function handleRename(project: Project, newName: string) {
     const res = await fetch(`/api/projects/${project.id}`, {
       method: 'PATCH',
@@ -272,6 +279,32 @@ export default function DashboardPage() {
           >
             {creating ? t('dashboard.creating') : t('dashboard.newProject')}
           </button>
+        </div>
+      )}
+
+      {/* Template shortcuts */}
+      {!loading && (
+        <div className="mb-8">
+          <h2 className="mb-3 text-sm font-medium text-foreground/60">{t('template.fromTemplate')}</h2>
+          <div className="flex gap-3 overflow-x-auto pb-1">
+            {[
+              { key: 'novelToStoryboard', icon: '\u{1F4DD}\u2192\u{1F3AC}' },
+              { key: 'videoRebuild', icon: '\u{1F3A5}\u2192\u{1F4CB}' },
+              { key: 'batchImageGen', icon: '\u{1F5BC}\u2192\u{1F5BC}' },
+            ].map((tpl) => (
+              <button
+                key={tpl.key}
+                type="button"
+                onClick={() => void handleCreateFromTemplate(tpl.key)}
+                className="flex min-w-[140px] flex-col items-center gap-2 rounded-xl border border-foreground/10 bg-foreground/[0.03] px-4 py-3 text-center transition-colors hover:border-foreground/20 hover:bg-foreground/[0.06]"
+              >
+                <span className="text-2xl">{tpl.icon}</span>
+                <span className="text-xs font-medium text-foreground/70">
+                  {t(`template.${tpl.key}`)}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

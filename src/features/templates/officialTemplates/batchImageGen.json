@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "img-1",
+      "type": "imageNode",
+      "position": { "x": 0, "y": 0 },
+      "data": {
+        "displayName": "Image 1",
+        "prompt": "",
+        "model": "grs-ai/flux-1",
+        "size": "1K",
+        "requestAspectRatio": "1:1",
+        "aspectRatio": "1:1",
+        "imageUrl": null,
+        "previewImageUrl": null,
+        "isGenerating": false,
+        "generationStartedAt": null
+      }
+    },
+    {
+      "id": "img-2",
+      "type": "imageNode",
+      "position": { "x": 400, "y": 0 },
+      "data": {
+        "displayName": "Image 2",
+        "prompt": "",
+        "model": "grs-ai/flux-1",
+        "size": "1K",
+        "requestAspectRatio": "1:1",
+        "aspectRatio": "1:1",
+        "imageUrl": null,
+        "previewImageUrl": null,
+        "isGenerating": false,
+        "generationStartedAt": null
+      }
+    },
+    {
+      "id": "img-3",
+      "type": "imageNode",
+      "position": { "x": 0, "y": 400 },
+      "data": {
+        "displayName": "Image 3",
+        "prompt": "",
+        "model": "grs-ai/flux-1",
+        "size": "1K",
+        "requestAspectRatio": "1:1",
+        "aspectRatio": "1:1",
+        "imageUrl": null,
+        "previewImageUrl": null,
+        "isGenerating": false,
+        "generationStartedAt": null
+      }
+    },
+    {
+      "id": "img-4",
+      "type": "imageNode",
+      "position": { "x": 400, "y": 400 },
+      "data": {
+        "displayName": "Image 4",
+        "prompt": "",
+        "model": "grs-ai/flux-1",
+        "size": "1K",
+        "requestAspectRatio": "1:1",
+        "aspectRatio": "1:1",
+        "imageUrl": null,
+        "previewImageUrl": null,
+        "isGenerating": false,
+        "generationStartedAt": null
+      }
+    }
+  ],
+  "edges": [],
+  "metadata": {
+    "name": "Batch Image Generation",
+    "description": "Generate multiple AI images in batch",
+    "requiredNodeTypes": ["imageNode"]
+  }
+}

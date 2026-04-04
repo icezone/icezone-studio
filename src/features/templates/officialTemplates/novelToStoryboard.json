@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "text-input",
+      "type": "textAnnotationNode",
+      "position": { "x": 0, "y": 0 },
+      "data": {
+        "displayName": "Novel/Script Input",
+        "content": ""
+      }
+    },
+    {
+      "id": "storyboard-gen",
+      "type": "storyboardGenNode",
+      "position": { "x": 400, "y": 0 },
+      "data": {
+        "displayName": "Storyboard Gen",
+        "gridRows": 2,
+        "gridCols": 3,
+        "frames": [
+          { "id": "f1", "description": "", "referenceIndex": null },
+          { "id": "f2", "description": "", "referenceIndex": null },
+          { "id": "f3", "description": "", "referenceIndex": null },
+          { "id": "f4", "description": "", "referenceIndex": null },
+          { "id": "f5", "description": "", "referenceIndex": null },
+          { "id": "f6", "description": "", "referenceIndex": null }
+        ],
+        "model": "grs-ai/flux-1",
+        "size": "1K",
+        "requestAspectRatio": "16:9",
+        "aspectRatio": "16:9",
+        "imageUrl": null,
+        "previewImageUrl": null,
+        "isGenerating": false,
+        "generationStartedAt": null
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "text-input",
+      "target": "storyboard-gen"
+    }
+  ],
+  "metadata": {
+    "name": "Novel to Storyboard",
+    "description": "Convert novel/script text into storyboard frames",
+    "requiredNodeTypes": ["textAnnotationNode", "storyboardGenNode"]
+  }
+}
