@@ -78,6 +78,181 @@
     "themeSystem": "System",
     "language": "Language",
     "langZh": "中文",
-    "langEn": "English"
+    "langEn": "English",
+    "missingAnyApiKeyMessage": "No API keys configured. AI features are unavailable.",
+    "openProvidersSettings": "Configure"
+  },
+  "canvas": {
+    "addImage": "Add Image",
+    "emptyHintTitle": "Canvas is empty",
+    "emptyHintSubtitle": "Double-click or use the left toolbar to add nodes",
+    "generate": "Generate",
+    "reference": "Reference",
+    "toolbar": {
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "fitView": "Fit View",
+      "lock": "Lock Canvas",
+      "unlock": "Unlock Canvas"
+    },
+    "sidebar": {
+      "addNode": "Add Node",
+      "nodeTypes": "Node Types",
+      "layers": "Layers",
+      "history": "History",
+      "assets": "Assets",
+      "undo": "Undo",
+      "redo": "Redo",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "fitView": "Fit View",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "clearCanvas": "Clear Canvas",
+      "settings": "Settings",
+      "backToDashboard": "Back to Dashboard"
+    }
+  },
+  "nodeToolbar": {
+    "copy": "Copy",
+    "download": "Download",
+    "reupload": "Reupload",
+    "copyText": "Copy Text",
+    "ungroup": "Ungroup",
+    "groupSelected": "Group Selected",
+    "saveAs": "Save As",
+    "copied": "Copied",
+    "copyErrorReport": "Copy Error Report",
+    "noDownloadPresetPathsHint": "Please set output path first",
+    "storyboardLine": "Add Storyboard Row"
+  },
+  "node": {
+    "menu": {
+      "uploadImage": "Upload Image",
+      "aiImageGeneration": "AI Image",
+      "textAnnotation": "Text Annotation",
+      "storyboard": "Storyboard",
+      "storyboardGen": "Storyboard Gen",
+      "videoGeneration": "AI Video"
+    },
+    "upload": {
+      "hint": "Click to upload or drag image here",
+      "uploadedAlt": "Uploaded image"
+    },
+    "imageEdit": {
+      "promptPlaceholder": "Describe the image you want...",
+      "promptRequired": "Please enter a prompt",
+      "apiKeyRequired": "API Key required to generate images",
+      "resultTitle": "Result"
+    },
+    "imageNode": {
+      "generatedAlt": "Generated image",
+      "generationFailed": "Generation failed",
+      "selectToEdit": "Click to select and edit",
+      "waitingResult": "Waiting for result...",
+      "waitingResultDelayed": "Generating, please wait..."
+    },
+    "textAnnotation": {
+      "placeholder": "Click to type...",
+      "empty": "(empty text)"
+    },
+    "storyboardGen": {
+      "frameCount": "Frames",
+      "colsShort": "Cols",
+      "rowsShort": "Rows",
+      "framePlaceholder": "Describe this frame...",
+      "gridPreviewTitle": "Storyboard Preview",
+      "cellAspectRatio": "Cell Ratio",
+      "overallAspectRatio": "Overall Ratio",
+      "ratioModeCell": "Cell",
+      "ratioModeOverall": "Overall"
+    },
+    "videoGen": {
+      "generate": "Generate Video",
+      "generating": "Generating...",
+      "regenerate": "Regenerate",
+      "retry": "Retry",
+      "download": "Download Video",
+      "duration": "Duration",
+      "startFrame": "Start Frame",
+      "endFrame": "End Frame",
+      "enableAudio": "Enable Audio",
+      "seed": "Seed",
+      "seedDescription": "Leave empty for random",
+      "optional": "Optional",
+      "promptPlaceholder": "Describe the video...",
+      "noPrompt": "Please enter a prompt",
+      "noApiKey": "API Key required",
+      "noApiKeyDetails": "Please configure the API Key in settings",
+      "uploadImage": "Upload Reference Image",
+      "uploadFailed": "Image upload failed",
+      "klingElements": "Kling Elements",
+      "multiShots": "Multi-shots"
+    }
+  },
+  "modelParams": {
+    "model": "Model",
+    "provider": "Provider",
+    "aspectRatio": "Aspect Ratio",
+    "autoAspectRatio": "Auto",
+    "quality": "Quality",
+    "mode": "Mode",
+    "modeStandard": "Standard",
+    "modeProfessional": "Professional",
+    "modeDescription": "Mode description",
+    "extraOptions": "More Options",
+    "otherParams": "Other Params",
+    "enableWebSearch": "Enable Web Search",
+    "multiShots": "Multi-shots",
+    "multiShotsDescription": "Multi-shots description",
+    "providerKeyRequiredTitle": "API Key Required",
+    "providerKeyRequiredDesc": "Please configure the {{provider}} API Key in settings",
+    "goConfigure": "Configure"
+  },
+  "tool": {
+    "crop": "Crop",
+    "annotate": "Annotate",
+    "split": "Split"
+  },
+  "toolDialog": {
+    "apply": "Apply",
+    "cropResultTitle": "Crop Result",
+    "annotateResultTitle": "Annotation Result",
+    "noProcessableImage": "No processable image",
+    "processFailed": "Processing failed",
+    "suffix": " (processed)"
+  },
+  "nodeDisplayName": {
+    "upload": "Upload Image",
+    "imageEdit": "AI Image",
+    "exportImage": "Result Image",
+    "textAnnotation": "Text Annotation",
+    "group": "Group",
+    "storyboardSplit": "Split Result",
+    "storyboardGen": "Storyboard Gen",
+    "videoGen": "AI Video",
+    "videoResult": "Video Result",
+    "storyboardGenOutput": "Storyboard Output",
+    "storyboardSplitExport": "Split Export",
+    "storyboardFrameEdit": "Frame Edit"
+  },
+  "videoErrors": {
+    "generation_failed": "Video generation failed",
+    "job_timeout": "Generation job timed out"
+  },
+  "ai": {
+    "error": "AI generation error"
+  },
+  "pricing": {
+    "nativePrice": "Native Price",
+    "originalPrice": "Listed Price",
+    "pointsCost": "Points Cost",
+    "grsaiTier": "GRS AI Tier"
+  },
+  "viewer": {
+    "imageAlt": "View image",
+    "prev": "Previous",
+    "next": "Next",
+    "reset": "Reset"
   }
 }

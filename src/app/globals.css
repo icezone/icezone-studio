@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* ─── Dark mode: class strategy (html.dark) ─────────────── */
+@variant dark (&:where(.dark, .dark *));
+
 /* ─── Design Tokens ─────────────────────────────────────── */
 @theme inline {
   --font-sans: var(--font-geist-sans);
@@ -21,22 +24,24 @@
   --color-border: rgba(255, 255, 255, 0.08);
   --color-border-subtle: rgba(255, 255, 255, 0.05);
 
-  /* App colors */
-  --color-background: #ffffff;
-  --color-foreground: #171717;
+  /* App colors — forced dark */
+  --color-background: #0a0a0a;
+  --color-foreground: #ededed;
+
+  /* Canvas dark palette */
+  --color-bg-dark: #111113;
+  --color-surface-dark: #1c1c21;
+  --color-text-dark: #e2e8f0;
+  --color-text-muted: #94a3b8;
+  --color-border-dark: rgba(255,255,255,0.12);
+  --color-accent: #3b82f6;
 }
 
 /* ─── Base ──────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --node-radius: 10px;
 }
 
 body {
@@ -222,4 +227,29 @@ body {
 .flow-line {
   stroke-dasharray: 6 4;
   animation: flow-path 3s linear infinite;
+}
+
+/* ─── Popup panel (UiPanel) ─────────────────────────────── */
+.ui-panel {
+  background: rgba(20, 20, 28, 0.97);
+  border-color: rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 16px 48px rgba(0, 0, 0, 0.7),
+    0 4px 16px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* ─── Input / field base ────────────────────────────────── */
+.ui-field {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #e2e8f0;
+}
+.ui-field:focus {
+  border-color: rgba(59, 130, 246, 0.6);
+  outline: none;
 }

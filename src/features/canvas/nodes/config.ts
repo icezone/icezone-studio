@@ -1,11 +1,11 @@
 export const nodeConfig = {
   imageNode: {
-    width: 200,
-    defaultHeight: 200,
+    width: 280,
+    defaultHeight: 240,
   },
   uploadNode: {
-    width: 200,
-    height: 200,
+    width: 280,
+    height: 240,
   },
   storyboardNode: {
     width: 'auto' as const,

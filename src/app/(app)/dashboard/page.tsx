@@ -65,13 +65,13 @@ function ProjectCard({ project, onOpen, onDelete, onRename }: ProjectCardProps) 
   }
 
   return (
-    <div data-testid="project-card" className="group relative flex flex-col rounded-xl border border-foreground/10 bg-foreground/[0.03] p-4 transition-colors hover:border-foreground/20 hover:bg-foreground/[0.06]">
+    <div data-testid="project-card" className="group relative flex flex-col rounded-xl border border-foreground/15 bg-foreground/[0.06] p-4 transition-colors hover:border-foreground/25 hover:bg-foreground/[0.09]">
       {/* Thumbnail placeholder */}
       <div
-        className="mb-3 flex h-32 cursor-pointer items-center justify-center rounded-lg bg-foreground/5"
+        className="mb-3 flex h-32 cursor-pointer items-center justify-center rounded-lg bg-foreground/8"
         onClick={onOpen}
       >
-        <svg className="h-8 w-8 text-foreground/20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+        <svg className="h-8 w-8 text-foreground/35" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
           <rect x="3" y="3" width="7" height="7" rx="1" />
           <rect x="14" y="3" width="7" height="7" rx="1" />
           <rect x="3" y="14" width="7" height="7" rx="1" />
@@ -256,8 +256,8 @@ export default function DashboardPage() {
 
       {/* Empty state */}
       {!loading && projects.length === 0 && !error && (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-foreground/15 py-24 text-center">
-          <svg className="mb-4 h-12 w-12 text-foreground/20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2}>
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-foreground/20 py-24 text-center">
+          <svg className="mb-4 h-12 w-12 text-foreground/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2}>
             <rect x="2" y="2" width="9" height="9" rx="2" />
             <rect x="13" y="2" width="9" height="9" rx="2" />
             <rect x="2" y="13" width="9" height="9" rx="2" />

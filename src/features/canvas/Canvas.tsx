@@ -58,6 +58,7 @@ import { SelectedNodeOverlay } from './ui/SelectedNodeOverlay';
 import { MultiSelectToolbar } from './ui/MultiSelectToolbar';
 import { NodeToolDialog } from './ui/NodeToolDialog';
 import { ImageViewerModal } from './ui/ImageViewerModal';
+import { CanvasSidebar } from './ui/CanvasSidebar';
 import { MissingApiKeyHint } from '@/features/settings/MissingApiKeyHint';
 
 const DEFAULT_VIEWPORT: Viewport = { x: 0, y: 0, zoom: 1 };
@@ -248,6 +249,9 @@ function CanvasInner() {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const suppressNextPaneClickRef = useRef(false);
   const suppressNextEdgeClickRef = useRef(false);
+
+  const [isLocked, setIsLocked] = useState(false);
+  const toggleLock = useCallback(() => setIsLocked((v) => !v), []);
 
   const [showNodeMenu, setShowNodeMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
@@ -1008,6 +1012,15 @@ function CanvasInner() {
     setShowNodeMenu(true);
   }, [reactFlowInstance]);
 
+  const handleSidebarAddNode = useCallback((_pos: { x: number; y: number }) => {
+    // Open node selection menu just to the right of the sidebar, near the top
+    const containerRect = wrapperRef.current?.getBoundingClientRect();
+    if (!containerRect) return;
+    const clientX = containerRect.left + 8;
+    const clientY = containerRect.top + 8;
+    openNodeMenuAtClientPosition(clientX, clientY);
+  }, [openNodeMenuAtClientPosition]);
+
   const handlePaneClick = useCallback((event: ReactMouseEvent) => {
     if (suppressNextPaneClickRef.current) {
       suppressNextPaneClickRef.current = false;
@@ -1694,14 +1707,20 @@ function CanvasInner() {
   }, []);
 
   return (
-    <div
-      ref={wrapperRef}
-      className="relative h-full w-full"
-      onMouseDown={handleRightMouseDown}
-      onMouseMove={handleRightMouseMove}
-      onMouseUp={handleRightMouseUp}
-      onContextMenu={handleContextMenu}
-    >
+    <div className="flex h-full w-full overflow-hidden">
+      <CanvasSidebar
+        isLocked={isLocked}
+        onToggleLock={toggleLock}
+        onAddNode={handleSidebarAddNode}
+      />
+      <div
+        ref={wrapperRef}
+        className="relative flex-1 h-full"
+        onMouseDown={handleRightMouseDown}
+        onMouseMove={handleRightMouseMove}
+        onMouseUp={handleRightMouseUp}
+        onContextMenu={handleContextMenu}
+      >
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -1732,6 +1751,8 @@ function CanvasInner() {
         deleteKeyCode={null}
         onlyRenderVisibleElements
         zoomOnDoubleClick={false}
+        panOnDrag={!isLocked}
+        nodesDraggable={!isLocked}
         proOptions={{ hideAttribution: true }}
         className="bg-bg-dark"
       >
@@ -1771,7 +1792,7 @@ function CanvasInner() {
 
       {nodes.length === 0 && emptyHint}
       {nodes.length > 0 && configuredApiKeyCount === 0 && (
-        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6">
+        <div className="pointer-events-none absolute bottom-6 left-0 right-0 z-10 flex justify-center px-6">
           <MissingApiKeyHint />
         </div>
       )}
@@ -1823,6 +1844,7 @@ function CanvasInner() {
         onClose={closeImageViewer}
         onNavigate={navigateImageViewer}
       />
+      </div>
     </div>
   );
 }

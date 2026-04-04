@@ -427,18 +427,18 @@ export const VideoParamsControls = memo(({
           <UiPanel className={modelPanelClassName}>
             <div className="ui-scrollbar max-h-[340px] space-y-4 overflow-y-auto p-1">
               <section>
-                <div className="mb-2 text-xs font-medium text-text-muted">
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/35">
                   {t('modelParams.provider')}
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-1.5">
                   {providerOptions.map((provider) => {
                     const active = provider.id === panelProviderId;
                     return (
                       <button
                         key={provider.id}
-                        className={`h-9 rounded-lg border px-3 text-xs transition-colors ${active
-                          ? 'border-accent/50 bg-accent/15 text-text-dark'
-                          : 'border-[rgba(255,255,255,0.12)] bg-bg-dark/65 text-text-muted hover:border-[rgba(255,255,255,0.2)]'
+                        className={`h-9 rounded-lg border px-3 text-xs font-medium transition-all ${active
+                          ? 'border-accent/55 bg-accent/20 text-white shadow-[0_0_0_1px_rgba(59,130,246,0.2)]'
+                          : 'border-white/10 bg-white/5 text-white/55 hover:border-white/20 hover:bg-white/8 hover:text-white/80'
                           }`}
                         onClick={(event) => {
                           event.stopPropagation();
@@ -465,10 +465,10 @@ export const VideoParamsControls = memo(({
               </section>
 
               <section>
-                <div className="mb-2 text-xs font-medium text-text-muted">
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/35">
                   {t('modelParams.model')}
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {modelGroups.map((group) => {
                     const active = group.models.some((model) => model.id === selectedModel.id);
                     const targetModel = group.models.find((model) => model.id === selectedModel.id)
@@ -476,9 +476,9 @@ export const VideoParamsControls = memo(({
                     return (
                       <button
                         key={group.name}
-                        className={`flex h-9 w-[120px] items-center justify-center rounded-lg border px-3 text-center text-xs transition-colors ${active
-                          ? 'border-accent/50 bg-accent/15 text-text-dark'
-                          : 'border-[rgba(255,255,255,0.12)] bg-bg-dark/65 text-text-muted hover:border-[rgba(255,255,255,0.2)]'
+                        className={`flex h-9 w-[120px] items-center justify-center rounded-lg border px-3 text-center text-xs font-medium transition-all ${active
+                          ? 'border-accent/55 bg-accent/20 text-white shadow-[0_0_0_1px_rgba(59,130,246,0.2)]'
+                          : 'border-white/10 bg-white/5 text-white/55 hover:border-white/20 hover:bg-white/8 hover:text-white/80'
                           }`}
                         onClick={(event) => {
                           event.stopPropagation();
@@ -508,16 +508,16 @@ export const VideoParamsControls = memo(({
           <UiPanel className={paramsPanelClassName}>
             {durationOptions.length > 0 && (
               <div>
-                <div className="mb-2 text-xs text-text-muted">{t('node.videoGen.duration')}</div>
-                <div className="grid grid-cols-4 gap-1 rounded-xl border border-[rgba(255,255,255,0.1)] bg-bg-dark/65 p-1">
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/35">{t('node.videoGen.duration')}</div>
+                <div className="grid grid-cols-4 gap-1 rounded-xl border border-white/8 bg-white/[0.04] p-1">
                   {durationOptions.map((item) => {
                     const active = item.value === selectedDuration?.value;
                     return (
                       <button
                         key={item.value}
-                        className={`h-8 rounded-lg text-sm transition-colors ${active
-                          ? 'bg-surface-dark text-text-dark'
-                          : 'text-text-muted hover:bg-bg-dark'
+                        className={`h-8 rounded-lg text-sm font-medium transition-all ${active
+                          ? 'bg-white/15 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
+                          : 'text-white/45 hover:bg-white/8 hover:text-white/75'
                           }`}
                         onClick={(event) => {
                           event.stopPropagation();
@@ -533,8 +533,8 @@ export const VideoParamsControls = memo(({
             )}
 
             <div className={durationOptions.length > 0 ? 'mt-3' : ''}>
-              <div className="mb-2 text-xs text-text-muted">{t('modelParams.aspectRatio')}</div>
-              <div className="grid grid-cols-5 gap-1 rounded-xl border border-[rgba(255,255,255,0.1)] bg-bg-dark/65 p-1">
+              <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/35">{t('modelParams.aspectRatio')}</div>
+              <div className="grid grid-cols-5 gap-1 rounded-xl border border-white/8 bg-white/[0.04] p-1">
                 {aspectRatioOptions.map((item) => {
                   const active = item.value === selectedAspectRatio.value;
                   const previewStyle = getRatioPreviewStyle(item.value);
@@ -542,9 +542,9 @@ export const VideoParamsControls = memo(({
                   return (
                     <button
                       key={item.value}
-                      className={`rounded-lg px-1 py-1.5 transition-colors ${active
-                        ? 'bg-surface-dark text-text-dark'
-                        : 'text-text-muted hover:bg-bg-dark'
+                      className={`rounded-lg px-1 py-1.5 transition-all ${active
+                        ? 'bg-white/15 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
+                        : 'text-white/40 hover:bg-white/8 hover:text-white/70'
                         }`}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -553,7 +553,7 @@ export const VideoParamsControls = memo(({
                     >
                       <div className="mb-1 flex h-6 items-center justify-center">
                         <span
-                          className="inline-block rounded-[3px] border border-current/60"
+                          className="inline-block rounded-[3px] border border-current/70"
                           style={previewStyle}
                         />
                       </div>
@@ -579,7 +579,7 @@ export const VideoParamsControls = memo(({
             <div className="space-y-2">
               {/* Audio Toggle */}
               {selectedModel.supportsAudio && (
-                <div className="rounded-lg border border-[rgba(255,255,255,0.08)] bg-bg-dark/65 px-3 py-2">
+                <div className="rounded-lg border border-white/8 bg-white/[0.04] px-3 py-2">
                   <label className="flex cursor-pointer items-center justify-between gap-2">
                     <span className="text-xs font-medium text-text-dark">{t('node.videoGen.enableAudio')}</span>
                     <UiCheckbox
@@ -592,7 +592,7 @@ export const VideoParamsControls = memo(({
 
               {/* Seed Input */}
               {selectedModel.supportsSeed && (
-                <div className="rounded-lg border border-[rgba(255,255,255,0.08)] bg-bg-dark/65 px-3 py-2">
+                <div className="rounded-lg border border-white/8 bg-white/[0.04] px-3 py-2">
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <label className="text-xs font-medium text-text-dark">{t('node.videoGen.seed')}</label>
                     <input
@@ -621,7 +621,7 @@ export const VideoParamsControls = memo(({
                 return (
                   <div
                     key={definition.key}
-                    className="rounded-lg border border-[rgba(255,255,255,0.08)] bg-bg-dark/65 px-3 py-2"
+                    className="rounded-lg border border-white/8 bg-white/[0.04] px-3 py-2"
                   >
                     {definition.type === 'enum' && definition.options && (
                       <>
@@ -724,7 +724,7 @@ export const VideoParamsControls = memo(({
 
               {/* Kling Elements */}
               {hasKlingElements && (
-                <div className="rounded-lg border border-[rgba(255,255,255,0.08)] bg-bg-dark/65 px-3 py-2">
+                <div className="rounded-lg border border-white/8 bg-white/[0.04] px-3 py-2">
                   <div className="mb-2 text-xs font-medium text-text-dark">{t('node.videoGen.klingElements')}</div>
                   <KlingElementsEditor
                     elements={(klingElements as Parameters<typeof KlingElementsEditor>[0]['elements']) ?? []}

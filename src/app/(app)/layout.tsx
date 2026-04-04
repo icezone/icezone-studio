@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/stores/authStore';
 import { useTranslation } from 'react-i18next';
 import '@/i18n';
+import { SettingsDialog } from '@/features/settings/SettingsDialog';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, initialize, signOut } = useAuthStore();
@@ -38,17 +39,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   // Canvas: full screen, no sidebar
   if (isCanvas) {
-    return <div className="h-screen w-screen overflow-hidden">{children}</div>;
+    return (
+      <div className="h-screen w-screen overflow-hidden">
+        {children}
+        <SettingsDialog />
+      </div>
+    );
   }
 
   // App shell: sidebar layout
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <aside className="flex w-56 flex-col border-r border-foreground/8 bg-background">
+      <aside className="flex w-56 flex-col border-r border-white/8 bg-[#111113]">
         {/* Logo */}
         <div className="flex h-14 items-center px-4">
-          <span className="text-sm font-semibold text-foreground/90">
+          <span className="text-sm font-semibold text-white/90">
             {t('nav.appName')}
           </span>
         </div>
@@ -64,18 +70,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* User */}
-        <div className="border-t border-foreground/8 p-3">
+        <div className="border-t border-white/8 p-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-foreground/10 text-xs font-medium text-foreground">
+            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-medium text-white">
               {user.email?.charAt(0).toUpperCase() ?? '?'}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="truncate text-xs text-foreground/70">{user.email}</div>
+              <div className="truncate text-xs text-white/65">{user.email}</div>
             </div>
             <button
               onClick={() => void signOut()}
               title={t('auth.signOut')}
-              className="flex-shrink-0 rounded p-1 text-foreground/30 hover:text-foreground/60"
+              className="flex-shrink-0 rounded p-1 text-white/35 hover:text-white/70"
               type="button"
             >
               <SignOutIcon />
@@ -85,7 +91,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      <main className="flex-1 overflow-y-auto bg-[#0a0a0a] p-6">{children}</main>
+      <SettingsDialog />
     </div>
   );
 }
@@ -107,8 +114,8 @@ function NavItem({
       href={href}
       className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors ${
         active
-          ? 'bg-foreground/8 text-foreground font-medium'
-          : 'text-foreground/60 hover:bg-foreground/5 hover:text-foreground'
+          ? 'bg-white/10 text-white font-medium'
+          : 'text-white/55 hover:bg-white/6 hover:text-white/85'
       }`}
     >
       <span className="h-4 w-4 flex-shrink-0">{icon}</span>
@@ -120,7 +127,10 @@ function NavItem({
 function ProjectsIcon() {
   return (
     <svg viewBox="0 0 16 16" fill="currentColor" className="h-4 w-4">
-      <path d="M2 2.5A1.5 1.5 0 0 1 3.5 1h4A1.5 1.5 0 0 1 9 2.5v4A1.5 1.5 0 0 1 7.5 8h-4A1.5 1.5 0 0 1 2 6.5v-4ZM3.5 2a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5h-4ZM8.5 9A1.5 1.5 0 0 0 7 10.5v4A1.5 1.5 0 0 0 8.5 16h4a1.5 1.5 0 0 0 1.5-1.5v-4A1.5 1.5 0 0 0 12.5 9h-4Zm0 1h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 .5-.5ZM2 10.5A1.5 1.5 0 0 1 3.5 9h4a1.5 1.5 0 0 1 .354.043l-1.028 1.028a.5.5 0 0 0-.326-.071H3.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-.674l1 1V14.5A1.5 1.5 0 0 1 7.5 16h-4A1.5 1.5 0 0 1 2 14.5v-4ZM11.5 2a1.5 1.5 0 0 0-1.5 1.5v4a1.5 1.5 0 0 0 .043.354L11.07 6.826A.5.5 0 0 1 11 6.5v-4a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-.674l1 1H15.5A1.5 1.5 0 0 0 17 6.5v-4A1.5 1.5 0 0 0 15.5 1h-4Z" />
+      <rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.25" />
+      <rect x="9" y="1.5" width="5.5" height="5.5" rx="1.25" />
+      <rect x="1.5" y="9" width="5.5" height="5.5" rx="1.25" />
+      <rect x="9" y="9" width="5.5" height="5.5" rx="1.25" />
     </svg>
   );
 }

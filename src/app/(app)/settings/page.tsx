@@ -7,7 +7,6 @@ import i18n from '@/i18n';
 
 export const dynamic = 'force-dynamic';
 
-type Theme = 'light' | 'dark' | 'system';
 type Lang = 'zh' | 'en';
 
 const PROVIDERS = ['kie', 'ppio', 'grsai', 'fal', 'openai', 'anthropic'] as const;
@@ -37,24 +36,10 @@ export default function SettingsPage() {
   const { user } = useAuthStore();
 
   const currentLang = (i18n.language?.slice(0, 2) === 'zh' ? 'zh' : 'en') as Lang;
-  const savedTheme = (typeof localStorage !== 'undefined'
-    ? (localStorage.getItem('scw-theme') as Theme | null) ?? 'system'
-    : 'system') as Theme;
 
   function handleLangChange(lang: Lang) {
     void i18n.changeLanguage(lang);
     localStorage.setItem('scw-lang', lang);
-  }
-
-  function handleThemeChange(theme: Theme) {
-    const root = document.documentElement;
-    if (theme === 'system') {
-      root.removeAttribute('data-theme');
-      localStorage.removeItem('scw-theme');
-    } else {
-      root.setAttribute('data-theme', theme);
-      localStorage.setItem('scw-theme', theme);
-    }
   }
 
   return (
@@ -90,30 +75,6 @@ export default function SettingsPage() {
                 }`}
               >
                 {lang === 'zh' ? t('settings.langZh') : t('settings.langEn')}
-              </button>
-            ))}
-          </div>
-        </SectionCard>
-
-        {/* Theme */}
-        <SectionCard title={t('settings.theme')}>
-          <div className="flex gap-2">
-            {(['light', 'dark', 'system'] as Theme[]).map((theme) => (
-              <button
-                key={theme}
-                type="button"
-                onClick={() => handleThemeChange(theme)}
-                className={`rounded-lg border px-4 py-2 text-sm transition-colors ${
-                  savedTheme === theme
-                    ? 'border-foreground/40 bg-foreground text-background'
-                    : 'border-foreground/15 text-foreground/60 hover:border-foreground/30 hover:text-foreground'
-                }`}
-              >
-                {theme === 'light'
-                  ? t('settings.themeLight')
-                  : theme === 'dark'
-                    ? t('settings.themeDark')
-                    : t('settings.themeSystem')}
               </button>
             ))}
           </div>

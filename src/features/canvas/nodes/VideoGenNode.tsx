@@ -807,7 +807,7 @@ function VideoGenNodeComponent({
                 </div>
               ) : (
                 <button
-                  className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[rgba(15,23,42,0.25)] transition-colors hover:border-[rgba(15,23,42,0.4)] hover:bg-[rgba(15,23,42,0.04)] dark:border-[rgba(255,255,255,0.15)] dark:hover:border-[rgba(255,255,255,0.3)] dark:hover:bg-[rgba(255,255,255,0.04)]"
+                  className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[rgba(15,23,42,0.25)] transition-colors hover:border-[rgba(15,23,42,0.4)] hover:bg-[rgba(15,23,42,0.04)] dark:border-[rgba(255,255,255,0.28)] dark:hover:border-[rgba(255,255,255,0.5)] dark:hover:bg-[rgba(255,255,255,0.04)]"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (incomingImageItems.length > 0) {
@@ -884,7 +884,7 @@ function VideoGenNodeComponent({
                 </div>
               ) : (
                 <button
-                  className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[rgba(15,23,42,0.25)] transition-colors hover:border-[rgba(15,23,42,0.4)] hover:bg-[rgba(15,23,42,0.04)] dark:border-[rgba(255,255,255,0.15)] dark:hover:border-[rgba(255,255,255,0.3)] dark:hover:bg-[rgba(255,255,255,0.04)]"
+                  className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[rgba(15,23,42,0.25)] transition-colors hover:border-[rgba(15,23,42,0.4)] hover:bg-[rgba(15,23,42,0.04)] dark:border-[rgba(255,255,255,0.28)] dark:hover:border-[rgba(255,255,255,0.5)] dark:hover:bg-[rgba(255,255,255,0.04)]"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (incomingImageItems.length > 0) {
