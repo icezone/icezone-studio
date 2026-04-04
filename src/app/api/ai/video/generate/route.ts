@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, getAuthUser } from '@/lib/supabase/server'
 import { getVideoProvider } from '@/server/video/registry'
 import { createJob, InsufficientCreditsError } from '@/server/jobs/jobService'
+import { withKeyRotation } from '@/server/ai/keyRotationHelper'
+import { AllKeysUnavailableError } from '@/server/ai/keyRotation'
 
 // Ensure all video providers are registered
 import '@/server/video/index'
@@ -95,20 +97,30 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create job' }, { status: 500 })
   }
 
-  // 6. Submit to provider
+  // 6. Submit to provider with key rotation
+  // Resolve the API key provider ID for rotation (video providers may map to a different key provider)
+  const keyProviderId = providerIdFromModel === 'kling' || providerIdFromModel === 'sora2' || providerIdFromModel === 'veo'
+    ? 'kie'  // All KIE-based video providers share the 'kie' API key
+    : resolvedProviderId
+
   try {
-    const providerJobId = await provider.submitJob({
-      modelId,
-      prompt: prompt as string,
-      imageUrl: typeof imageUrl === 'string' ? imageUrl : undefined,
-      duration: duration as number,
-      aspectRatio: aspectRatio as string,
-      seed: typeof seed === 'number' ? seed : undefined,
-      audio: typeof audio === 'boolean' ? audio : undefined,
-      extraParams: extraParams && typeof extraParams === 'object'
-        ? (extraParams as Record<string, unknown>)
-        : undefined,
-    })
+    const { result: providerJobId } = await withKeyRotation(
+      supabase,
+      user.id,
+      keyProviderId,
+      () => provider.submitJob({
+        modelId,
+        prompt: prompt as string,
+        imageUrl: typeof imageUrl === 'string' ? imageUrl : undefined,
+        duration: duration as number,
+        aspectRatio: aspectRatio as string,
+        seed: typeof seed === 'number' ? seed : undefined,
+        audio: typeof audio === 'boolean' ? audio : undefined,
+        extraParams: extraParams && typeof extraParams === 'object'
+          ? (extraParams as Record<string, unknown>)
+          : undefined,
+      })
+    )
 
     // 7. Update job record with provider job ID
     await supabase
@@ -122,6 +134,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ jobId }, { status: 202 })
   } catch (error) {
+    if (error instanceof AllKeysUnavailableError) {
+      // Update job to failed since all keys are unavailable
+      const { updateJobStatus } = await import('@/server/jobs/jobService')
+      await updateJobStatus(jobId, 'failed', {
+        errorMessage: error.message,
+      }).catch((e) => console.error('Failed to update failed job status:', e))
+
+      return NextResponse.json({ error: error.message }, { status: 503 })
+    }
+
     // Provider submission failed — update job to failed (refund handled by updateJobStatus)
     console.error('Video provider submit error:', error)
     const { updateJobStatus } = await import('@/server/jobs/jobService')

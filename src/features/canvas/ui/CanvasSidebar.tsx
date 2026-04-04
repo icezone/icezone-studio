@@ -15,6 +15,7 @@ import {
   Redo2,
   Settings,
   ChevronLeft,
+  LayoutTemplate,
 } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 import { useCanvasStore } from '@/stores/canvasStore';
@@ -24,6 +25,7 @@ interface CanvasSidebarProps {
   isLocked: boolean;
   onToggleLock: () => void;
   onAddNode: (position: { x: number; y: number }) => void;
+  onOpenTemplates?: () => void;
 }
 
 interface SidebarButtonProps {
@@ -59,7 +61,7 @@ const Divider = () => (
   <div className="mx-auto my-1 h-px w-7 bg-white/10" />
 );
 
-export const CanvasSidebar = memo(({ isLocked, onToggleLock, onAddNode }: CanvasSidebarProps) => {
+export const CanvasSidebar = memo(({ isLocked, onToggleLock, onAddNode, onOpenTemplates }: CanvasSidebarProps) => {
   const { t } = useTranslation();
   const router = useRouter();
   const { zoomIn, zoomOut, fitView } = useReactFlow();
@@ -79,6 +81,7 @@ export const CanvasSidebar = memo(({ isLocked, onToggleLock, onAddNode }: Canvas
   const handleFitView = useCallback(() => { fitView({ padding: 0.2 }); }, [fitView]);
   const handleClear = useCallback(() => { clearCanvas(); }, [clearCanvas]);
   const handleSettings = useCallback(() => { openSettingsDialog(); }, []);
+  const handleOpenTemplates = useCallback(() => { onOpenTemplates?.(); }, [onOpenTemplates]);
   const handleBackToDashboard = useCallback(() => { router.push('/dashboard'); }, [router]);
 
   return (
@@ -93,6 +96,11 @@ export const CanvasSidebar = memo(({ isLocked, onToggleLock, onAddNode }: Canvas
       {/* Add node */}
       <SidebarButton onClick={handleAddNode} title={t('canvas.sidebar.addNode')} disabled={isLocked}>
         <Plus className="h-4 w-4" />
+      </SidebarButton>
+
+      {/* Templates */}
+      <SidebarButton onClick={handleOpenTemplates} title={t('template.templates')}>
+        <LayoutTemplate className="h-4 w-4" />
       </SidebarButton>
 
       <Divider />

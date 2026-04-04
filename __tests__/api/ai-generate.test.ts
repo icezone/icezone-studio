@@ -30,6 +30,22 @@ vi.mock('@/server/ai/registry', () => ({
 
 vi.mock('@/server/ai/index', () => ({}))
 
+vi.mock('@/server/ai/keyRotationHelper', () => ({
+  withKeyRotation: vi.fn(async (_supabase: unknown, _userId: string, _providerId: string, fn: () => Promise<unknown>) => {
+    const result = await fn()
+    return { result, keyIndex: 0 }
+  }),
+}))
+
+vi.mock('@/server/ai/keyRotation', () => ({
+  AllKeysUnavailableError: class AllKeysUnavailableError extends Error {
+    constructor(message: string) {
+      super(message)
+      this.name = 'AllKeysUnavailableError'
+    }
+  },
+}))
+
 vi.mock('@/server/jobs/jobService', () => ({
   createJob: mock.mockCreateJob,
   updateJobStatus: mock.mockUpdateJobStatus,

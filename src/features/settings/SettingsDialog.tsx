@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { X } from 'lucide-react';
+import { X, RotateCcw, Trash2, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { subscribeOpenSettingsDialog } from './settingsEvents';
 import { useAuthStore } from '@/stores/authStore';
@@ -10,11 +10,16 @@ import i18n from '@/i18n';
 const PROVIDERS = ['kie', 'ppio', 'grsai', 'fal', 'openai', 'anthropic'] as const;
 type Provider = (typeof PROVIDERS)[number];
 type Lang = 'zh' | 'en';
+type KeyStatus = 'active' | 'exhausted' | 'invalid' | 'rate_limited';
 
 interface ApiKeyEntry {
   id: string;
   provider: Provider;
   maskedValue: string;
+  key_index: number;
+  status: KeyStatus;
+  last_error: string | null;
+  error_count: number;
   created_at: string;
 }
 
@@ -27,6 +32,34 @@ function SectionBlock({ title, desc, children }: { title: string; desc?: string;
       </div>
       {children}
     </div>
+  );
+}
+
+function StatusBadge({ status, t }: { status: KeyStatus; t: (key: string) => string }) {
+  const config: Record<KeyStatus, { label: string; className: string }> = {
+    active: {
+      label: t('settings.statusActive'),
+      className: 'bg-green-500/15 text-green-400 border-green-500/30',
+    },
+    rate_limited: {
+      label: t('settings.statusRateLimited'),
+      className: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+    },
+    exhausted: {
+      label: t('settings.statusExhausted'),
+      className: 'bg-red-500/15 text-red-400 border-red-500/30',
+    },
+    invalid: {
+      label: t('settings.statusInvalid'),
+      className: 'bg-red-500/15 text-red-400 border-red-500/30',
+    },
+  };
+
+  const { label, className } = config[status] ?? config.active;
+  return (
+    <span className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-medium ${className}`}>
+      {label}
+    </span>
   );
 }
 
@@ -75,42 +108,92 @@ function ApiKeyManager() {
     }
   }
 
-  async function handleDelete(provider: Provider) {
+  async function handleDelete(provider: Provider, keyIndex: number) {
     await fetch('/api/settings/api-keys', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ provider }),
+      body: JSON.stringify({ provider, key_index: keyIndex }),
     });
-    setKeys((prev) => prev.filter((k) => k.provider !== provider));
+    await loadKeys();
     showToast(t('settings.keyDeleted'));
   }
 
-  const existingProviders = new Set(keys.map((k) => k.provider));
-  const availableProviders = PROVIDERS.filter((p) => !existingProviders.has(p));
+  async function handleRestore(provider: Provider, keyIndex: number) {
+    await fetch('/api/settings/api-keys', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider, key_index: keyIndex, status: 'active' }),
+    });
+    await loadKeys();
+    showToast(t('settings.multiKeyRestored'));
+  }
+
+  // Group keys by provider
+  const keysByProvider = PROVIDERS.reduce<Record<string, ApiKeyEntry[]>>((acc, p) => {
+    const providerKeys = keys.filter((k) => k.provider === p);
+    if (providerKeys.length > 0) acc[p] = providerKeys;
+    return acc;
+  }, {});
+
+  const providersWithKeys = Object.keys(keysByProvider);
+  const availableProviders = PROVIDERS.filter((p) => !keysByProvider[p]);
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {loading && <p className="text-xs text-white/50">{t('common.loading')}</p>}
 
-      {keys.map((key) => (
-        <div key={key.id} className="flex items-center justify-between rounded-lg border border-white/8 px-3 py-2.5">
-          <div>
-            <span className="text-sm font-medium text-white/80">{key.provider}</span>
-            <span className="ml-3 font-mono text-xs text-white/50">{key.maskedValue}</span>
+      {providersWithKeys.map((provider) => (
+        <div key={provider} className="rounded-lg border border-white/8 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm font-medium text-white/80">{provider}</span>
+            <button
+              type="button"
+              onClick={() => { setAddingProvider(provider as Provider); setInputValue(''); }}
+              className="flex items-center gap-1 text-[10px] text-white/40 transition-colors hover:text-white/70"
+            >
+              <Plus className="h-3 w-3" />
+              {t('settings.multiKeyAddKey')}
+            </button>
           </div>
-          <div className="flex items-center gap-3">
-            <button type="button" onClick={() => { setAddingProvider(key.provider); setInputValue(''); }}
-              className="text-xs text-white/55 transition-colors hover:text-white/80">
-              {t('common.edit')}
-            </button>
-            <button type="button" onClick={() => void handleDelete(key.provider)}
-              className="text-xs text-red-400 transition-colors hover:text-red-300">
-              {t('common.delete')}
-            </button>
+          <div className="space-y-1.5">
+            {keysByProvider[provider].map((key) => (
+              <div key={key.id} className="flex items-center justify-between rounded-md border border-white/6 px-2.5 py-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs text-white/50">{key.maskedValue}</span>
+                  <StatusBadge status={key.status} t={t} />
+                  {key.last_error && (
+                    <span className="max-w-[120px] truncate text-[10px] text-red-400/60" title={key.last_error}>
+                      {key.last_error}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {(key.status === 'exhausted' || key.status === 'rate_limited') && (
+                    <button
+                      type="button"
+                      onClick={() => void handleRestore(key.provider, key.key_index)}
+                      className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-amber-400 transition-colors hover:bg-amber-500/10 hover:text-amber-300"
+                      title={t('settings.multiKeyRestore')}
+                    >
+                      <RotateCcw className="h-3 w-3" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => void handleDelete(key.provider, key.key_index)}
+                    className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-300"
+                    title={t('common.delete')}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       ))}
 
+      {/* Input for adding a key */}
       {addingProvider ? (
         <div className="rounded-lg border border-white/12 p-3">
           <div className="mb-2 text-xs font-medium text-white/50">{addingProvider}</div>
@@ -144,9 +227,7 @@ function ApiKeyManager() {
             <button key={provider} type="button"
               onClick={() => { setAddingProvider(provider); setInputValue(''); }}
               className="flex items-center gap-1.5 rounded-lg border border-white/12 px-3 py-1.5 text-xs text-white/50 transition-colors hover:border-white/25 hover:text-white/80">
-              <svg viewBox="0 0 12 12" fill="currentColor" className="h-3 w-3">
-                <path d="M6 1a.5.5 0 0 1 .5.5v4h4a.5.5 0 0 1 0 1h-4v4a.5.5 0 0 1-1 0v-4h-4a.5.5 0 0 1 0-1h4v-4A.5.5 0 0 1 6 1Z" />
-              </svg>
+              <Plus className="h-3 w-3" />
               {provider}
             </button>
           ))}
@@ -233,7 +314,7 @@ export function SettingsDialog() {
               </div>
               <div>
                 <div className="text-sm text-white/80">{user?.email}</div>
-                <div className="text-xs text-white/50">{user?.id?.slice(0, 8)}…</div>
+                <div className="text-xs text-white/50">{user?.id?.slice(0, 8)}...</div>
               </div>
             </div>
           </SectionBlock>
@@ -259,7 +340,10 @@ export function SettingsDialog() {
           </SectionBlock>
 
           {/* API Keys */}
-          <SectionBlock title={t('settings.apiKeys')} desc={t('settings.apiKeysDesc')}>
+          <SectionBlock
+            title={t('settings.apiKeys')}
+            desc={t('settings.multiKeyDesc')}
+          >
             <ApiKeyManager />
           </SectionBlock>
         </div>

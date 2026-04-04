@@ -35,9 +35,21 @@ function maskKey(plaintext: string): string {
   return plaintext.slice(0, 4) + '••••' + plaintext.slice(-4)
 }
 
-const upsertSchema = z.object({
+const addKeySchema = z.object({
   provider: z.enum(SUPPORTED_PROVIDERS),
   key: z.string().min(8),
+  key_index: z.number().int().min(0).optional(),
+})
+
+const deleteKeySchema = z.object({
+  provider: z.enum(SUPPORTED_PROVIDERS),
+  key_index: z.number().int().min(0).optional(),
+})
+
+const updateStatusSchema = z.object({
+  provider: z.enum(SUPPORTED_PROVIDERS),
+  key_index: z.number().int().min(0),
+  status: z.enum(['active', 'exhausted', 'invalid', 'rate_limited']),
 })
 
 export async function GET() {
@@ -47,9 +59,10 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('user_api_keys')
-    .select('id, provider, encrypted_key, iv, created_at')
+    .select('id, provider, encrypted_key, iv, key_index, status, last_error, last_used_at, error_count, created_at')
     .eq('user_id', user.id)
     .order('provider')
+    .order('key_index')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
@@ -60,7 +73,17 @@ export async function GET() {
     } catch {
       // If decryption fails, return masked placeholder
     }
-    return { id: row.id, provider: row.provider, maskedValue, created_at: row.created_at }
+    return {
+      id: row.id,
+      provider: row.provider,
+      maskedValue,
+      key_index: row.key_index ?? 0,
+      status: row.status ?? 'active',
+      last_error: row.last_error,
+      last_used_at: row.last_used_at,
+      error_count: row.error_count ?? 0,
+      created_at: row.created_at,
+    }
   })
 
   return NextResponse.json(masked)
@@ -72,7 +95,7 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const parsed = upsertSchema.safeParse(body)
+  const parsed = addKeySchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
@@ -80,19 +103,71 @@ export async function POST(request: Request) {
   const { provider, key } = parsed.data
   const { encrypted, iv } = encrypt(key)
 
+  // If key_index is provided, use it. Otherwise, auto-assign the next available index.
+  let keyIndex = parsed.data.key_index
+  if (keyIndex === undefined) {
+    const { data: existing } = await supabase
+      .from('user_api_keys')
+      .select('key_index')
+      .eq('user_id', user.id)
+      .eq('provider', provider)
+      .order('key_index', { ascending: false })
+      .limit(1)
+
+    keyIndex = existing && existing.length > 0 ? (existing[0].key_index ?? 0) + 1 : 0
+  }
+
   const { error } = await supabase
     .from('user_api_keys')
     .upsert(
-      { user_id: user.id, provider, encrypted_key: encrypted, iv },
-      { onConflict: 'user_id,provider' }
+      {
+        user_id: user.id,
+        provider,
+        encrypted_key: encrypted,
+        iv,
+        key_index: keyIndex,
+        status: 'active',
+        error_count: 0,
+        last_error: null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id,provider,key_index' }
     )
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  return NextResponse.json({ ok: true, key_index: keyIndex })
+}
+
+export async function PATCH(request: Request) {
+  const supabase = await createClient()
+  const user = await getAuthUser(supabase)
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
+  const body = await request.json()
+  const parsed = updateStatusSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+  }
+
+  const { provider, key_index, status } = parsed.data
+
+  const { error } = await supabase
+    .from('user_api_keys')
+    .update({
+      status,
+      error_count: status === 'active' ? 0 : undefined,
+      last_error: status === 'active' ? null : undefined,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', user.id)
+    .eq('provider', provider)
+    .eq('key_index', key_index)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   return NextResponse.json({ ok: true })
 }
-
-const providerSchema = z.object({ provider: z.enum(SUPPORTED_PROVIDERS) })
 
 export async function DELETE(request: Request) {
   const supabase = await createClient()
@@ -100,16 +175,25 @@ export async function DELETE(request: Request) {
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const parsed = providerSchema.safeParse(body)
+  const parsed = deleteKeySchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { error } = await supabase
+  const { provider, key_index } = parsed.data
+
+  let query = supabase
     .from('user_api_keys')
     .delete()
     .eq('user_id', user.id)
-    .eq('provider', parsed.data.provider)
+    .eq('provider', provider)
+
+  // If key_index specified, delete only that key; otherwise delete all keys for the provider
+  if (key_index !== undefined) {
+    query = query.eq('key_index', key_index)
+  }
+
+  const { error } = await query
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 

@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "upload-video-ref",
+      "type": "uploadNode",
+      "position": { "x": 0, "y": 0 },
+      "data": {
+        "displayName": "Reference Image",
+        "imageUrl": null,
+        "previewImageUrl": null,
+        "aspectRatio": "16:9"
+      }
+    },
+    {
+      "id": "ai-image",
+      "type": "imageNode",
+      "position": { "x": 400, "y": 0 },
+      "data": {
+        "displayName": "AI Rebuild",
+        "prompt": "",
+        "model": "grs-ai/flux-1",
+        "size": "1K",
+        "requestAspectRatio": "16:9",
+        "aspectRatio": "16:9",
+        "imageUrl": null,
+        "previewImageUrl": null,
+        "isGenerating": false,
+        "generationStartedAt": null
+      }
+    },
+    {
+      "id": "video-gen",
+      "type": "videoGenNode",
+      "position": { "x": 800, "y": 0 },
+      "data": {
+        "displayName": "Video Generation",
+        "prompt": "",
+        "model": "kling/kling-3.0",
+        "duration": 5,
+        "aspectRatio": "16:9",
+        "enableAudio": true,
+        "videoUrl": null,
+        "thumbnailUrl": null,
+        "isGenerating": false,
+        "jobId": null,
+        "errorMessage": null
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "upload-video-ref",
+      "target": "ai-image"
+    },
+    {
+      "id": "e2",
+      "source": "ai-image",
+      "target": "video-gen"
+    }
+  ],
+  "metadata": {
+    "name": "Video Rebuild",
+    "description": "Analyze video keyframes and regenerate storyboard",
+    "requiredNodeTypes": ["uploadNode", "imageNode", "videoGenNode"]
+  }
+}

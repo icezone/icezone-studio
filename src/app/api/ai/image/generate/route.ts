@@ -3,6 +3,8 @@ import { createClient, getAuthUser } from '@/lib/supabase/server'
 import { getProvider } from '@/server/ai/registry'
 import { createJob } from '@/server/jobs/jobService'
 import { InsufficientCreditsError } from '@/server/jobs/jobService'
+import { withKeyRotation } from '@/server/ai/keyRotationHelper'
+import { AllKeysUnavailableError } from '@/server/ai/keyRotation'
 
 // Ensure providers are registered
 import '@/server/ai/index'
@@ -78,7 +80,6 @@ export async function POST(request: NextRequest) {
   try {
     // Synchronous provider path
     if (provider.generate) {
-      // Check credits first
       const cost = typeof creditCost === 'number' ? creditCost : DEFAULT_CREDIT_COST
       const jobId = await createJob({
         userId: user.id,
@@ -90,7 +91,13 @@ export async function POST(request: NextRequest) {
       })
 
       try {
-        const result = await provider.generate(generateRequest)
+        // Use key rotation: tries multiple keys on failure
+        const { result } = await withKeyRotation(
+          supabase,
+          user.id,
+          providerId,
+          () => provider.generate!(generateRequest)
+        )
         await import('@/server/jobs/jobService').then(({ updateJobStatus }) =>
           updateJobStatus(jobId, 'completed', { outputUrl: result.imageUrl })
         )
@@ -109,8 +116,13 @@ export async function POST(request: NextRequest) {
     if (provider.submitJob) {
       const cost = typeof creditCost === 'number' ? creditCost : DEFAULT_CREDIT_COST
 
-      // Submit job to provider first to get external job ID
-      const externalJobId = await provider.submitJob(generateRequest)
+      // Use key rotation for job submission
+      const { result: externalJobId } = await withKeyRotation(
+        supabase,
+        user.id,
+        providerId,
+        () => provider.submitJob!(generateRequest)
+      )
 
       const jobId = await createJob({
         userId: user.id,
@@ -130,6 +142,9 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
   } catch (error) {
+    if (error instanceof AllKeysUnavailableError) {
+      return NextResponse.json({ error: error.message }, { status: 503 })
+    }
     if (error instanceof InsufficientCreditsError || (error instanceof Error && error.name === 'InsufficientCreditsError')) {
       return NextResponse.json({ error: (error as Error).message }, { status: 402 })
     }

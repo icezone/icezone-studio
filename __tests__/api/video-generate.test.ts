@@ -100,6 +100,22 @@ vi.mock('@/server/video/registry', () => ({
 // Prevent index.ts from importing real providers
 vi.mock('@/server/video/index', () => ({}))
 
+vi.mock('@/server/ai/keyRotationHelper', () => ({
+  withKeyRotation: vi.fn(async (_supabase: unknown, _userId: string, _providerId: string, fn: () => Promise<unknown>) => {
+    const result = await fn()
+    return { result, keyIndex: 0 }
+  }),
+}))
+
+vi.mock('@/server/ai/keyRotation', () => ({
+  AllKeysUnavailableError: class AllKeysUnavailableError extends Error {
+    constructor(message: string) {
+      super(message)
+      this.name = 'AllKeysUnavailableError'
+    }
+  },
+}))
+
 // ---------------------------------------------------------------------------
 // Import route under test
 // ---------------------------------------------------------------------------

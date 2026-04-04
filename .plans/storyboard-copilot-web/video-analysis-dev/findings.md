@@ -1,8 +1,8 @@
 # Findings — video-analysis-dev
 
-## Existing Infrastructure
-- `src/server/video/analysis/types.ts` already defines SceneDetectOptions, SceneDetectResult, VideoMetadata, FrameExtractOptions, ExtractedFrame, VideoAnalyzeJobResult
-- `src/server/jobs/jobService.ts` provides createJob/updateJobStatus/getJob
-- `src/app/api/jobs/[id]/route.ts` handles job polling (video/image providers)
-- Tests follow hoisted mock pattern with vi.hoisted() for ffmpeg/sharp mocks
-- Job type field in createJob params accepts 'image' | 'video' — will need to extend or use 'video' for video_analysis
+## Key Observations
+
+1. Job service (`src/server/jobs/jobService.ts`) uses `type: 'image' | 'video'` but the type field is currently unused (suppressed with `void`). Need to extend to support `'video_analysis'`.
+2. Job polling in `src/app/api/jobs/[id]/route.ts` checks video providers then image providers. For video_analysis, need a separate path since it's not a generation provider.
+3. Existing test pattern: Supabase mocked via `vi.hoisted()` + `vi.mock()` with chainable query builders.
+4. `fluent-ffmpeg` and `@ffmpeg-installer/ffmpeg` are not yet in package.json — need to install.

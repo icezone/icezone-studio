@@ -28,7 +28,16 @@
       "Bash(node --input-type=module -e \":*)",
       "Bash(git -C D:/storyboard-copilot-web worktree list)",
       "Bash(git -C D:/storyboard-copilot-web log --oneline ws/auth-shell)",
-      "Bash(git worktree:*)"
+      "Bash(git worktree:*)",
+      "Bash(node -e \"const p = require\\('./package.json'\\); console.log\\(p.version\\)\")",
+      "Bash(mkdir -p \"C:/icezone/storyboard-copilot-web/.claude/worktrees/agent-a904fcbc/src/app/api/templates/[id]/use\")",
+      "Bash(mkdir -p \"C:/icezone/storyboard-copilot-web/.claude/worktrees/agent-a904fcbc/src/app/api/templates/[id]/publish\")",
+      "Bash(git add:*)",
+      "Bash(git commit -m 'feat\\(ai\\): implement N4 novel/script analysis backend:*)",
+      "Bash(git commit -m 'feat\\(canvas\\): implement N4 novel/script input frontend:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
