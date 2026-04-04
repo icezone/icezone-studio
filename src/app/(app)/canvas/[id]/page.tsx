@@ -3,6 +3,8 @@
 import { useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { useTranslation } from 'react-i18next';
+import '@/i18n';
 import { useProjectStore } from '@/stores/projectStore';
 import { useCanvasStore } from '@/stores/canvasStore';
 
@@ -14,29 +16,43 @@ const Canvas = dynamic(
 
 function CanvasLoading() {
   return (
-    <div className="flex h-full w-full items-center justify-center bg-background">
-      <div className="text-sm text-foreground/40">Loading canvas...</div>
+    <div className="flex h-full w-full items-center justify-center bg-[#0a0a0a]">
+      <div className="text-sm text-white/30">Loading canvas...</div>
     </div>
   );
 }
 
-function SaveStatusBadge() {
+function CanvasTopBar() {
+  const { t } = useTranslation();
   const saveStatus = useProjectStore((state) => state.saveStatus);
+  const currentProject = useProjectStore((state) => state.currentProject);
+
+  const projectName = currentProject?.name || t('canvas.untitledProject');
 
   const statusMap = {
-    saving: { label: 'Saving...', className: 'text-foreground/40' },
-    saved: { label: 'Saved', className: 'text-emerald-400' },
-    unsynced: { label: 'Unsynced', className: 'text-amber-400' },
-    offline: { label: 'Offline', className: 'text-red-400' },
-    conflict: { label: 'Conflict', className: 'text-red-500' },
+    saving:   { label: t('canvas.saveStatus.saving'),   className: 'text-white/40' },
+    saved:    { label: t('canvas.saveStatus.saved'),    className: 'text-emerald-400/80' },
+    unsynced: { label: t('canvas.saveStatus.unsynced'), className: 'text-amber-400' },
+    offline:  { label: t('canvas.saveStatus.offline'),  className: 'text-red-400' },
+    conflict: { label: t('canvas.saveStatus.conflict'), className: 'text-red-500' },
   } as const;
 
-  const { label, className } = statusMap[saveStatus] ?? { label: saveStatus, className: 'text-foreground/40' };
+  const { label, className } = statusMap[saveStatus] ?? { label: saveStatus, className: 'text-white/30' };
 
   return (
-    <span className={`pointer-events-none select-none text-xs ${className}`}>
-      {label}
-    </span>
+    <div className="pointer-events-none absolute left-0 right-0 top-0 z-[50] flex items-center justify-between px-4 py-3">
+      {/* Project name — centred visually by sitting left of save status */}
+      <div className="flex items-center gap-2 pl-14">
+        <span className="max-w-[260px] truncate text-sm font-medium text-white/70">
+          {projectName}
+        </span>
+      </div>
+
+      {/* Save status */}
+      <span className={`select-none text-xs ${className}`}>
+        {label}
+      </span>
+    </div>
   );
 }
 
@@ -49,6 +65,8 @@ export default function CanvasPage() {
   const setCurrentProject = useProjectStore((state) => state.setCurrentProject);
   const setCanvasData = useCanvasStore((state) => state.setCanvasData);
 
+  const patchProjectName = useProjectStore((state) => state.patchProjectName);
+
   const initProject = useCallback(async () => {
     if (!projectId) {
       return;
@@ -56,17 +74,26 @@ export default function CanvasPage() {
 
     setCurrentProject(projectId);
 
-    try {
-      const draft = await loadProject(projectId);
-      if (draft) {
-        const nodes = Array.isArray(draft.nodes) ? draft.nodes : [];
-        const edges = Array.isArray(draft.edges) ? draft.edges : [];
-        setCanvasData(nodes as Parameters<typeof setCanvasData>[0], edges as Parameters<typeof setCanvasData>[1]);
-      }
-    } catch (error) {
-      console.error('[CanvasPage] Failed to load project:', error);
+    // Fetch project meta (name) and draft in parallel
+    const [draft] = await Promise.all([
+      loadProject(projectId).catch((err) => {
+        console.error('[CanvasPage] Failed to load project draft:', err);
+        return null;
+      }),
+      fetch(`/api/projects/${projectId}`)
+        .then((res) => res.ok ? res.json() : null)
+        .then((meta: { name?: string } | null) => {
+          if (meta?.name) patchProjectName(meta.name);
+        })
+        .catch(() => undefined),
+    ]);
+
+    if (draft) {
+      const nodes = Array.isArray(draft.nodes) ? draft.nodes : [];
+      const edges = Array.isArray(draft.edges) ? draft.edges : [];
+      setCanvasData(nodes as Parameters<typeof setCanvasData>[0], edges as Parameters<typeof setCanvasData>[1]);
     }
-  }, [projectId, loadProject, setCurrentProject, setCanvasData]);
+  }, [projectId, loadProject, setCurrentProject, setCanvasData, patchProjectName]);
 
   useEffect(() => {
     void initProject();
@@ -75,10 +102,10 @@ export default function CanvasPage() {
   if (!projectId) {
     return (
       <div className="flex h-full w-full items-center justify-center">
-        <p className="text-sm text-foreground/50">Invalid project ID.</p>
+        <p className="text-sm text-white/50">Invalid project ID.</p>
         <button
           type="button"
-          className="ml-3 text-sm text-foreground underline"
+          className="ml-3 text-sm text-white underline"
           onClick={() => router.push('/')}
         >
           Go home
@@ -89,10 +116,7 @@ export default function CanvasPage() {
 
   return (
     <div className="relative flex h-full w-full flex-col">
-      {/* Save status indicator */}
-      <div className="pointer-events-none absolute right-4 top-4 z-[50]">
-        <SaveStatusBadge />
-      </div>
+      <CanvasTopBar />
 
       {/* Canvas fills remaining space */}
       <div className="flex-1 overflow-hidden">

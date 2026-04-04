@@ -253,3 +253,23 @@ body {
   border-color: rgba(59, 130, 246, 0.6);
   outline: none;
 }
+
+/* ─── UI primitive CSS variables (dark-forced) ──────────── */
+:root {
+  --ui-surface-field:      rgba(255, 255, 255, 0.05);
+  --ui-surface-panel:      #1a1a24;
+  --ui-border-soft:        rgba(255, 255, 255, 0.14);
+  --ui-border-strong:      rgba(255, 255, 255, 0.28);
+  --ui-shadow-panel:       0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
+  --accent-rgb:            59, 130, 246;
+}
+
+/* Remove number input spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}

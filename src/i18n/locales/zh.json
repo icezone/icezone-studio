@@ -84,6 +84,14 @@
   },
   "canvas": {
     "addImage": "添加图片",
+    "saveStatus": {
+      "saving": "保存中...",
+      "saved": "已保存",
+      "unsynced": "未同步",
+      "offline": "离线",
+      "conflict": "冲突"
+    },
+    "untitledProject": "未命名项目",
     "emptyHintTitle": "画布为空",
     "emptyHintSubtitle": "双击空白处或点击左侧工具栏添加节点",
     "generate": "生成",

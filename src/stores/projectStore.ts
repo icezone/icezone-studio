@@ -37,6 +37,7 @@ interface ProjectState {
   load: (projectId: string) => Promise<CanvasDraft | null>
   saveViewport: (viewport: Viewport) => void
   _cleanup: () => void
+  patchProjectName: (name: string) => void
   // Canvas.tsx-compatible adapter methods
   getCurrentProject: () => CanvasProjectSnapshot | null
   saveCurrentProject: (
@@ -65,6 +66,13 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   currentProjectId: null,
   currentProject: null,
   revision: 0,
+
+  patchProjectName(name: string) {
+    const existing = get().currentProject
+    if (existing) {
+      set({ currentProject: { ...existing, name } })
+    }
+  },
 
   setCurrentProject(id: string) {
     // 清理旧的 BroadcastChannel

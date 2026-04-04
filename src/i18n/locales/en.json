@@ -84,6 +84,14 @@
   },
   "canvas": {
     "addImage": "Add Image",
+    "saveStatus": {
+      "saving": "Saving...",
+      "saved": "Saved",
+      "unsynced": "Unsynced",
+      "offline": "Offline",
+      "conflict": "Conflict"
+    },
+    "untitledProject": "Untitled Project",
     "emptyHintTitle": "Canvas is empty",
     "emptyHintSubtitle": "Double-click or use the left toolbar to add nodes",
     "generate": "Generate",

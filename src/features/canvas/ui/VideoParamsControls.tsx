@@ -596,16 +596,16 @@ export const VideoParamsControls = memo(({
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <label className="text-xs font-medium text-text-dark">{t('node.videoGen.seed')}</label>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={seed ?? ''}
                       onChange={(event) => {
-                        const value = event.target.value;
+                        const value = event.target.value.replace(/\D/g, '');
                         onSeedChange?.(value ? Number(value) : null);
                       }}
                       placeholder="50000"
-                      min="10000"
-                      max="99999"
-                      className="h-7 w-24 rounded border border-[rgba(255,255,255,0.15)] bg-bg-dark/60 px-2 text-xs text-text-dark placeholder:text-text-muted/50 focus:border-accent/60 focus:outline-none"
+                      className="h-7 w-[100px] rounded border border-white/14 bg-white/5 px-2 text-xs text-text-dark placeholder:text-white/25 focus:border-accent/60 focus:outline-none"
                     />
                   </div>
                   <div className="text-[10px] leading-3 text-text-muted">
@@ -629,10 +629,11 @@ export const VideoParamsControls = memo(({
                           <label className="text-xs font-medium text-text-dark">
                             {translateParam(definition.key, 'label') || definition.label}
                           </label>
+                          <div className="w-[100px]">
                           <UiSelect
                             value={String(resolvedValue ?? '')}
                             onChange={(event) => onExtraParamChange?.(definition.key, event.target.value)}
-                            className="h-7 w-32 text-xs"
+                            className="h-7 text-xs"
                           >
                             {definition.options.map((option) => (
                               <option key={option.value} value={option.value}>
@@ -640,6 +641,7 @@ export const VideoParamsControls = memo(({
                               </option>
                             ))}
                           </UiSelect>
+                          </div>
                         </div>
                         {definition.description && (
                           <div className="text-[10px] leading-3 text-text-muted">
