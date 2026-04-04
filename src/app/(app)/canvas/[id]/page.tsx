@@ -74,19 +74,19 @@ export default function CanvasPage() {
 
     setCurrentProject(projectId);
 
-    // Fetch project meta (name) and draft in parallel
-    const [draft] = await Promise.all([
+    // Fetch project meta (name) and draft in parallel, then apply name after draft is loaded
+    const [draft, meta] = await Promise.all([
       loadProject(projectId).catch((err) => {
         console.error('[CanvasPage] Failed to load project draft:', err);
         return null;
       }),
       fetch(`/api/projects/${projectId}`)
-        .then((res) => res.ok ? res.json() : null)
-        .then((meta: { name?: string } | null) => {
-          if (meta?.name) patchProjectName(meta.name);
-        })
-        .catch(() => undefined),
+        .then((res) => res.ok ? res.json() as Promise<{ name?: string }> : null)
+        .catch(() => null),
     ]);
+
+    // Apply name AFTER loadProject has set currentProject
+    if (meta?.name) patchProjectName(meta.name);
 
     if (draft) {
       const nodes = Array.isArray(draft.nodes) ? draft.nodes : [];
