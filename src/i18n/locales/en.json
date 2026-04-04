@@ -173,7 +173,22 @@
       "cellAspectRatio": "Cell Ratio",
       "overallAspectRatio": "Overall Ratio",
       "ratioModeCell": "Cell",
-      "ratioModeOverall": "Overall"
+      "ratioModeOverall": "Overall",
+      "batchGenerate": "Batch ({{count}} frames)",
+      "batchPartialFail": "Batch complete: {{succeeded}} succeeded, {{failed}} failed",
+      "noFramesError": "Please fill in at least one frame description",
+      "noApiKeyError": "Please configure API Key in settings",
+      "frameControl": "Frame Control",
+      "startFrame": "Start Frame",
+      "endFrame": "End Frame",
+      "frameMode": "Frame Mode",
+      "frameModeNone": "None",
+      "frameModeReference": "Reference",
+      "frameModeStrict": "Strict",
+      "multiReference": "Multi-Reference",
+      "referenceWeight": "Reference Weight",
+      "addReference": "Add Reference",
+      "removeReference": "Remove Reference"
     },
     "videoGen": {
       "generate": "Generate Video",

@@ -115,10 +115,32 @@ export interface StoryboardSplitNodeData {
   [key: string]: unknown;
 }
 
+export type StoryboardFrameMode = 'none' | 'reference' | 'strict';
+
 export interface StoryboardGenFrameItem {
   id: string;
   description: string;
   referenceIndex: number | null;
+
+  // Frame control
+  startFrameUrl?: string | null;
+  endFrameUrl?: string | null;
+  startFrameMode?: StoryboardFrameMode;
+  endFrameMode?: StoryboardFrameMode;
+
+  // Multi-reference
+  referenceImageUrls?: string[];
+  referenceWeights?: number[]; // 0~1 for each reference
+}
+
+export function createDefaultStoryboardGenFrame(id?: string): StoryboardGenFrameItem {
+  return {
+    id: id ?? `frame-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    description: '',
+    referenceIndex: null,
+    startFrameMode: 'none',
+    endFrameMode: 'none',
+  };
 }
 
 export type StoryboardRatioControlMode = 'overall' | 'cell';

@@ -173,7 +173,22 @@
       "cellAspectRatio": "单帧比例",
       "overallAspectRatio": "整体比例",
       "ratioModeCell": "单帧",
-      "ratioModeOverall": "整体"
+      "ratioModeOverall": "整体",
+      "batchGenerate": "批量生成 ({{count}}帧)",
+      "batchPartialFail": "批量生成完成：{{succeeded}} 成功，{{failed}} 失败",
+      "noFramesError": "请填写至少一个分镜内容描述",
+      "noApiKeyError": "请在设置中填写 API Key",
+      "frameControl": "帧控制",
+      "startFrame": "首帧",
+      "endFrame": "末帧",
+      "frameMode": "帧模式",
+      "frameModeNone": "无",
+      "frameModeReference": "参考",
+      "frameModeStrict": "严格",
+      "multiReference": "多图参考",
+      "referenceWeight": "参考权重",
+      "addReference": "添加参考图",
+      "removeReference": "移除参考图"
     },
     "videoGen": {
       "generate": "生成视频",

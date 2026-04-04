@@ -10,7 +10,7 @@ import {
   useRef,
 } from 'react';
 import { Handle, Position, useUpdateNodeInternals, useViewport } from '@xyflow/react';
-import { Minus, Plus, Sparkles } from 'lucide-react';
+import { Film, Images, Minus, Plus, Sparkles, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -19,6 +19,7 @@ import {
   DEFAULT_ASPECT_RATIO,
   EXPORT_RESULT_NODE_DEFAULT_WIDTH,
   EXPORT_RESULT_NODE_LAYOUT_HEIGHT,
+  createDefaultStoryboardGenFrame,
   type ImageSize,
   type StoryboardRatioControlMode,
   type StoryboardGenNodeData,
@@ -48,6 +49,12 @@ import {
   sanitizeStoryboardText,
 } from '@/features/canvas/application/storyboardText';
 import {
+  submitBatchJobs,
+  pollBatchJobs,
+  createInitialBatchProgress,
+  type BatchProgress,
+} from '@/features/canvas/application/storyboardBatchGenerate';
+import {
   findReferenceTokens,
   insertReferenceToken,
   removeTextRange,
@@ -72,6 +79,9 @@ import {
 import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canvas/ui/NodeHeader';
 import { NodePriceBadge } from '@/features/canvas/ui/NodePriceBadge';
 import { NodeResizeHandle } from '@/features/canvas/ui/NodeResizeHandle';
+import { FrameReferenceEditor } from '@/features/canvas/ui/FrameReferenceEditor';
+import { FrameControlEditor } from '@/features/canvas/ui/FrameControlEditor';
+import type { StoryboardFrameMode } from '@/features/canvas/domain/canvasNodes';
 import {
   NODE_CONTROL_CHIP_CLASS,
   NODE_CONTROL_ICON_CLASS,
@@ -576,8 +586,12 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
   const grsaiCreditTierId = useSettingsStore((state) => state.grsaiCreditTierId);
 
   const [error, setError] = useState<string | null>(null);
+  const [batchProgress, setBatchProgress] = useState<BatchProgress | null>(null);
+  const isBatchGenerating = batchProgress !== null && batchProgress.completed < batchProgress.total;
   const rootRef = useRef<HTMLDivElement>(null);
   const activeFrameTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [activeReferenceEditorFrameIndex, setActiveReferenceEditorFrameIndex] = useState<number | null>(null);
+  const [activeFrameControlEditorFrameIndex, setActiveFrameControlEditorFrameIndex] = useState<number | null>(null);
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [pickerFrameIndex, setPickerFrameIndex] = useState<number | null>(null);
   const [pickerCursor, setPickerCursor] = useState<number | null>(null);
@@ -920,11 +934,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
       if (i < currentFrames.length) {
         newFrames.push(currentFrames[i]);
       } else {
-        newFrames.push({
-          id: generateFrameId(),
-          description: '',
-          referenceIndex: null,
-        });
+        newFrames.push(createDefaultStoryboardGenFrame());
       }
     }
 
@@ -1218,6 +1228,126 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
     ignoreAtTagWhenCopyingAndGenerating,
   ]);
 
+  const handleBatchGenerate = useCallback(async () => {
+    if (!nodeData || isBatchGenerating) {
+      return;
+    }
+
+    const framesToGenerate = nodeData.frames.filter((f) => f.description.trim().length > 0);
+    if (framesToGenerate.length === 0) {
+      const errorMessage = t('node.storyboardGen.noFramesError', { defaultValue: '请填写至少一个分镜内容描述' });
+      setError(errorMessage);
+      return;
+    }
+
+    if (!providerApiKey) {
+      const errorMessage = t('node.storyboardGen.noApiKeyError', { defaultValue: '请在设置中填写 API Key' });
+      setError(errorMessage);
+      return;
+    }
+
+    setError(null);
+    const progress = createInitialBatchProgress(framesToGenerate.length);
+    setBatchProgress(progress);
+
+    try {
+      await canvasAiGateway.setApiKey(selectedModel.providerId, providerApiKey);
+
+      const resolvedRequestAspectRatio = await resolveEffectiveRequestAspectRatio();
+
+      const batchContext = {
+        model: selectedModel.id,
+        requestModel: requestResolution.requestModel,
+        size: selectedResolution.value,
+        aspectRatio: resolvedRequestAspectRatio,
+        extraParams: effectiveExtraParams,
+      };
+
+      // Submit all jobs
+      const jobStates = await submitBatchJobs(
+        framesToGenerate,
+        batchContext,
+        (payload) => canvasAiGateway.submitGenerateImageJob(payload)
+      );
+
+      const submitFailed = jobStates.filter((j) => j.error !== null).length;
+      setBatchProgress((prev) =>
+        prev
+          ? { ...prev, failed: submitFailed, completed: submitFailed, inProgress: new Set(jobStates.filter((j) => j.jobId).map((j) => j.frameId)) }
+          : prev
+      );
+
+      // Poll all jobs
+      const pollResults = await pollBatchJobs(
+        jobStates,
+        (jobId) => canvasAiGateway.getGenerateImageJob(jobId)
+      );
+
+      // Create output nodes for succeeded frames
+      let succeededCount = 0;
+      for (const result of pollResults) {
+        if (result.status === 'succeeded' && result.result) {
+          succeededCount++;
+          const newNodePosition = findNodePosition(
+            id,
+            EXPORT_RESULT_NODE_DEFAULT_WIDTH,
+            EXPORT_RESULT_NODE_LAYOUT_HEIGHT
+          );
+          const newNodeId = addNode(
+            CANVAS_NODE_TYPES.exportImage,
+            newNodePosition,
+            {
+              displayName: `${EXPORT_RESULT_DISPLAY_NAME.storyboardGenOutput} (${result.frameId})`,
+              resultKind: 'storyboardGenOutput',
+              imageUrl: result.result,
+              previewImageUrl: result.result,
+              aspectRatio: resolvedRequestAspectRatio,
+            }
+          );
+          addEdge(id, newNodeId);
+        }
+      }
+
+      const failedCount = pollResults.filter((r) => r.status === 'failed').length;
+      setBatchProgress({
+        total: framesToGenerate.length,
+        completed: framesToGenerate.length,
+        succeeded: succeededCount,
+        failed: failedCount,
+        inProgress: new Set(),
+      });
+
+      if (failedCount > 0) {
+        setError(t('node.storyboardGen.batchPartialFail', {
+          succeeded: succeededCount,
+          failed: failedCount,
+          defaultValue: `批量生成完成：${succeededCount} 成功，${failedCount} 失败`,
+        }));
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+      setBatchProgress(null);
+    }
+
+    // Clear batch progress after a delay
+    setTimeout(() => setBatchProgress(null), 3000);
+  }, [
+    nodeData,
+    isBatchGenerating,
+    providerApiKey,
+    selectedModel,
+    requestResolution.requestModel,
+    selectedResolution.value,
+    effectiveExtraParams,
+    resolveEffectiveRequestAspectRatio,
+    findNodePosition,
+    addNode,
+    addEdge,
+    id,
+    t,
+  ]);
+
   const handleRowChange = useCallback(
     (delta: number) => {
       if (!nodeData) {
@@ -1266,6 +1396,32 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
       updateNodeData(id, { frames: newFrames });
     },
     [id, incomingImages.length, nodeData.frames, updateNodeData]
+  );
+
+  const handleFrameReferenceImagesChange = useCallback(
+    (frameIndex: number, urls: string[], weights: number[]) => {
+      const frame = nodeData.frames[frameIndex];
+      if (!frame) return;
+      const newFrames = [...nodeData.frames];
+      newFrames[frameIndex] = { ...frame, referenceImageUrls: urls, referenceWeights: weights };
+      updateNodeData(id, { frames: newFrames });
+    },
+    [id, nodeData.frames, updateNodeData]
+  );
+
+  const handleFrameControlChange = useCallback(
+    (frameIndex: number, field: 'start' | 'end', url: string | null, mode: StoryboardFrameMode) => {
+      const frame = nodeData.frames[frameIndex];
+      if (!frame) return;
+      const newFrames = [...nodeData.frames];
+      if (field === 'start') {
+        newFrames[frameIndex] = { ...frame, startFrameUrl: url, startFrameMode: mode };
+      } else {
+        newFrames[frameIndex] = { ...frame, endFrameUrl: url, endFrameMode: mode };
+      }
+      updateNodeData(id, { frames: newFrames });
+    },
+    [id, nodeData.frames, updateNodeData]
   );
 
   const closeImagePicker = useCallback(() => {
@@ -1563,6 +1719,80 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
                   className="ui-scrollbar nodrag nowheel relative z-10 h-full w-full resize-none overflow-y-auto overflow-x-hidden bg-transparent px-1.5 py-1 text-left text-[10px] leading-4 text-transparent caret-text-dark placeholder:text-text-muted/40 focus:border-accent/50 focus:outline-none whitespace-pre-wrap break-words"
                   style={{ scrollbarGutter: 'stable' }}
                 />
+
+                {/* Frame control icon (bottom-left) */}
+                {incomingImages.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveFrameControlEditorFrameIndex(
+                        activeFrameControlEditorFrameIndex === index ? null : index
+                      );
+                      setActiveReferenceEditorFrameIndex(null);
+                    }}
+                    className={`absolute bottom-0.5 left-0.5 z-20 flex h-4 w-4 items-center justify-center rounded transition-colors ${
+                      frame.startFrameMode !== 'none' || frame.endFrameMode !== 'none'
+                        ? 'bg-accent/30 text-accent'
+                        : 'text-text-muted/40 hover:bg-white/10 hover:text-text-muted'
+                    }`}
+                    title={t('node.storyboardGen.frameControl')}
+                  >
+                    <Film className="h-2.5 w-2.5" />
+                  </button>
+                )}
+
+                {/* Multi-reference icon (bottom-right) */}
+                {incomingImages.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveReferenceEditorFrameIndex(
+                        activeReferenceEditorFrameIndex === index ? null : index
+                      );
+                      setActiveFrameControlEditorFrameIndex(null);
+                    }}
+                    className={`absolute bottom-0.5 right-0.5 z-20 flex h-4 w-4 items-center justify-center rounded transition-colors ${
+                      frame.referenceImageUrls && frame.referenceImageUrls.length > 0
+                        ? 'bg-accent/30 text-accent'
+                        : 'text-text-muted/40 hover:bg-white/10 hover:text-text-muted'
+                    }`}
+                    title={t('node.storyboardGen.multiReference')}
+                  >
+                    <Images className="h-2.5 w-2.5" />
+                    {frame.referenceImageUrls && frame.referenceImageUrls.length > 0 && (
+                      <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-accent text-[6px] font-bold text-white">
+                        {frame.referenceImageUrls.length}
+                      </span>
+                    )}
+                  </button>
+                )}
+
+                {/* Frame Control Editor popup */}
+                {activeFrameControlEditorFrameIndex === index && (
+                  <FrameControlEditor
+                    startFrameUrl={frame.startFrameUrl ?? null}
+                    endFrameUrl={frame.endFrameUrl ?? null}
+                    startFrameMode={frame.startFrameMode ?? 'none'}
+                    endFrameMode={frame.endFrameMode ?? 'none'}
+                    incomingImages={incomingImages}
+                    onStartFrameChange={(url, mode) => handleFrameControlChange(index, 'start', url, mode)}
+                    onEndFrameChange={(url, mode) => handleFrameControlChange(index, 'end', url, mode)}
+                    onClose={() => setActiveFrameControlEditorFrameIndex(null)}
+                  />
+                )}
+
+                {/* Frame Reference Editor popup */}
+                {activeReferenceEditorFrameIndex === index && (
+                  <FrameReferenceEditor
+                    referenceImageUrls={frame.referenceImageUrls ?? []}
+                    referenceWeights={frame.referenceWeights ?? []}
+                    incomingImages={incomingImages}
+                    onReferenceImagesChange={(urls, weights) => handleFrameReferenceImagesChange(index, urls, weights)}
+                    onClose={() => setActiveReferenceEditorFrameIndex(null)}
+                  />
+                )}
               </div>
             );
           })}
@@ -1658,21 +1888,52 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
           paramsPanelClassName="w-[420px] p-3"
         />
 
-        <UiButton
-          onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
-            event.stopPropagation();
-            const previewGridOnly =
-              enableStoryboardGenGridPreviewShortcut && event.ctrlKey && event.altKey && event.shiftKey;
-            void handleGenerate(previewGridOnly);
-          }}
-          variant="primary"
-          size="sm"
-          className={`!min-w-0 shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
-        >
-          <Sparkles className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
-          {t('canvas.generate')}
-        </UiButton>
+        <div className="flex shrink-0 items-center gap-1">
+          <UiButton
+            onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
+              event.stopPropagation();
+              const previewGridOnly =
+                enableStoryboardGenGridPreviewShortcut && event.ctrlKey && event.altKey && event.shiftKey;
+              void handleGenerate(previewGridOnly);
+            }}
+            variant="primary"
+            size="sm"
+            className={`!min-w-0 shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
+          >
+            <Sparkles className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
+            {t('canvas.generate')}
+          </UiButton>
+
+          <UiButton
+            onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
+              event.stopPropagation();
+              void handleBatchGenerate();
+            }}
+            variant="primary"
+            size="sm"
+            disabled={isBatchGenerating}
+            className={`!min-w-0 shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
+          >
+            <Zap className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
+            {t('node.storyboardGen.batchGenerate', { count: totalFrames })}
+          </UiButton>
+        </div>
       </div>
+
+      {/* Batch progress bar */}
+      {batchProgress && (
+        <div className="mx-3 mb-1 flex items-center gap-2">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[rgba(255,255,255,0.08)]">
+            <div
+              className="h-full rounded-full bg-accent transition-all duration-300"
+              style={{ width: `${batchProgress.total > 0 ? (batchProgress.completed / batchProgress.total) * 100 : 0}%` }}
+            />
+          </div>
+          <span className="shrink-0 text-[9px] text-text-muted">
+            {batchProgress.completed}/{batchProgress.total}
+          </span>
+        </div>
+      )}
 
       <Handle
         type="target"
