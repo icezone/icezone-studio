@@ -151,7 +151,8 @@
       "storyboard": "Storyboard",
       "storyboardGen": "Storyboard Gen",
       "videoGeneration": "AI Video",
-      "novelInput": "Novel/Script Input"
+      "novelInput": "Novel/Script Input",
+      "videoAnalysis": "Video Analysis"
     },
     "upload": {
       "hint": "Click to upload or drag image here",
@@ -244,6 +245,21 @@
       "uploadFailed": "Image upload failed",
       "klingElements": "Kling Elements",
       "multiShots": "Multi-shots"
+    },
+    "videoAnalysis": {
+      "uploadHint": "Click to upload or drag video here",
+      "sensitivity": "Sensitivity",
+      "minDuration": "Min Duration",
+      "maxKeyframes": "Max Frames",
+      "analyzeButton": "Start Analysis",
+      "analyzing": "Analyzing...",
+      "analysisFailed": "Analysis failed",
+      "scenesDetected": "{{count}} scenes detected",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "exportKeyframes": "Export Keyframes",
+      "exportKeyframesCount": "Export Selected Keyframes ({{count}})",
+      "keyframe": "Keyframe"
     }
   },
   "modelParams": {
@@ -291,7 +307,8 @@
     "storyboardGenOutput": "Storyboard Output",
     "storyboardSplitExport": "Split Export",
     "storyboardFrameEdit": "Frame Edit",
-    "novelInput": "Novel/Script Input"
+    "novelInput": "Novel/Script Input",
+    "videoAnalysis": "Video Analysis"
   },
   "videoErrors": {
     "generation_failed": "Video generation failed",

@@ -13,6 +13,7 @@ import {
   type StoryboardGenNodeData,
   type TextAnnotationNodeData,
   type UploadImageNodeData,
+  type VideoAnalysisNodeData,
 } from './canvasNodes';
 import { DEFAULT_NODE_DISPLAY_NAME } from './nodeDisplay';
 import { DEFAULT_IMAGE_MODEL_ID, DEFAULT_VIDEO_MODEL_ID } from '../models';
@@ -345,6 +346,37 @@ const novelInputNodeDefinition: CanvasNodeDefinition<NovelInputNodeData> = {
   }),
 };
 
+const videoAnalysisNodeDefinition: CanvasNodeDefinition<VideoAnalysisNodeData> = {
+  type: CANVAS_NODE_TYPES.videoAnalysis,
+  menuLabelKey: 'node.menu.videoAnalysis',
+  menuIcon: 'video',
+  visibleInMenu: true,
+  capabilities: {
+    toolbar: true,
+    promptInput: false,
+  },
+  connectivity: {
+    sourceHandle: true,
+    targetHandle: true,
+    connectMenu: {
+      fromSource: true,
+      fromTarget: true,
+    },
+  },
+  createDefaultData: () => ({
+    displayName: DEFAULT_NODE_DISPLAY_NAME[CANVAS_NODE_TYPES.videoAnalysis],
+    videoUrl: null,
+    videoFileName: null,
+    sensitivityThreshold: 0.3,
+    minSceneDurationMs: 500,
+    maxKeyframes: 50,
+    isAnalyzing: false,
+    analysisProgress: 0,
+    errorMessage: null,
+    scenes: [],
+  }),
+};
+
 export const canvasNodeDefinitions: Record<CanvasNodeType, CanvasNodeDefinition> = {
   [CANVAS_NODE_TYPES.upload]: uploadNodeDefinition,
   [CANVAS_NODE_TYPES.imageEdit]: imageEditNodeDefinition,
@@ -356,6 +388,7 @@ export const canvasNodeDefinitions: Record<CanvasNodeType, CanvasNodeDefinition>
   [CANVAS_NODE_TYPES.videoGen]: videoGenNodeDefinition,
   [CANVAS_NODE_TYPES.videoResult]: videoResultNodeDefinition,
   [CANVAS_NODE_TYPES.novelInput]: novelInputNodeDefinition,
+  [CANVAS_NODE_TYPES.videoAnalysis]: videoAnalysisNodeDefinition,
 };
 
 export function getNodeDefinition(type: CanvasNodeType): CanvasNodeDefinition {

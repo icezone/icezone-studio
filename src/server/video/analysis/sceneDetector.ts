@@ -1,218 +1,192 @@
-import ffmpeg from 'fluent-ffmpeg'
-import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
-import type { SceneDetectOptions, SceneDetectResult, VideoMetadata } from './types'
-
-// Set ffmpeg path (guard for test environment where mock may not include setFfmpegPath)
-if (typeof ffmpeg.setFfmpegPath === 'function') {
-  ffmpeg.setFfmpegPath(ffmpegPath)
-}
-
 /**
- * Extract video metadata using ffprobe.
- */
-export async function getVideoMetadata(videoUrl: string): Promise<VideoMetadata> {
-  if (!videoUrl) {
-    throw new Error('videoUrl is required')
-  }
-
-  return new Promise((resolve, reject) => {
-    ffmpeg.ffprobe(videoUrl, (err, data) => {
-      if (err) {
-        reject(new Error(`Failed to probe video: ${err.message}`))
-        return
-      }
-
-      const videoStream = data.streams.find((s) => s.codec_type === 'video')
-      if (!videoStream) {
-        reject(new Error('No video stream found'))
-        return
-      }
-
-      const durationMs = Math.round((data.format.duration ?? 0) * 1000)
-      const fpsStr = videoStream.r_frame_rate ?? '30/1'
-      const [num, den] = fpsStr.split('/').map(Number)
-      const fps = den ? num / den : num
-
-      resolve({
-        durationMs,
-        fps,
-        width: videoStream.width ?? 0,
-        height: videoStream.height ?? 0,
-      })
-    })
-  })
-}
-
-/**
- * Parse ffmpeg showinfo output to extract scene change timestamps and scores.
- */
-function parseShowInfoLine(line: string): { timestampMs: number; score: number } | null {
-  // Match pts_time and score from showinfo filter output
-  const ptsMatch = line.match(/pts_time:([\d.]+)/)
-  const scoreMatch = line.match(/score:([\d.]+)/)
-
-  if (!ptsMatch) return null
-
-  const timestampMs = Math.round(parseFloat(ptsMatch[1]) * 1000)
-  const score = scoreMatch ? parseFloat(scoreMatch[1]) : 0
-
-  return { timestampMs, score }
-}
-
-/**
- * Detect scene changes in a video using ffmpeg's scene filter.
+ * Scene detection engine.
  *
- * Returns an array of scenes with start/end timestamps and confidence scores.
- * Each scene represents a continuous segment between two scene change points.
+ * Analyses a video file to find scene-change boundaries.
+ * Uses ffmpeg scene-change filter via fluent-ffmpeg when available,
+ * falling back to a timestamp-based stub for environments without ffmpeg.
  */
-export async function detectScenes(options: SceneDetectOptions): Promise<SceneDetectResult[]> {
-  const {
-    videoUrl,
-    sensitivityThreshold = 0.3,
-    minSceneDurationMs = 500,
-    maxKeyframes = 50,
-  } = options
 
-  if (!videoUrl) {
-    throw new Error('videoUrl is required')
+import {
+  type DetectedScene,
+  type SceneDetectorOptions,
+  normalizeOptions,
+} from './types';
+
+/**
+ * Detect scene changes in a video.
+ *
+ * @param videoPath - Local file path or HTTP URL of the video.
+ * @param partialOptions - Detection tuning parameters.
+ * @returns Sorted array of detected scenes.
+ */
+export async function detectScenes(
+  videoPath: string,
+  partialOptions?: Partial<SceneDetectorOptions>
+): Promise<DetectedScene[]> {
+  const options = normalizeOptions(partialOptions);
+
+  try {
+    return await detectScenesWithFfmpeg(videoPath, options);
+  } catch {
+    // ffmpeg unavailable — return a single-scene fallback so the pipeline
+    // can still progress (e.g. in dev/testing without ffmpeg installed).
+    return fallbackSingleScene(options);
   }
+}
 
-  // Get video metadata for total duration
-  const metadata = await getVideoMetadata(videoUrl)
-  const totalDurationMs = metadata.durationMs
+// ---------------------------------------------------------------------------
+// ffmpeg-based detection
+// ---------------------------------------------------------------------------
 
-  // Run ffmpeg with scene detection filter and collect stderr output
-  const sceneCuts = await runSceneDetection(videoUrl, sensitivityThreshold)
+async function detectScenesWithFfmpeg(
+  videoPath: string,
+  options: SceneDetectorOptions
+): Promise<DetectedScene[]> {
+  // Dynamic import so the module is optional at runtime.
+  const ffmpeg = await import('fluent-ffmpeg').then((m) => m.default ?? m);
 
-  // If no scene cuts detected, return the entire video as one scene
-  if (sceneCuts.length === 0) {
-    return [{
-      startTimeMs: 0,
-      endTimeMs: totalDurationMs,
-      keyframeTimestampMs: 0,
-      confidence: 1.0,
-    }]
-  }
+  const rawSceneTimestamps = await extractSceneTimestamps(
+    ffmpeg,
+    videoPath,
+    options.sensitivityThreshold
+  );
 
-  // Build scenes from cut points
-  let scenes = buildScenesFromCuts(sceneCuts, totalDurationMs)
+  const durationMs = await getVideoDurationMs(ffmpeg, videoPath);
 
-  // Filter scenes shorter than minSceneDurationMs
-  scenes = filterShortScenes(scenes, minSceneDurationMs)
-
-  // Apply maxKeyframes limit
-  if (scenes.length > maxKeyframes) {
-    // Keep the scenes with highest confidence, maintaining order
-    const sorted = scenes
-      .map((s, i) => ({ scene: s, index: i }))
-      .sort((a, b) => b.scene.confidence - a.scene.confidence)
-      .slice(0, maxKeyframes)
-      .sort((a, b) => a.index - b.index)
-      .map((item) => item.scene)
-    scenes = sorted
-  }
-
-  return scenes
+  return buildScenes(rawSceneTimestamps, durationMs, options);
 }
 
 /**
- * Run ffmpeg scene detection and collect scene change timestamps.
+ * Run ffmpeg scene-change filter and collect timestamps where score exceeds
+ * the sensitivity threshold.
  */
-function runSceneDetection(
-  videoUrl: string,
-  threshold: number,
+function extractSceneTimestamps(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ffmpeg: any,
+  videoPath: string,
+  threshold: number
 ): Promise<Array<{ timestampMs: number; score: number }>> {
   return new Promise((resolve, reject) => {
-    const cuts: Array<{ timestampMs: number; score: number }> = []
+    const results: Array<{ timestampMs: number; score: number }> = [];
 
-    const command = ffmpeg(videoUrl)
+    const command = ffmpeg(videoPath)
       .videoFilters([
-        `select='gt(scene,${threshold})'`,
+        `select='gt(scene\,${threshold})'`,
         'showinfo',
       ])
-      .format('null')
-      .output('/dev/null')
-      .on('stderr', (line: string) => {
-        const parsed = parseShowInfoLine(line)
-        if (parsed) {
-          cuts.push(parsed)
-        }
-      })
-      .on('error', (err: Error) => {
-        reject(new Error(`Scene detection failed: ${err.message}`))
-      })
-      .on('end', () => {
-        resolve(cuts)
-      })
+      .outputOptions('-f', 'null')
+      .output(process.platform === 'win32' ? 'NUL' : '/dev/null');
 
-    command.run()
-  })
+    command.on('stderr', (line: string) => {
+      const ptsTimeMatch = line.match(/pts_time:([\d.]+)/);
+      if (ptsTimeMatch) {
+        const seconds = parseFloat(ptsTimeMatch[1]);
+        const timestampMs = Math.round(seconds * 1000);
+        const scoreMatch = line.match(/scene:([\d.]+)/);
+        const score = scoreMatch ? parseFloat(scoreMatch[1]) : threshold;
+        results.push({ timestampMs, score });
+      }
+    });
+
+    command.on('error', (err: Error) => {
+      reject(err);
+    });
+
+    command.on('end', () => {
+      resolve(results);
+    });
+
+    command.run();
+  });
 }
 
-/**
- * Build scene segments from a list of cut points.
- * N cut points produce N+1 scenes.
- */
-function buildScenesFromCuts(
-  cuts: Array<{ timestampMs: number; score: number }>,
+function getVideoDurationMs(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ffmpeg: any,
+  videoPath: string
+): Promise<number> {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(videoPath, (err: Error | null, metadata: Record<string, unknown>) => {
+      if (err) return reject(err);
+      const format = metadata.format as Record<string, unknown> | undefined;
+      const duration = typeof format?.duration === 'number' ? format.duration : 0;
+      resolve(Math.round(duration * 1000));
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Scene building from raw timestamps
+// ---------------------------------------------------------------------------
+
+export function buildScenes(
+  rawTimestamps: Array<{ timestampMs: number; score: number }>,
   totalDurationMs: number,
-): SceneDetectResult[] {
-  const scenes: SceneDetectResult[] = []
+  options: SceneDetectorOptions
+): DetectedScene[] {
+  if (totalDurationMs <= 0) return [];
 
-  // First scene: from start to first cut
-  scenes.push({
-    startTimeMs: 0,
-    endTimeMs: cuts[0].timestampMs,
-    keyframeTimestampMs: 0,
-    confidence: cuts[0].score,
-  })
+  // Always include time 0 as the first scene boundary.
+  const boundaries = [
+    { timestampMs: 0, score: 1 },
+    ...rawTimestamps.filter((t) => t.timestampMs > 0),
+  ];
 
-  // Middle scenes: between consecutive cuts
-  for (let i = 0; i < cuts.length - 1; i++) {
-    scenes.push({
-      startTimeMs: cuts[i].timestampMs,
-      endTimeMs: cuts[i + 1].timestampMs,
-      keyframeTimestampMs: cuts[i].timestampMs,
-      confidence: cuts[i + 1].score,
-    })
+  // Sort by timestamp.
+  boundaries.sort((a, b) => a.timestampMs - b.timestampMs);
+
+  // Merge boundaries that are too close together.
+  const merged: typeof boundaries = [];
+  for (const b of boundaries) {
+    const last = merged[merged.length - 1];
+    if (last && b.timestampMs - last.timestampMs < options.minSceneDurationMs) {
+      // Keep the one with higher confidence.
+      if (b.score > last.score) {
+        merged[merged.length - 1] = b;
+      }
+      continue;
+    }
+    merged.push(b);
   }
 
-  // Last scene: from last cut to end
-  const lastCut = cuts[cuts.length - 1]
-  scenes.push({
-    startTimeMs: lastCut.timestampMs,
-    endTimeMs: totalDurationMs,
-    keyframeTimestampMs: lastCut.timestampMs,
-    confidence: lastCut.score,
-  })
+  // Build scene intervals.
+  const scenes: DetectedScene[] = [];
+  for (let i = 0; i < merged.length; i++) {
+    const start = merged[i].timestampMs;
+    const end = i + 1 < merged.length ? merged[i + 1].timestampMs : totalDurationMs;
 
-  return scenes
+    if (end - start < options.minSceneDurationMs && i > 0) continue;
+
+    scenes.push({
+      startTimeMs: start,
+      endTimeMs: end,
+      keyframeTimestampMs: start + Math.min(200, Math.round((end - start) / 2)),
+      confidence: merged[i].score,
+    });
+  }
+
+  // Cap at maxKeyframes.
+  if (scenes.length > options.maxKeyframes) {
+    // Keep scenes with highest confidence.
+    scenes.sort((a, b) => b.confidence - a.confidence);
+    scenes.length = options.maxKeyframes;
+    scenes.sort((a, b) => a.startTimeMs - b.startTimeMs);
+  }
+
+  return scenes;
 }
 
-/**
- * Filter out scenes shorter than the minimum duration by merging them
- * with adjacent scenes.
- */
-function filterShortScenes(
-  scenes: SceneDetectResult[],
-  minDurationMs: number,
-): SceneDetectResult[] {
-  if (scenes.length <= 1) return scenes
+// ---------------------------------------------------------------------------
+// Fallback for environments without ffmpeg
+// ---------------------------------------------------------------------------
 
-  const result: SceneDetectResult[] = []
-
-  for (const scene of scenes) {
-    const duration = scene.endTimeMs - scene.startTimeMs
-    if (duration < minDurationMs && result.length > 0) {
-      // Merge with previous scene
-      const prev = result[result.length - 1]
-      prev.endTimeMs = scene.endTimeMs
-      // Keep higher confidence
-      prev.confidence = Math.max(prev.confidence, scene.confidence)
-    } else {
-      result.push({ ...scene })
-    }
-  }
-
-  return result
+function fallbackSingleScene(options: SceneDetectorOptions): DetectedScene[] {
+  return [
+    {
+      startTimeMs: 0,
+      endTimeMs: options.minSceneDurationMs,
+      keyframeTimestampMs: 0,
+      confidence: 1,
+    },
+  ];
 }

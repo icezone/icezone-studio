@@ -151,7 +151,8 @@
       "storyboard": "分镜",
       "storyboardGen": "分镜生成",
       "videoGeneration": "AI 视频",
-      "novelInput": "小说/剧本输入"
+      "novelInput": "小说/剧本输入",
+      "videoAnalysis": "视频分析"
     },
     "upload": {
       "hint": "点击上传或拖拽图片到此处",
@@ -244,6 +245,21 @@
       "uploadFailed": "图片上传失败",
       "klingElements": "Kling 元素",
       "multiShots": "多镜头"
+    },
+    "videoAnalysis": {
+      "uploadHint": "点击上传或拖拽视频到此处",
+      "sensitivity": "灵敏度",
+      "minDuration": "最短场景",
+      "maxKeyframes": "最大帧数",
+      "analyzeButton": "开始分析",
+      "analyzing": "分析中...",
+      "analysisFailed": "分析失败",
+      "scenesDetected": "检测到 {{count}} 个场景",
+      "selectAll": "全选",
+      "deselectAll": "取消全选",
+      "exportKeyframes": "导出关键帧",
+      "exportKeyframesCount": "导出选中关键帧 ({{count}})",
+      "keyframe": "关键帧"
     }
   },
   "modelParams": {
@@ -291,7 +307,8 @@
     "storyboardGenOutput": "分镜输出",
     "storyboardSplitExport": "切割导出",
     "storyboardFrameEdit": "分镜帧",
-    "novelInput": "小说/剧本输入"
+    "novelInput": "小说/剧本输入",
+    "videoAnalysis": "视频分析"
   },
   "videoErrors": {
     "generation_failed": "视频生成失败",

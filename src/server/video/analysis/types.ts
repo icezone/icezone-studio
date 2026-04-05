@@ -1,89 +1,77 @@
 /**
- * Options for scene detection in a video.
+ * Server-side types for video analysis (scene detection + keyframe extraction).
  */
-export interface SceneDetectOptions {
-  /** Video file URL or local path */
-  videoUrl: string
-  /** Scene change sensitivity threshold (0.0 ~ 1.0). Higher = fewer scenes. Default 0.3 */
-  sensitivityThreshold?: number
-  /** Minimum scene duration in milliseconds. Scenes shorter than this are filtered. Default 500 */
-  minSceneDurationMs?: number
-  /** Maximum number of keyframes to extract. Default 50 */
-  maxKeyframes?: number
+
+export interface VideoAnalyzeRequest {
+  videoUrl: string;
+  sensitivityThreshold?: number; // default 0.3
+  minSceneDurationMs?: number; // default 500
+  maxKeyframes?: number; // default 50
+  projectId: string;
 }
 
-/**
- * A single detected scene with its keyframe.
- */
-export interface SceneDetectResult {
-  /** Start time of the scene in milliseconds */
-  startTimeMs: number
-  /** End time of the scene in milliseconds */
-  endTimeMs: number
-  /** Timestamp of the extracted keyframe in milliseconds */
-  keyframeTimestampMs: number
-  /** Scene change confidence score (0 ~ 1) */
-  confidence: number
+export interface VideoAnalyzeResponse {
+  jobId: string;
 }
 
-/**
- * Video metadata extracted via ffprobe.
- */
-export interface VideoMetadata {
-  /** Total duration in milliseconds */
-  durationMs: number
-  /** Frames per second */
-  fps: number
-  /** Video width in pixels */
-  width: number
-  /** Video height in pixels */
-  height: number
+export interface DetectedScene {
+  startTimeMs: number;
+  endTimeMs: number;
+  keyframeTimestampMs: number;
+  confidence: number;
 }
 
-/**
- * Options for extracting frames from a video.
- */
-export interface FrameExtractOptions {
-  /** Video file URL or local path */
-  videoUrl: string
-  /** Timestamps (in ms) at which to extract frames */
-  timestamps: number[]
-  /** Output format for extracted frames. Default 'jpeg' */
-  format?: 'jpeg' | 'png'
-  /** JPEG quality (1-100). Default 85 */
-  quality?: number
-  /** Thumbnail width for preview images. Default 320 */
-  thumbnailWidth?: number
+export interface ExtractedKeyframe {
+  timestampMs: number;
+  /** Base64-encoded JPEG data (data URI or raw base64). */
+  imageData: string;
 }
 
-/**
- * Result of a single frame extraction.
- */
-export interface ExtractedFrame {
-  /** Timestamp in milliseconds where the frame was extracted */
-  timestampMs: number
-  /** Full-resolution frame as a Buffer */
-  frameBuffer: Buffer
-  /** Thumbnail frame as a Buffer */
-  thumbnailBuffer: Buffer
-  /** Width of the extracted frame */
-  width: number
-  /** Height of the extracted frame */
-  height: number
-}
-
-/**
- * Full result returned from the video analysis job.
- * Stored in ai_jobs.result when the job completes.
- */
-export interface VideoAnalyzeJobResult {
+export interface VideoAnalyzeResult {
   scenes: Array<{
-    startTimeMs: number
-    endTimeMs: number
-    keyframeUrl: string
-    previewUrl: string
-    confidence: number
-  }>
-  totalDurationMs: number
-  fps: number
+    startTimeMs: number;
+    endTimeMs: number;
+    keyframeUrl: string;
+    confidence: number;
+  }>;
+  totalDurationMs: number;
+  fps: number;
+}
+
+export interface SceneDetectorOptions {
+  sensitivityThreshold: number;
+  minSceneDurationMs: number;
+  maxKeyframes: number;
+}
+
+export const DEFAULT_SCENE_DETECTOR_OPTIONS: SceneDetectorOptions = {
+  sensitivityThreshold: 0.3,
+  minSceneDurationMs: 500,
+  maxKeyframes: 50,
+};
+
+export function normalizeOptions(
+  partial?: Partial<SceneDetectorOptions>
+): SceneDetectorOptions {
+  const defaults = DEFAULT_SCENE_DETECTOR_OPTIONS;
+  return {
+    sensitivityThreshold: clamp(
+      partial?.sensitivityThreshold ?? defaults.sensitivityThreshold,
+      0.1,
+      1.0
+    ),
+    minSceneDurationMs: Math.max(
+      partial?.minSceneDurationMs ?? defaults.minSceneDurationMs,
+      100
+    ),
+    maxKeyframes: clamp(
+      partial?.maxKeyframes ?? defaults.maxKeyframes,
+      1,
+      200
+    ),
+  };
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
 }

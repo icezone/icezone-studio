@@ -37,7 +37,9 @@
       "Bash(git commit -m 'feat\\(canvas\\): implement N4 novel/script input frontend:*)",
       "Bash(git checkout:*)",
       "Bash(git merge:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(gh run:*)",
+      "Bash(git log:*)"
     ]
   }
 }

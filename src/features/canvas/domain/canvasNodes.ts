@@ -11,6 +11,7 @@ export const CANVAS_NODE_TYPES = {
   videoGen: 'videoGenNode',
   videoResult: 'videoResultNode',
   novelInput: 'novelInputNode',
+  videoAnalysis: 'videoAnalysisNode',
 } as const;
 
 export type CanvasNodeType = (typeof CANVAS_NODE_TYPES)[keyof typeof CANVAS_NODE_TYPES];
@@ -218,6 +219,35 @@ export interface NovelInputNodeData extends NodeDisplayData {
   scenes: NovelScene[];
 }
 
+export interface VideoScene {
+  id: string;
+  startTimeMs: number;
+  endTimeMs: number;
+  keyframeUrl: string;
+  previewUrl?: string;
+  confidence: number;
+  selected: boolean;
+}
+
+export interface VideoAnalysisNodeData extends NodeDisplayData {
+  // Input
+  videoUrl: string | null;
+  videoFileName?: string | null;
+
+  // Analysis parameters
+  sensitivityThreshold: number; // 0.1 ~ 1.0, default 0.3
+  minSceneDurationMs: number; // min scene duration (ms), default 500
+  maxKeyframes: number; // max keyframes, default 50
+
+  // Analysis state
+  isAnalyzing: boolean;
+  analysisProgress: number; // 0 ~ 100
+  errorMessage: string | null;
+
+  // Analysis results
+  scenes: VideoScene[];
+}
+
 export interface VideoResultNodeData extends NodeDisplayData {
   videoUrl: string;
   thumbnailUrl?: string | null;
@@ -242,7 +272,8 @@ export type CanvasNodeData =
   | StoryboardGenNodeData
   | VideoGenNodeData
   | VideoResultNodeData
-  | NovelInputNodeData;
+  | NovelInputNodeData
+  | VideoAnalysisNodeData;
 
 export type CanvasNode = Node<CanvasNodeData, CanvasNodeType>;
 export type CanvasEdge = Edge;
@@ -319,6 +350,12 @@ export function isNovelInputNode(
   node: CanvasNode | null | undefined
 ): node is Node<NovelInputNodeData, typeof CANVAS_NODE_TYPES.novelInput> {
   return node?.type === CANVAS_NODE_TYPES.novelInput;
+}
+
+export function isVideoAnalysisNode(
+  node: CanvasNode | null | undefined
+): node is Node<VideoAnalysisNodeData, typeof CANVAS_NODE_TYPES.videoAnalysis> {
+  return node?.type === CANVAS_NODE_TYPES.videoAnalysis;
 }
 
 export function isVideoGenNode(

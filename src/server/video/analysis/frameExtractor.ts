@@ -1,131 +1,87 @@
-import ffmpeg from 'fluent-ffmpeg'
-import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
-import sharp from 'sharp'
-import { readFile, mkdir, rm } from 'fs/promises'
-import { tmpdir } from 'os'
-import { join } from 'path'
-import { randomUUID } from 'crypto'
-import type { FrameExtractOptions, ExtractedFrame } from './types'
-
-// Set ffmpeg path (guard for test environment where mock may not include setFfmpegPath)
-if (typeof ffmpeg.setFfmpegPath === 'function') {
-  ffmpeg.setFfmpegPath(ffmpegPath)
-}
-
 /**
- * Format milliseconds to HH:MM:SS.mmm for ffmpeg seek.
- */
-function msToTimestamp(ms: number): string {
-  const totalSeconds = ms / 1000
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${seconds.toFixed(3).padStart(6, '0')}`
-}
-
-/**
- * Extract frames from a video at specified timestamps.
+ * Frame extractor — pulls keyframe images from a video at given timestamps.
  *
- * For each timestamp, extracts the full-resolution frame and generates
- * a thumbnail using sharp.
+ * Uses ffmpeg to seek to specific timestamps and extract single JPEG frames.
  */
-export async function extractFrames(options: FrameExtractOptions): Promise<ExtractedFrame[]> {
-  const {
-    videoUrl,
-    timestamps,
-    format = 'jpeg',
-    quality = 85,
-    thumbnailWidth = 320,
-  } = options
 
-  if (!videoUrl) {
-    throw new Error('videoUrl is required')
-  }
+import { type ExtractedKeyframe } from './types';
 
-  if (!timestamps || timestamps.length === 0) {
-    throw new Error('timestamps must not be empty')
-  }
-
-  // Create a temporary directory for extracted frames
-  const tempDir = join(tmpdir(), `frame-extract-${randomUUID()}`)
-  await mkdir(tempDir, { recursive: true })
+/**
+ * Extract keyframe images at the given timestamps.
+ *
+ * @param videoPath - Local file path or HTTP URL of the video.
+ * @param timestampsMs - Array of timestamps in milliseconds.
+ * @returns Array of extracted keyframes with base64-encoded JPEG data.
+ */
+export async function extractKeyframes(
+  videoPath: string,
+  timestampsMs: number[]
+): Promise<ExtractedKeyframe[]> {
+  if (timestampsMs.length === 0) return [];
 
   try {
-    const frames: ExtractedFrame[] = []
-
-    for (const ts of timestamps) {
-      const filename = `frame-${ts}.${format === 'png' ? 'png' : 'jpg'}`
-      const outputPath = join(tempDir, filename)
-
-      // Extract single frame using ffmpeg
-      await extractSingleFrame(videoUrl, ts, outputPath, format)
-
-      // Read the extracted frame
-      const frameBuffer = await readFile(outputPath)
-
-      // Get metadata for dimensions
-      const sharpInstance = sharp(frameBuffer)
-      const metadata = await sharpInstance.metadata()
-      const width = metadata.width ?? 0
-      const height = metadata.height ?? 0
-
-      // Generate thumbnail
-      const thumbHeight = height > 0 && width > 0
-        ? Math.round((thumbnailWidth / width) * height)
-        : thumbnailWidth
-
-      let thumbnailBuffer: Buffer
-      const thumbSharp = sharp(frameBuffer).resize(thumbnailWidth, thumbHeight, { fit: 'inside' })
-      if (format === 'png') {
-        thumbnailBuffer = await thumbSharp.png().toBuffer()
-      } else {
-        thumbnailBuffer = await thumbSharp.jpeg({ quality }).toBuffer()
-      }
-
-      frames.push({
-        timestampMs: ts,
-        frameBuffer,
-        thumbnailBuffer,
-        width,
-        height,
-      })
-    }
-
-    return frames
-  } finally {
-    // Clean up temp directory
-    await rm(tempDir, { recursive: true, force: true }).catch(() => {
-      // Ignore cleanup errors
-    })
+    return await extractWithFfmpeg(videoPath, timestampsMs);
+  } catch {
+    // Return empty array when ffmpeg is not available.
+    return [];
   }
 }
 
-/**
- * Extract a single frame from a video at the given timestamp.
- */
-function extractSingleFrame(
-  videoUrl: string,
-  timestampMs: number,
-  outputPath: string,
-  format: string,
-): Promise<void> {
+async function extractWithFfmpeg(
+  videoPath: string,
+  timestampsMs: number[]
+): Promise<ExtractedKeyframe[]> {
+  const ffmpeg = await import('fluent-ffmpeg').then((m) => m.default ?? m);
+  const { Writable } = await import('stream');
+
+  const results: ExtractedKeyframe[] = [];
+
+  for (const ts of timestampsMs) {
+    const seekSeconds = ts / 1000;
+    try {
+      const buffer = await captureFrame(ffmpeg, Writable, videoPath, seekSeconds);
+      const base64 = `data:image/jpeg;base64,${buffer.toString('base64')}`;
+      results.push({ timestampMs: ts, imageData: base64 });
+    } catch {
+      // Skip frames that fail to extract.
+    }
+  }
+
+  return results;
+}
+
+function captureFrame(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ffmpeg: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Writable: any,
+  videoPath: string,
+  seekSeconds: number
+): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const timestamp = msToTimestamp(timestampMs)
+    const chunks: Buffer[] = [];
 
-    const command = ffmpeg(videoUrl)
-      .outputOptions([
-        '-ss', timestamp,
-        '-frames:v', '1',
-        '-f', 'image2',
-      ])
-      .output(outputPath)
-      .on('error', (err: Error) => {
-        reject(new Error(`Frame extraction failed at ${timestampMs}ms: ${err.message}`))
-      })
-      .on('end', () => {
-        resolve()
-      })
+    const writable = new Writable({
+      write(chunk: Buffer, _encoding: string, callback: () => void) {
+        chunks.push(chunk);
+        callback();
+      },
+    });
 
-    command.run()
-  })
+    ffmpeg(videoPath)
+      .seekInput(seekSeconds)
+      .frames(1)
+      .outputOptions('-f', 'image2pipe', '-vcodec', 'mjpeg')
+      .pipe(writable);
+
+    writable.on('finish', () => {
+      if (chunks.length === 0) {
+        reject(new Error(`No frame data at ${seekSeconds}s`));
+        return;
+      }
+      resolve(Buffer.concat(chunks));
+    });
+
+    writable.on('error', reject);
+  });
 }

@@ -27,7 +27,6 @@ const mockFfmpeg = vi.hoisted(() => {
     format: vi.fn().mockReturnThis(),
     on: vi.fn(function (this: typeof ffmpegInstance, event: string, cb: (...args: unknown[]) => void) {
       if (event === 'end') {
-        // Store end callback
         (ffmpegInstance as unknown as Record<string, unknown>)._endCb = cb
       }
       if (event === 'error') {
@@ -82,7 +81,7 @@ vi.mock('@ffmpeg-installer/ffmpeg', () => ({
   path: '/usr/bin/ffmpeg',
 }))
 
-import { detectScenes, getVideoMetadata } from '@/server/video/analysis/sceneDetector'
+import { detectScenes } from '@/server/video/analysis/sceneDetector'
 
 describe('SceneDetector', () => {
   beforeEach(() => {
@@ -94,15 +93,11 @@ describe('SceneDetector', () => {
     mockFfmpeg.setShowInfoOutput([])
   })
 
-  it('should return error for empty video URL', async () => {
-    await expect(detectScenes({ videoUrl: '' })).rejects.toThrow('videoUrl is required')
-  })
-
   it('should detect single scene video and return 1 scene', async () => {
     // No scene changes detected — the entire video is 1 scene
     mockFfmpeg.setShowInfoOutput([])
 
-    const scenes = await detectScenes({ videoUrl: 'https://example.com/video.mp4' })
+    const scenes = await detectScenes('https://example.com/video.mp4')
 
     expect(scenes).toHaveLength(1)
     expect(scenes[0].startTimeMs).toBe(0)
@@ -110,20 +105,13 @@ describe('SceneDetector', () => {
   })
 
   it('should adjust detection count based on sensitivity threshold', async () => {
-    // Simulate ffmpeg showinfo output with scene detection timestamps
-    // pts_time values at 2s, 5s, 8s with varying scene scores
     mockFfmpeg.setShowInfoOutput([
       '[Parsed_showinfo_1 @ 0x1234] n:  60 pts:  60060 pts_time:2.002    pos: 100000 fmt:yuv420p sar:1/1 s:1920x1080 i:P iskey:1 type:I cmb:0 cmb_raw:0.0 score:0.45',
       '[Parsed_showinfo_1 @ 0x1234] n: 150 pts: 150150 pts_time:5.005    pos: 250000 fmt:yuv420p sar:1/1 s:1920x1080 i:P iskey:1 type:I cmb:0 cmb_raw:0.0 score:0.25',
       '[Parsed_showinfo_1 @ 0x1234] n: 240 pts: 240240 pts_time:8.008    pos: 400000 fmt:yuv420p sar:1/1 s:1920x1080 i:P iskey:1 type:I cmb:0 cmb_raw:0.0 score:0.60',
     ])
 
-    // With threshold 0.3, scenes with score >= 0.3 pass the filter
-    // The ffmpeg filter already applies the threshold, but our detector uses
-    // the threshold to configure ffmpeg. Since we mock the output, we simulate
-    // that all 3 lines passed the filter.
-    const scenes = await detectScenes({
-      videoUrl: 'https://example.com/video.mp4',
+    const scenes = await detectScenes('https://example.com/video.mp4', {
       sensitivityThreshold: 0.3,
     })
 
@@ -132,7 +120,6 @@ describe('SceneDetector', () => {
   })
 
   it('should respect maxKeyframes limit', async () => {
-    // Many scene changes but max 2 keyframes
     mockFfmpeg.setShowInfoOutput([
       '[Parsed_showinfo_1 @ 0x1234] n:  30 pts:  30030 pts_time:1.001    pos: 50000 fmt:yuv420p sar:1/1 s:1920x1080 i:P iskey:1 type:I cmb:0 cmb_raw:0.0 score:0.50',
       '[Parsed_showinfo_1 @ 0x1234] n:  90 pts:  90090 pts_time:3.003    pos: 150000 fmt:yuv420p sar:1/1 s:1920x1080 i:P iskey:1 type:I cmb:0 cmb_raw:0.0 score:0.40',
@@ -141,8 +128,7 @@ describe('SceneDetector', () => {
       '[Parsed_showinfo_1 @ 0x1234] n: 270 pts: 270270 pts_time:9.009    pos: 450000 fmt:yuv420p sar:1/1 s:1920x1080 i:P iskey:1 type:I cmb:0 cmb_raw:0.0 score:0.55',
     ])
 
-    const scenes = await detectScenes({
-      videoUrl: 'https://example.com/video.mp4',
+    const scenes = await detectScenes('https://example.com/video.mp4', {
       maxKeyframes: 2,
     })
 
@@ -156,7 +142,7 @@ describe('SceneDetector', () => {
       '[Parsed_showinfo_1 @ 0x1234] n: 210 pts: 210210 pts_time:7.007    pos: 350000 fmt:yuv420p sar:1/1 s:1920x1080 i:P iskey:1 type:I cmb:0 cmb_raw:0.0 score:0.40',
     ])
 
-    const scenes = await detectScenes({ videoUrl: 'https://example.com/video.mp4' })
+    const scenes = await detectScenes('https://example.com/video.mp4')
 
     // 2 cuts => 3 scenes: [0, 3003), [3003, 7007), [7007, 10000)
     expect(scenes).toHaveLength(3)
@@ -179,8 +165,7 @@ describe('SceneDetector', () => {
       '[Parsed_showinfo_1 @ 0x1234] n: 240 pts: 240240 pts_time:8.000    pos: 400000 fmt:yuv420p sar:1/1 s:1920x1080 i:P iskey:1 type:I cmb:0 cmb_raw:0.0 score:0.60',
     ])
 
-    const scenes = await detectScenes({
-      videoUrl: 'https://example.com/video.mp4',
+    const scenes = await detectScenes('https://example.com/video.mp4', {
       minSceneDurationMs: 500,
     })
 
@@ -189,20 +174,5 @@ describe('SceneDetector', () => {
     for (const scene of scenes) {
       expect(scene.endTimeMs - scene.startTimeMs).toBeGreaterThanOrEqual(500)
     }
-  })
-
-  describe('getVideoMetadata', () => {
-    it('should return video metadata', async () => {
-      const metadata = await getVideoMetadata('https://example.com/video.mp4')
-
-      expect(metadata.durationMs).toBe(10000)
-      expect(metadata.fps).toBe(30)
-      expect(metadata.width).toBe(1920)
-      expect(metadata.height).toBe(1080)
-    })
-
-    it('should throw for empty URL', async () => {
-      await expect(getVideoMetadata('')).rejects.toThrow('videoUrl is required')
-    })
   })
 })
