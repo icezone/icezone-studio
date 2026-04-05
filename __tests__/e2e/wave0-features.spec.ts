@@ -151,9 +151,9 @@ test.describe('Wave 1: Template & Enhancement Features', () => {
   test('N8: API Key Rotation - settings page has multi-key support', async ({ page }) => {
     await page.goto('/settings')
 
-    // Check for API Keys section
-    const apiKeysSection = page.locator('text=API Keys')
-    await expect(apiKeysSection).toBeVisible({ timeout: 5000 })
+    // Check for API Keys section (zh: "API Key", en: "API Keys")
+    const apiKeysSection = page.locator('text=API Key')
+    await expect(apiKeysSection.first()).toBeVisible({ timeout: 5000 })
 
     // Check for add key button (multi-key support indicator)
     const addKeyButton = page.locator('button:has-text("添加"), button:has-text("Add")')
@@ -190,8 +190,8 @@ test.describe('Integration: Full Workflow', () => {
     const uploadNode = page.locator('[data-testid="node-upload"]').first()
     await expect(uploadNode).toBeVisible({ timeout: 5000 })
 
-    // Return to dashboard
-    await page.click('a[href="/dashboard"]')
+    // Return to dashboard via sidebar back button (zh: "返回主页", en: "Back to Dashboard")
+    await page.click('button[title="返回主页"], button[title="Back to Dashboard"]')
     await page.waitForURL('/dashboard', { timeout: 10000 })
 
     // Verify project appears in list
