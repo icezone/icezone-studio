@@ -213,6 +213,7 @@ function NovelInputNodeComponent({
           ? 'border-accent shadow-accent/30'
           : 'border-[rgba(15,23,42,0.45)] hover:border-[rgba(15,23,42,0.58)] dark:border-[rgba(255,255,255,0.22)] dark:hover:border-[rgba(255,255,255,0.34)]'}
       `}
+      data-testid="node-novelInput"
       style={{ width: resolvedWidth, height: resolvedHeight }}
       onClick={() => setSelectedNode(id)}
     >

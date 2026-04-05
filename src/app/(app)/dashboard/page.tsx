@@ -232,6 +232,7 @@ export default function DashboardPage() {
           type="button"
           onClick={handleCreate}
           disabled={creating}
+          data-testid="new-project-button"
           className="flex items-center gap-2 rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-80 disabled:opacity-50"
         >
           {creating ? (

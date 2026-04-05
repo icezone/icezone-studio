@@ -311,6 +311,7 @@ export const UploadNode = memo(({ id, data, selected, width, height }: UploadNod
           ? 'border-accent shadow-[0_0_0_1px_rgba(59,130,246,0.32)]'
           : 'border-[rgba(15,23,42,0.45)] hover:border-[rgba(15,23,42,0.58)] dark:border-[rgba(255,255,255,0.22)] dark:hover:border-[rgba(255,255,255,0.34)]'}
       `}
+      data-testid="node-upload"
       style={{ width: resolvedWidth, height: resolvedHeight }}
       onClick={handleNodeClick}
       onDrop={handleDrop}

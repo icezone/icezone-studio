@@ -1567,6 +1567,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
   return (
     <div
       ref={rootRef}
+      data-testid="node-storyboardGen"
       className={`
         group relative flex h-full flex-col overflow-visible rounded-[var(--node-radius)] border bg-surface-dark/95 p-3 transition-colors duration-150
         ${selected

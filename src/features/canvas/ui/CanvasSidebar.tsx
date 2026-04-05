@@ -34,9 +34,10 @@ interface SidebarButtonProps {
   disabled?: boolean;
   children: React.ReactNode;
   variant?: 'default' | 'danger' | 'active';
+  'data-testid'?: string;
 }
 
-const SidebarButton = memo(({ onClick, title, disabled, children, variant = 'default' }: SidebarButtonProps) => {
+const SidebarButton = memo(({ onClick, title, disabled, children, variant = 'default', 'data-testid': testId }: SidebarButtonProps) => {
   const variantClass =
     variant === 'danger'
       ? 'hover:bg-red-500/15 text-red-400'
@@ -49,6 +50,7 @@ const SidebarButton = memo(({ onClick, title, disabled, children, variant = 'def
       onClick={onClick}
       disabled={disabled}
       title={title}
+      data-testid={testId}
       className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${variantClass}`}
     >
       {children}
@@ -94,7 +96,7 @@ export const CanvasSidebar = memo(({ isLocked, onToggleLock, onAddNode, onOpenTe
       <Divider />
 
       {/* Add node */}
-      <SidebarButton onClick={handleAddNode} title={t('canvas.sidebar.addNode')} disabled={isLocked}>
+      <SidebarButton onClick={handleAddNode} title={t('canvas.sidebar.addNode')} disabled={isLocked} data-testid="add-node-button">
         <Plus className="h-4 w-4" />
       </SidebarButton>
 

@@ -342,6 +342,7 @@ export const NodeActionToolbar = memo(({ node }: NodeActionToolbarProps) => {
         {!isImageEdit && canHandleImage && (
           <UiChipButton
             key="shot-analysis"
+            data-testid="node-action-shot-analysis"
             className={`h-8 ${TOOLBAR_BUTTON_RADIUS_CLASS} px-2.5 text-xs ${TOOLBAR_NEUTRAL_BUTTON_CLASS}`}
             onClick={(event) => {
               event.stopPropagation();
@@ -371,6 +372,7 @@ export const NodeActionToolbar = memo(({ node }: NodeActionToolbarProps) => {
         {!isImageEdit && canHandleImage && (
           <UiChipButton
             key="reverse-prompt"
+            data-testid="node-action-reverse-prompt"
             className={`h-8 ${TOOLBAR_BUTTON_RADIUS_CLASS} px-2.5 text-xs ${TOOLBAR_NEUTRAL_BUTTON_CLASS}`}
             onClick={() => {
               if (imageSource) {
