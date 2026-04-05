@@ -61,6 +61,10 @@ import { ReversePromptDialog } from './ui/ReversePromptDialog';
 import { ImageViewerModal } from './ui/ImageViewerModal';
 import { CanvasSidebar } from './ui/CanvasSidebar';
 import { MissingApiKeyHint } from '@/features/settings/MissingApiKeyHint';
+import { TemplateLibrary } from '@/features/templates/TemplateLibrary';
+import { SaveTemplateDialog } from '@/features/templates/SaveTemplateDialog';
+import { serializeCanvasToTemplate, deserializeTemplateToCanvas } from './application/templateSerializer';
+import type { WorkflowTemplate } from '@/features/templates/types';
 
 const DEFAULT_VIEWPORT: Viewport = { x: 0, y: 0, zoom: 1 };
 
@@ -266,6 +270,10 @@ function CanvasInner() {
   const [previewConnectionVisual, setPreviewConnectionVisual] =
     useState<PreviewConnectionVisual | null>(null);
 
+  // Template state
+  const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
+  const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
+
   const isRestoringCanvasRef = useRef(true);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const copiedSnapshotRef = useRef<ClipboardSnapshot | null>(null);
@@ -308,6 +316,8 @@ function CanvasInner() {
   const setCanvasData = useCanvasStore((state) => state.setCanvasData);
   const updateNodeData = useCanvasStore((state) => state.updateNodeData);
   const addNode = useCanvasStore((state) => state.addNode);
+  const addEdge = useCanvasStore((state) => state.addEdge);
+  const clearCanvas = useCanvasStore((state) => state.clearCanvas);
   const setSelectedNode = useCanvasStore((state) => state.setSelectedNode);
   const selectedNodeId = useCanvasStore((state) => state.selectedNodeId);
   const deleteEdge = useCanvasStore((state) => state.deleteEdge);
@@ -1707,12 +1717,108 @@ function CanvasInner() {
     e.preventDefault();
   }, []);
 
+  // Template handlers
+  const handleOpenTemplates = useCallback(() => {
+    setShowTemplateLibrary(true);
+  }, []);
+
+  const handleOpenSaveTemplate = useCallback(() => {
+    setShowSaveTemplateDialog(true);
+  }, []);
+
+  const handleSaveTemplate = useCallback(async (data: { name: string; description: string; tags: string[] }) => {
+    const templateData = serializeCanvasToTemplate(nodes, edges, {
+      name: data.name,
+      description: data.description,
+    });
+
+    const res = await fetch('/api/templates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: data.name,
+        description: data.description,
+        tags: data.tags,
+        templateData,
+      }),
+    });
+
+    if (res.ok) {
+      setShowSaveTemplateDialog(false);
+    }
+  }, [nodes, edges]);
+
+  const handleUseTemplate = useCallback(async (template: WorkflowTemplate) => {
+    const res = await fetch(`/api/templates/${template.id}`);
+    if (!res.ok) return;
+
+    const data = await res.json();
+    const { nodes: templateNodes, edges: templateEdges } = deserializeTemplateToCanvas(
+      data.templateData,
+      { x: 100, y: 100 }
+    );
+
+    // Clear current canvas and load template
+    clearCanvas();
+    templateNodes.forEach((node) => {
+      addNode(node.type as CanvasNodeType, node.position, node.data);
+    });
+    templateEdges.forEach((edge) => {
+      addEdge(edge.source, edge.target);
+    });
+
+    setShowTemplateLibrary(false);
+  }, [clearCanvas, addNode, addEdge]);
+
+  const handleImportJson = useCallback(() => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      const text = await file.text();
+      const templateData = JSON.parse(text);
+      const { nodes: templateNodes, edges: templateEdges } = deserializeTemplateToCanvas(
+        templateData,
+        { x: 100, y: 100 }
+      );
+
+      clearCanvas();
+      templateNodes.forEach((node) => {
+        addNode(node.type as CanvasNodeType, node.position, node.data);
+      });
+      templateEdges.forEach((edge) => {
+        addEdge(edge.source, edge.target);
+      });
+    };
+    input.click();
+  }, [clearCanvas, addNode, addEdge]);
+
+  const handleExportJson = useCallback(() => {
+    const templateData = serializeCanvasToTemplate(nodes, edges, {
+      name: 'Exported Template',
+      description: '',
+    });
+
+    const blob = new Blob([JSON.stringify(templateData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `template-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [nodes, edges]);
+
   return (
     <div className="flex h-full w-full overflow-hidden">
       <CanvasSidebar
         isLocked={isLocked}
         onToggleLock={toggleLock}
         onAddNode={handleSidebarAddNode}
+        onOpenTemplates={handleOpenTemplates}
+        onSaveTemplate={handleOpenSaveTemplate}
       />
       <div
         ref={wrapperRef}
@@ -1845,6 +1951,20 @@ function CanvasInner() {
         currentIndex={imageViewer.currentIndex}
         onClose={closeImageViewer}
         onNavigate={navigateImageViewer}
+      />
+
+      <TemplateLibrary
+        isOpen={showTemplateLibrary}
+        onClose={() => setShowTemplateLibrary(false)}
+        onUseTemplate={handleUseTemplate}
+        onImportJson={handleImportJson}
+        onExportJson={handleExportJson}
+      />
+
+      <SaveTemplateDialog
+        isOpen={showSaveTemplateDialog}
+        onClose={() => setShowSaveTemplateDialog(false)}
+        onSave={handleSaveTemplate}
       />
       </div>
     </div>
