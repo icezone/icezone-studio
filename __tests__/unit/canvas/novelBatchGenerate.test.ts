@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { NovelScene } from '@/features/canvas/domain/canvasNodes';
 import { batchGenerateStoryboards } from '@/features/canvas/application/novelToStoryboard';
-import type { CanvasStore } from '@/stores/canvasStore';
 
 describe('batchGenerateStoryboards', () => {
   const mockAddNode = vi.fn().mockReturnValue('new-node-id');
@@ -20,7 +19,7 @@ describe('batchGenerateStoryboards', () => {
     nodes: baseNodes,
     addNode: mockAddNode,
     addEdge: mockAddEdge,
-  } as unknown as CanvasStore;
+  };
 
   const sampleScenes: NovelScene[] = [
     {
@@ -129,7 +128,7 @@ describe('batchGenerateStoryboards', () => {
     const storeWithoutNode = {
       ...mockCanvasStore,
       nodes: [],
-    } as unknown as CanvasStore;
+    };
 
     batchGenerateStoryboards('nonexistent', sampleScenes, storeWithoutNode);
 

@@ -45,6 +45,7 @@ export type {
   ActiveToolDialog,
   CanvasEdge,
   CanvasNode,
+  CanvasState,
   CanvasNodeData,
   CanvasNodeType,
   NodeToolType,
