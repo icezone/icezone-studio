@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-test.describe('Shot Analysis (N3)', () => {
+test.describe('Shot Analysis API (N3)', () => {
   test('shot analysis API returns structured result', async ({ request }) => {
     // This test validates the API route structure.
     // In CI without GEMINI_API_KEY, it should return a 500 or 401.

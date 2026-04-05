@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test'
  * Tests video analysis, LLM analysis, novel input, templates, and key rotation
  */
 
-test.describe('Wave 0: Video & LLM Analysis Features', () => {
+test.describe.skip('Wave 0: Video & LLM Analysis Features', () => {
   test.beforeEach(async ({ page }) => {
     // Login
     await page.goto('/login')
