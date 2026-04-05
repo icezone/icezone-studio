@@ -1739,7 +1739,10 @@ function CanvasInner() {
     });
 
     if (!res.ok) {
-      throw new Error('Failed to save template');
+      const errorData = await res.json().catch(() => ({}));
+      const errorMessage = errorData.error || `HTTP ${res.status}`;
+      console.error('Failed to save template:', errorMessage, errorData);
+      throw new Error(`Failed to save template: ${errorMessage}`);
     }
   }, [nodes, edges]);
 

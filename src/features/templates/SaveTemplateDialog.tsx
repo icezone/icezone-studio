@@ -18,6 +18,7 @@ export function SaveTemplateDialog({ isOpen, onClose, onSave }: SaveTemplateDial
   const [tagInput, setTagInput] = useState('');
   const [isPublic, setIsPublic] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleTagKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
@@ -37,6 +38,7 @@ export function SaveTemplateDialog({ isOpen, onClose, onSave }: SaveTemplateDial
 
   const handleSave = useCallback(async () => {
     if (!name.trim()) return;
+    setError(null);
     setSaving(true);
     try {
       await onSave({ name: name.trim(), description: description.trim(), tags, isPublic });
@@ -44,11 +46,15 @@ export function SaveTemplateDialog({ isOpen, onClose, onSave }: SaveTemplateDial
       setDescription('');
       setTags([]);
       setIsPublic(false);
+      setError(null);
       onClose();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('template.saveFailed');
+      setError(message);
     } finally {
       setSaving(false);
     }
-  }, [name, description, tags, isPublic, onSave, onClose]);
+  }, [name, description, tags, isPublic, onSave, onClose, t]);
 
   if (!isOpen) return null;
 
@@ -142,6 +148,13 @@ export function SaveTemplateDialog({ isOpen, onClose, onSave }: SaveTemplateDial
             ({t('template.makePublicHint')})
           </span>
         </label>
+
+        {/* Error message */}
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">
+            {error}
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex justify-end gap-3">
