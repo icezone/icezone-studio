@@ -1,4 +1,4 @@
-# storyboard-copilot-web - API 契约
+# icezone-studio - API 契约
 
 > 前后端接口定义。字段名和类型的真理源头。
 > 维护者：devs（添加/变更端点时**必须**更新）

@@ -421,7 +421,7 @@ export default function LandingPage() {
             >
               Built for every creative
             </h2>
-            <p className="text-muted">Whatever you make, Storyboard Copilot fits your workflow.</p>
+            <p className="text-muted">Whatever you make, IceZone Studio fits your workflow.</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -562,7 +562,7 @@ export default function LandingPage() {
               Start creating today
             </h2>
             <p className="text-lg text-muted mb-8 max-w-xl mx-auto">
-              Join thousands of creators who use Storyboard Copilot to bring their
+              Join thousands of creators who use IceZone Studio to bring their
               ideas to life. Free plan includes 100 credits — no credit card needed.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -654,7 +654,7 @@ export default function LandingPage() {
             style={{ borderColor: 'rgba(255,255,255,0.06)' }}
           >
             <p className="text-xs text-muted">
-              © 2026 Storyboard Copilot. All rights reserved.
+              © 2026 IceZone Studio. All rights reserved.
             </p>
             <div className="flex items-center gap-5">
               {['Twitter', 'GitHub', 'Discord'].map((social) => (

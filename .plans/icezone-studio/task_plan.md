@@ -1,10 +1,10 @@
-# storyboard-copilot-web - 主计划
+# icezone-studio - 主计划
 
 > 状态: PHASE_4_COMPLETE / 待后续迭代
 > 创建: 2026-03-25
 > 更新: 2026-04-03
-> 团队: storyboard-copilot-web (auth-dev, image-dev, db-dev, canvas-dev, ai-dev, video-dev, reviewer)
-> 决策记录: .plans/storyboard-copilot-web/decisions.md
+> 团队: icezone-studio (auth-dev, image-dev, db-dev, canvas-dev, ai-dev, video-dev, reviewer)
+> 决策记录: .plans/icezone-studio/decisions.md
 
 ---
 
@@ -21,9 +21,9 @@
 
 | 文档 | 位置 | 内容 |
 |------|------|------|
-| 架构 | .plans/storyboard-copilot-web/docs/architecture.md | 系统组件、数据流、关键设计决策 |
-| API 契约 | .plans/storyboard-copilot-web/docs/api-contracts.md | 前后端接口定义 |
-| 不变量 | .plans/storyboard-copilot-web/docs/invariants.md | 不可违反的系统边界 |
+| 架构 | .plans/icezone-studio/docs/architecture.md | 系统组件、数据流、关键设计决策 |
+| API 契约 | .plans/icezone-studio/docs/api-contracts.md | 前后端接口定义 |
+| 不变量 | .plans/icezone-studio/docs/invariants.md | 不可违反的系统边界 |
 | 实现计划 | docs/implementation-plan.md | 各阶段详细任务清单 |
 | 系统设计 | docs/system-design-plan.md | 系统架构设计 |
 
@@ -74,12 +74,12 @@
 
 | # | 任务 | 负责人 | 状态 | 进度文件 |
 |---|------|--------|------|----------|
-| T-A | Phase 0 - Auth + App Shell | auth-dev | ✅ DONE | .plans/storyboard-copilot-web/auth-dev/progress.md |
-| T-F | Phase 0 - 图片处理 API | image-dev | ✅ DONE | .plans/storyboard-copilot-web/image-dev/progress.md |
-| T-B | Phase 1 - DB Schema + 持久化 | db-dev | ✅ DONE | .plans/storyboard-copilot-web/db-dev/progress.md |
-| T-C | Phase 1 - 画布 + 节点 | canvas-dev | ✅ DONE | .plans/storyboard-copilot-web/canvas-dev/task_plan.md |
-| T-D | Phase 2 - AI Provider | ai-dev | ✅ DONE | .plans/storyboard-copilot-web/ai-dev/progress.md |
-| T-E | Phase 2 - 视频 Provider | video-dev | ✅ DONE | .plans/storyboard-copilot-web/video-dev/progress.md |
+| T-A | Phase 0 - Auth + App Shell | auth-dev | ✅ DONE | .plans/icezone-studio/auth-dev/progress.md |
+| T-F | Phase 0 - 图片处理 API | image-dev | ✅ DONE | .plans/icezone-studio/image-dev/progress.md |
+| T-B | Phase 1 - DB Schema + 持久化 | db-dev | ✅ DONE | .plans/icezone-studio/db-dev/progress.md |
+| T-C | Phase 1 - 画布 + 节点 | canvas-dev | ✅ DONE | .plans/icezone-studio/canvas-dev/task_plan.md |
+| T-D | Phase 2 - AI Provider | ai-dev | ✅ DONE | .plans/icezone-studio/ai-dev/progress.md |
+| T-E | Phase 2 - 视频 Provider | video-dev | ✅ DONE | .plans/icezone-studio/video-dev/progress.md |
 
 ---
 
@@ -87,7 +87,7 @@
 
 - **远程分支**：仅 `origin/main`，所有功能分支已删除
 - **本地分支**：仅 `main`
-- **Worktree**：仅主仓库 `D:/storyboard-copilot-web`，所有 agent worktree 已删除
+- **Worktree**：仅主仓库 `D:/icezone-studio`，所有 agent worktree 已删除
 
 ---
 

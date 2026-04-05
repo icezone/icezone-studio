@@ -15,7 +15,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - 测试：Vitest（单元/API）+ Playwright（E2E），TDD 流程。
 - 关键原则：解耦、可扩展、可回归验证、自动持久化、交互性能优先。
 
-> **项目定位**：基于桌面版（`Storyboard-Copilot`）升级扩展为 Web SaaS。Web 版在 `storyboard-copilot-web` 新仓库中开发，尽可能沿用现有代码，重构基础设施层适配 Web。
+> **项目定位**：基于桌面版（`Storyboard-Copilot`）升级扩展为 Web SaaS。Web 版（IceZone Studio）在独立仓库中开发，尽可能沿用现有代码，重构基础设施层适配 Web。
 
 ## 2. 依赖安装权限
 

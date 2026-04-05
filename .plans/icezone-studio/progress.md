@@ -1,4 +1,4 @@
-# storyboard-copilot-web - 进度日志
+# icezone-studio - 进度日志
 
 > 按时间线记录。每条记录谁做了什么。
 
@@ -7,7 +7,7 @@
 ## 2026-03-25 Session 1 — 团队搭建 + Wave 1 启动
 
 ### 已完成
-- [x] GitHub 仓库创建并推送（icezone/storyboard-copilot-web）
+- [x] GitHub 仓库创建并推送（icezone/icezone-studio）
 - [x] 6 个 git worktree 创建
 - [x] .plans 文档结构搭建
 - [x] 主 task_plan.md + findings.md + decisions.md 创建

@@ -1,4 +1,4 @@
-# storyboard-copilot-web - 架构
+# icezone-studio - 架构
 
 > 维护者：team-lead, devs（架构变更后更新）
 > 创建: 2026-03-25

@@ -11,7 +11,7 @@
 - 关键原则：解耦、可扩展、可回归验证、自动持久化、交互性能优先。
 - 多媒体支持：图片生成/编辑（同步/异步）、视频生成（异步轮询 + Realtime 推送）。
 
-> **项目定位**：基于现有桌面版（本仓库 `Storyboard-Copilot`）升级扩展为 Web SaaS 产品。Web 版在独立仓库 `storyboard-copilot-web` 中开发，**尽可能沿用桌面版现有代码**（画布域逻辑、模型定义、工具体系、UI 组件等），重构基础设施层以适配 Web 架构。桌面版仓库保留，不做破坏性修改。
+> **项目定位**：基于现有桌面版（`Storyboard-Copilot`）升级扩展为 Web SaaS 产品。Web 版（IceZone Studio）在独立仓库中开发，**尽可能沿用桌面版现有代码**（画布域逻辑、模型定义、工具体系、UI 组件等），重构基础设施层以适配 Web 架构。桌面版仓库保留，不做破坏性修改。
 
 ## 2. 依赖安装权限
 
@@ -409,7 +409,7 @@ npm run release -- patch --notes-file docs/releases/vx.y.z.md
 
 ---
 
-# storyboard-copilot-web - 团队运营手册
+# icezone-studio - 团队运营手册
 
 > 由 CCteam 自动生成，2026-03-25。
 > 此部分让 team-lead 的团队知识在上下文压缩后仍然保持。
@@ -418,7 +418,7 @@ npm run release -- patch --notes-file docs/releases/vx.y.z.md
 
 - team-lead = 主对话，不是生成的 agent
 - team-lead 负责用户对齐、范围控制、任务分解和阶段推进
-- team-lead 维护：`.plans/storyboard-copilot-web/task_plan.md`、`decisions.md` 和此 CLAUDE.md
+- team-lead 维护：`.plans/icezone-studio/task_plan.md`、`decisions.md` 和此 CLAUDE.md
 - **禁用独立子智能体**：团队存在后，所有工作通过 SendMessage 交给队友
 
 ## 团队花名册
@@ -465,15 +465,15 @@ Wave 3（D完成后）:  video-dev
 
 ```bash
 # 快速扫描（并行读取）
-Read .plans/storyboard-copilot-web/auth-dev/progress.md
-Read .plans/storyboard-copilot-web/image-dev/progress.md
-Read .plans/storyboard-copilot-web/db-dev/progress.md
+Read .plans/icezone-studio/auth-dev/progress.md
+Read .plans/icezone-studio/image-dev/progress.md
+Read .plans/icezone-studio/db-dev/progress.md
 
 # 深入了解
-Read .plans/storyboard-copilot-web/<agent>/findings.md
+Read .plans/icezone-studio/<agent>/findings.md
 
 # 全局方向
-Read .plans/storyboard-copilot-web/task_plan.md
+Read .plans/icezone-studio/task_plan.md
 ```
 
 读取顺序：**progress**（到哪了）→ **findings**（遇到什么）→ **task_plan**（目标是什么）

@@ -1,4 +1,4 @@
-# storyboard-copilot-web - 系统不变量
+# icezone-studio - 系统不变量
 
 > 不可违反的系统边界。违反任何一条 = CRITICAL Bug。
 > 创建: 2026-03-25

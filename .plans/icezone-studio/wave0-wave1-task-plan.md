@@ -66,7 +66,7 @@ Implementation guide: `docs/implementation-guide-wave0-wave1.md`
 
 **Status**: Backend complete (commit a147c5a in worktree-agent-afb3df02), frontend pending
 **Dependencies**: None (parallel with N2/N3)
-**Worktree**: `C:\icezone\storyboard-copilot-web\.claude\worktrees\agent-afb3df02` (branch: worktree-agent-afb3df02)
+**Worktree**: `C:\icezone\icezone-studio\.claude\worktrees\agent-afb3df02` (branch: worktree-agent-afb3df02)
 
 ---
 
@@ -306,9 +306,9 @@ git worktree add D:/ws-key-rotation -b wave1-key-rotation
 ## 9. Progress Tracking
 
 Track in each agent's folder:
-- `.plans/storyboard-copilot-web/{agent}/task_plan.md`
-- `.plans/storyboard-copilot-web/{agent}/progress.md`
-- `.plans/storyboard-copilot-web/{agent}/findings.md`
+- `.plans/icezone-studio/{agent}/task_plan.md`
+- `.plans/icezone-studio/{agent}/progress.md`
+- `.plans/icezone-studio/{agent}/findings.md`
 
 ---
 

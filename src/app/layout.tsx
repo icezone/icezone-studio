@@ -19,12 +19,12 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "Storyboard Copilot — AI Creative Studio",
+  title: "IceZone Studio — AI Creative Studio",
   description:
     "A node-based AI canvas for generating images, creating storyboards, and producing videos. Powered by the world's best AI models including Kling, Sora2, and Veo.",
-  keywords: "AI storyboard, image generation, video generation, AI canvas, creative tool",
+  keywords: "AI storyboard, image generation, video generation, AI canvas, creative tool, IceZone Studio",
   openGraph: {
-    title: "Storyboard Copilot — AI Creative Studio",
+    title: "IceZone Studio — AI Creative Studio",
     description: "Create stunning storyboards and videos with AI on a node-based canvas.",
     type: "website",
   },

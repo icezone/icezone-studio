@@ -1,4 +1,4 @@
-# storyboard-copilot-web - 架构决策记录
+# icezone-studio - 架构决策记录
 
 > 记录每个决策及其理由。
 

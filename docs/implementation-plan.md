@@ -1,4 +1,4 @@
-# Implementation Plan: Storyboard Copilot Web
+# Implementation Plan: IceZone Studio
 
 > 基于桌面版升级扩展为 Web SaaS 的任务级实现计划。
 > TDD + Git Worktree 并行 Agent 团队开发。
@@ -10,7 +10,7 @@
 
 - **来源**：桌面版 `Storyboard-Copilot`（Tauri 2 + Rust）已验证核心画布工作流。
 - **目标**：升级扩展为 Web SaaS 产品，覆盖全球和中国市场。
-- **仓库**：桌面版仓库保留不变。Web 版在独立新仓库 **`storyboard-copilot-web`** 中开发。
+- **仓库**：桌面版仓库保留不变。Web 版在独立新仓库 **`icezone-studio`** 中开发。
 - **代码复用策略**：
   - **直接复制**（零改动或微调）：`domain/`、`models/`、`tools/`、`ui/`、`edges/`、`hooks/`、`pricing/`、`canvasStore.ts`、`primitives.tsx`、`i18n/`
   - **适配改写**（替换 Tauri 依赖为 Web API）：`nodes/*.tsx`（文件操作）、`toolProcessor.ts`（移除直接命令导入）

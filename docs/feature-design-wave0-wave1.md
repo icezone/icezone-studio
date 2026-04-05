@@ -1,4 +1,4 @@
-# Storyboard Copilot Web — Feature Design Document
+# IceZone Studio — Feature Design Document
 
 > 基于竞品 Tapnow Studio PP 分析，提炼 Wave 0 + Wave 1 新需求的详细设计。
 

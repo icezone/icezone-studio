@@ -1,10 +1,10 @@
-# Storyboard Copilot: Desktop to Web Migration Plan (v2)
+# IceZone Studio: Desktop to Web Migration Plan (v2)
 
 > Engineer-facing migration plan for an immediate desktop replacement strategy. This document assumes the web product becomes the primary product during implementation rather than running a long desktop/web coexistence period.
 
 ## 1. Goal
 
-Migrate Storyboard Copilot from a Tauri desktop prototype to a web-based product that can be shared, discovered, monetized, and operated as a SaaS offering for the creative video community.
+Migrate IceZone Studio from a Tauri desktop prototype to a web-based product that can be shared, discovered, monetized, and operated as a SaaS offering for the creative video community.
 
 This v2 plan assumes:
 
@@ -15,7 +15,7 @@ This v2 plan assumes:
 
 ## 2. Product Intent
 
-Storyboard Copilot is not just an internal editor. It is the main product of a startup focused on AI-assisted creative video generation. The migration is therefore both:
+IceZone Studio is not just an internal editor. It is the main product of a startup focused on AI-assisted creative video generation. The migration is therefore both:
 
 - a platform migration
 - a product distribution and growth strategy
