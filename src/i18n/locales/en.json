@@ -300,6 +300,26 @@
   "ai": {
     "error": "AI generation error"
   },
+  "shotAnalysis": {
+    "title": "Shot Analysis",
+    "analyzing": "Analyzing shot...",
+    "analysisFailed": "Shot analysis failed",
+    "retry": "Retry",
+    "shotType": "Shot Type",
+    "cameraMovement": "Camera Movement",
+    "subject": "Subject",
+    "subjectAction": "Action",
+    "lighting": "Lighting",
+    "lightingMood": "Light Mood",
+    "colorPalette": "Palette",
+    "mood": "Mood",
+    "composition": "Composition",
+    "directorNote": "Director's Note",
+    "copy": "Copy",
+    "export": "Export",
+    "imagePreview": "Shot preview",
+    "toolbarButton": "Shot Analysis"
+  },
   "pricing": {
     "nativePrice": "Native Price",
     "originalPrice": "Listed Price",

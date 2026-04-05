@@ -107,6 +107,31 @@ export interface ToolProcessor {
   ) => Promise<ToolProcessorResult>;
 }
 
+export interface ShotAnalysisPayload {
+  imageUrl: string;
+  additionalFrameUrls?: string[];
+  language: 'zh' | 'en';
+}
+
+export interface ShotAnalysisResult {
+  shotType: string;
+  shotTypeConfidence: number;
+  cameraMovement: string;
+  movementDescription: string;
+  subject: string;
+  subjectAction: string;
+  lightingType: string;
+  lightingMood: string;
+  colorPalette: string[];
+  mood: string;
+  composition: string;
+  directorNote: string;
+}
+
+export interface LlmAnalysisGateway {
+  analyzeShot: (payload: ShotAnalysisPayload) => Promise<ShotAnalysisResult>;
+}
+
 export interface CanvasEventMap {
   'tool-dialog/open': {
     nodeId: string;

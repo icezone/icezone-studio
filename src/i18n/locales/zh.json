@@ -300,6 +300,26 @@
   "ai": {
     "error": "AI 生成出错"
   },
+  "shotAnalysis": {
+    "title": "镜头分析",
+    "analyzing": "正在分析镜头...",
+    "analysisFailed": "镜头分析失败",
+    "retry": "重试",
+    "shotType": "镜头类型",
+    "cameraMovement": "镜头运动",
+    "subject": "主体",
+    "subjectAction": "主体动作",
+    "lighting": "光照",
+    "lightingMood": "光照氛围",
+    "colorPalette": "色调",
+    "mood": "情绪",
+    "composition": "构图",
+    "directorNote": "导演笔记",
+    "copy": "复制",
+    "export": "导出分镜",
+    "imagePreview": "镜头预览",
+    "toolbarButton": "镜头分析"
+  },
   "pricing": {
     "nativePrice": "原始价格",
     "originalPrice": "定价",

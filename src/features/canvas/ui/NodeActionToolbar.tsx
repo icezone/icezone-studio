@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { NodeToolbar as ReactFlowNodeToolbar } from '@xyflow/react';
-import { Copy, Crop, Download, FolderOpen, PenLine, RefreshCw, Scissors, Trash2, Unlink2 } from 'lucide-react';
+import { Copy, Crop, Download, FolderOpen, PenLine, RefreshCw, Scissors, ScanSearch, Trash2, Unlink2 } from 'lucide-react';
 // Web version: Tauri save dialog replaced with browser download
 import { useTranslation } from 'react-i18next';
 
@@ -35,6 +35,7 @@ import {
   NODE_TOOLBAR_OFFSET,
   NODE_TOOLBAR_POSITION,
 } from './nodeToolbarConfig';
+import { ShotAnalysisDialog } from './ShotAnalysisDialog';
 
 interface NodeActionToolbarProps {
   node: CanvasNode;
@@ -69,6 +70,7 @@ export const NodeActionToolbar = memo(({ node }: NodeActionToolbarProps) => {
   const [isCopySuccess, setIsCopySuccess] = useState(false);
   const [isCopyTextSuccess, setIsCopyTextSuccess] = useState(false);
   const [isCopyErrorSuccess, setIsCopyErrorSuccess] = useState(false);
+  const [isShotAnalysisOpen, setIsShotAnalysisOpen] = useState(false);
   const downloadMenuRef = useRef<HTMLDivElement | null>(null);
   const copyFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const copyTextFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -339,6 +341,19 @@ export const NodeActionToolbar = memo(({ node }: NodeActionToolbarProps) => {
         )}
         {!isImageEdit && canHandleImage && (
           <UiChipButton
+            key="shot-analysis"
+            className={`h-8 ${TOOLBAR_BUTTON_RADIUS_CLASS} px-2.5 text-xs ${TOOLBAR_NEUTRAL_BUTTON_CLASS}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              setIsShotAnalysisOpen(true);
+            }}
+          >
+            <ScanSearch className="h-3.5 w-3.5" />
+            {t('shotAnalysis.toolbarButton')}
+          </UiChipButton>
+        )}
+        {!isImageEdit && canHandleImage && (
+          <UiChipButton
             key="image-copy"
             className={`h-8 ${TOOLBAR_BUTTON_RADIUS_CLASS} px-2.5 text-xs ${TOOLBAR_NEUTRAL_BUTTON_CLASS} ${
               isCopySuccess
@@ -474,6 +489,13 @@ export const NodeActionToolbar = memo(({ node }: NodeActionToolbarProps) => {
             </div>
           )}
         </div>
+      )}
+      {isShotAnalysisOpen && (
+        <ShotAnalysisDialog
+          isOpen={isShotAnalysisOpen}
+          onClose={() => setIsShotAnalysisOpen(false)}
+          imageUrl={imageSource}
+        />
       )}
     </ReactFlowNodeToolbar>
   );

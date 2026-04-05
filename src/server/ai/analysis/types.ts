@@ -35,3 +35,33 @@ export interface LlmAnalysisRequest {
   userMessage: string
   temperature?: number
 }
+
+/** Types for shot analysis (N3) */
+
+export interface ShotAnalysisParams {
+  imageUrl: string
+  additionalFrameUrls?: string[]
+  language: 'zh' | 'en'
+}
+
+export interface ShotAnalysisResult {
+  shotType: string
+  shotTypeConfidence: number
+  cameraMovement: string
+  movementDescription: string
+  subject: string
+  subjectAction: string
+  lightingType: string
+  lightingMood: string
+  colorPalette: string[]
+  mood: string
+  composition: string
+  directorNote: string
+}
+
+export interface LlmVisionAnalysisRequest {
+  systemPrompt: string
+  imageUrls: string[]
+  userMessage: string
+  temperature?: number
+}
