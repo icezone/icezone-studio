@@ -1,17 +1,95 @@
-# CLAUDE.md
+# CLAUDE.md — IceZone Studio
 
 ## 1. 项目目标与技术栈
 
-- 产品目标：基于节点画布进行图片上传、AI 生成/编辑、工具处理（裁剪/标注/分镜）、视频生成的 Web SaaS 产品。
+- 产品名称：**IceZone Studio** — AI Creative Studio
+- 产品目标：基于节点画布进行图片上传、AI 生成/编辑、工具处理（裁剪/标注/分镜）、视频生成、AI 分析的 Web SaaS 产品。
+- 仓库：`https://github.com/icezone/icezone-studio`
 - 前端：Next.js 15 (App Router) + React 19 + TypeScript + Zustand 5 + @xyflow/react 12 + TailwindCSS 4。
 - 后端：Supabase (Auth + Postgres + Storage + Realtime) + Next.js API Routes + sharp（图片处理）。
 - 支付：PayPal + Alipay + WeChat Pay（全球 + 中国市场）。
 - 认证：Supabase Auth（Email + Google + WeChat OAuth）。
 - 测试：Vitest（单元/API）+ Playwright（E2E），TDD 流程。
 - 关键原则：解耦、可扩展、可回归验证、自动持久化、交互性能优先。
-- 多媒体支持：图片生成/编辑（同步/异步）、视频生成（异步轮询 + Realtime 推送）。
+- 多媒体支持：图片生成/编辑（同步/异步）、视频生成（异步轮询 + Realtime 推送）、AI 视觉分析。
 
-> **项目定位**：基于现有桌面版（`Storyboard-Copilot`）升级扩展为 Web SaaS 产品。Web 版（IceZone Studio）在独立仓库中开发，**尽可能沿用桌面版现有代码**（画布域逻辑、模型定义、工具体系、UI 组件等），重构基础设施层以适配 Web 架构。桌面版仓库保留，不做破坏性修改。
+> **项目定位**：基于桌面版（`Storyboard-Copilot`）升级的 Web SaaS 产品，沿用画布域逻辑、模型定义、工具体系、UI 组件，重构基础设施层适配 Web 架构。
+
+## 1.1 已实现功能概览（截至 2026-04-05）
+
+### 节点类型（11 种）
+
+| 节点 | 类型 ID | 菜单可见 | 说明 |
+|------|---------|---------|------|
+| 上传图片 | `uploadNode` | ✅ | 图片上传/导入，支持宽高比管理 |
+| 图片编辑 | `imageNode` | ✅ | AI 图片生成与编辑 |
+| 导出结果 | `exportImageNode` | 流程创建 | 生成/处理结果展示 |
+| 文字标注 | `textAnnotationNode` | ✅ | 画布文字注释 |
+| 编组 | `groupNode` | 流程创建 | 节点分组/组织 |
+| 分镜拆分 | `storyboardNode` | ✅ | 网格切割与导出 |
+| 分镜生成 | `storyboardGenNode` | ✅ | AI 分镜描述 + 参考图 + 批量生成 |
+| 视频生成 | `videoGenNode` | ✅ | 视频生成（文字/图片驱动） |
+| 视频结果 | `videoResultNode` | 流程创建 | 视频生成结果播放 |
+| 小说输入 | `novelInputNode` | ✅ | 小说/剧本文本分析与拆分 (N4) |
+| 视频分析 | `videoAnalysisNode` | ✅ | 视频场景检测与关键帧提取 (N1) |
+
+### AI 模型
+
+**图片生成（7 模型 / 4 Provider）**：
+- KIE（默认）：nano-banana-2、nano-banana-pro
+- FAL：nano-banana-2、nano-banana-pro
+- GRSAI：nano-banana-2、nano-banana-pro
+- PPIO：gemini-3.1-flash
+
+**视频生成（5 模型 / 3 Provider）**：
+- Kling（默认）：kling-3.0（3s/5s/10s/15s）
+- Sora2：sora2-pro、sora2-standard
+- VEO：veo3-fast、veo3-quality
+
+### AI 分析功能
+
+| 功能 | 节点/对话框 | API | 说明 |
+|------|------------|-----|------|
+| N1: 视频分析 | VideoAnalysisNode | `/api/video/analyze` | 场景检测 + 关键帧提取 |
+| N2: 反向提示词 | ReversePromptDialog | `/api/ai/reverse-prompt` | 图片→提示词（Gemini Vision） |
+| N3: 镜头分析 | ShotAnalysisDialog | `/api/ai/shot-analysis` | 专业影视分析（景别/运镜/灯光/构图） |
+| N4: 小说拆分 | NovelInputNode | `/api/ai/novel-analyze` | 文本→场景拆分 + 角色提取 |
+
+### 工具体系（3 种）
+
+- **裁剪** (cropToolPlugin)：预设比例 + 自定义比例
+- **标注** (annotateToolPlugin)：颜色/线宽/字号可调
+- **分镜切割** (splitStoryboardToolPlugin)：行列网格 + 线宽
+
+### 模板系统
+
+- 3 个官方模板：小说转分镜、视频拆解重制、批量图片生成
+- 用户自定义模板：保存/加载/发布/分享
+- 模板序列化：画布 ↔ 模板双向转换
+
+### API 端点（23+）
+
+- AI 生成：`/api/ai/image/generate`、`/api/ai/video/generate`、`/api/ai/models`
+- AI 分析：`/api/ai/novel-analyze`、`/api/ai/reverse-prompt`、`/api/ai/shot-analysis`
+- 图片处理：`/api/image/crop`、`/api/image/split`、`/api/image/merge`、`/api/image/metadata`
+- 资产管理：`/api/assets/upload`、`/api/assets/upload-url`、`/api/assets/complete`
+- 项目管理：`/api/projects` CRUD、`/api/projects/[id]/draft`、`/api/projects/[id]/draft/viewport`
+- 模板：`/api/templates` CRUD + publish + use
+- 设置：`/api/settings/api-keys`（AES-256-GCM 加密存储）
+- 任务轮询：`/api/jobs/[id]`
+- 视频分析：`/api/video/analyze`
+
+### BYOK（Bring Your Own Key）
+
+支持 6 个 Provider：`kie`、`ppio`、`grsai`、`fal`、`openai`、`anthropic`
+
+### 其他
+
+- **i18n**：中文 + 英文双语
+- **持久化**：Supabase Postgres + IndexedDB 双写，冲突检测
+- **认证**：Email/密码 + Google OAuth
+- **画布交互**：多选、编组、复制粘贴、撤销重做、缩略图、模板、右键框选
+- **CI/CD**：GitHub Actions（TypeScript check + Lint + Unit tests + Build + E2E）
 
 ## 2. 依赖安装权限
 
@@ -67,21 +145,28 @@
 - `src/features/canvas/infrastructure/webVideoGateway.ts`
 - `src/features/canvas/infrastructure/webImageSplitGateway.ts`
 - `src/features/canvas/infrastructure/webImagePersistence.ts`
+- `src/features/canvas/infrastructure/webLlmAnalysisGateway.ts`（N2/N3/N4 分析）
 
 7. 服务端（API Routes + Server Logic）
 - `app/api/projects/`（项目 CRUD）
 - `app/api/projects/[id]/draft/`（草稿读写）
 - `app/api/assets/`（资产上传/管理）
-- `app/api/ai/`（AI 图片/视频生成）
-- `app/api/image/`（图片处理：split/crop/merge）
+- `app/api/ai/image/`、`app/api/ai/video/`（AI 生成）
+- `app/api/ai/reverse-prompt/`（N2: 反向提示词）
+- `app/api/ai/shot-analysis/`（N3: 镜头分析）
+- `app/api/ai/novel-analyze/`（N4: 小说拆分）
+- `app/api/video/analyze/`（N1: 视频分析）
+- `app/api/image/`（图片处理：split/crop/merge/metadata）
+- `app/api/templates/`（模板 CRUD + publish + use）
 - `app/api/jobs/[id]/`（任务状态轮询）
+- `app/api/settings/`（API Key 管理，AES-256-GCM 加密）
 - `app/api/billing/`（支付）
-- `app/api/settings/`（API Key 管理）
-- `src/server/ai/`（AI Provider 实现）
+- `src/server/ai/`（AI Provider 实现 + 分析服务）
+- `src/server/ai/analysis/`（reversePrompt / shotAnalysis / novelAnalysis）
 - `src/server/video/`（视频 Provider 实现）
+- `src/server/video/analysis/`（场景检测 + 关键帧提取）
 - `src/server/image/`（sharp 图片处理）
 - `src/server/jobs/`（任务编排）
-- `src/server/billing/`（支付集成）
 
 8. 数据库
 - `supabase/migrations/`（SQL 迁移文件）
@@ -409,109 +494,18 @@ npm run release -- patch --notes-file docs/releases/vx.y.z.md
 
 ---
 
-# icezone-studio - 团队运营手册
+## 14. Known Pitfalls
 
-> 由 CCteam 自动生成，2026-03-25。
-> 此部分让 team-lead 的团队知识在上下文压缩后仍然保持。
+> 识别到反复失败模式时追加。格式：症状、根因、修复、预防。
 
-## Team-Lead 控制平面
-
-- team-lead = 主对话，不是生成的 agent
-- team-lead 负责用户对齐、范围控制、任务分解和阶段推进
-- team-lead 维护：`.plans/icezone-studio/task_plan.md`、`decisions.md` 和此 CLAUDE.md
-- **禁用独立子智能体**：团队存在后，所有工作通过 SendMessage 交给队友
-
-## 团队花名册
-
-| 名称 | 角色 | 模型 | worktree | 核心能力 |
-|------|------|------|----------|---------|
-| auth-dev | Phase 0 工作流 A | opus | D:/ws-auth-shell | Auth + App Shell + Middleware + i18n |
-| image-dev | Phase 0 工作流 F | opus | D:/ws-image-processing | sharp 图片处理 API |
-| db-dev | Phase 1 工作流 B | opus | D:/ws-project-persistence | DB Schema + 持久化 API |
-| canvas-dev | Phase 1 工作流 C | opus | D:/ws-canvas-nodes | 画布 + 节点（等 B.2+B.3） |
-| ai-dev | Phase 2 工作流 D | opus | D:/ws-ai-providers | 服务端 AI Provider（等 B.1） |
-| video-dev | Phase 2 工作流 E | opus | D:/ws-video-providers | 视频 Provider（等 D.1+D.3） |
-| reviewer | 代码审查 | opus | 主仓库 | 安全/质量/性能审查（只读代码） |
-
-## 并行策略
-
-```
-Wave 1（同时启动）: auth-dev + image-dev + db-dev
-Wave 2（B完成后）:  canvas-dev + ai-dev
-Wave 3（D完成后）:  video-dev
-```
-
-### 解锁条件
-- canvas-dev 解锁：db-dev 完成 B.2（项目CRUD API）+ B.3（草稿API）并报告 team-lead
-- ai-dev 解锁：db-dev 完成 B.1（含 005_ai_jobs.sql）并报告 team-lead
-- video-dev 解锁：ai-dev 完成 D.1+D.3（AI接口 + Job Service）并报告 team-lead
-
-## 任务下发协议
-
-### 大任务下发格式（必须包含）
-1. 范围和目标 + 验收标准
-2. "请创建 `task-<name>/` 任务文件夹（含 task_plan.md + findings.md + progress.md），并在根 findings.md 中添加索引"
-3. 依赖说明（关键文件路径）
-4. 审查预期：完成后是否需要 reviewer 审查
-
-### 通信速查
-| 操作 | 命令 |
-|------|------|
-| 给单个 agent 分配任务 | `SendMessage(to: "<名称>", message: "...")` |
-| dev 请求审查 | dev 直接联系 reviewer（不经 team-lead） |
-| 上报阻塞 | SendMessage(to: "team-lead", ...) |
-
-## 状态检查
-
-```bash
-# 快速扫描（并行读取）
-Read .plans/icezone-studio/auth-dev/progress.md
-Read .plans/icezone-studio/image-dev/progress.md
-Read .plans/icezone-studio/db-dev/progress.md
-
-# 深入了解
-Read .plans/icezone-studio/<agent>/findings.md
-
-# 全局方向
-Read .plans/icezone-studio/task_plan.md
-```
-
-读取顺序：**progress**（到哪了）→ **findings**（遇到什么）→ **task_plan**（目标是什么）
-
-## Harness 检查清单（阶段边界时执行）
-
-- **文档 harness**：CLAUDE.md + 主 task_plan.md 是否还准确？
-- **可观测性 harness**：Grep progress.md 搜索 "error|fail"
-- **不变量 harness**：Known Pitfalls 中是否有条目应升级为自动化测试？
-- **回放 harness**：本阶段是否产生了可复用的模式？用 [TEAM-PROTOCOL] 记录
-
-## CI 命令
-
-```bash
-npx tsc --noEmit          # 类型检查
-npx vitest run            # 单元测试
-npm run lint              # lint
-npm run build             # 完整构建（大改前）
-npx playwright test       # E2E（合并前）
-```
-
-## Known Pitfalls
-
-> Wave 1 启动时初始为空。识别到反复失败模式时追加。
-> 格式：症状、根因、修复、预防。
-
-### API 路由输入校验不完整（来自 image-dev 审查）
+### API 路由输入校验不完整
 - **症状**：非图片文件/越界参数/超量文件返回 500 而非 4xx
 - **根因**：Zod 只校验参数类型，未校验文件 MIME type、坐标边界、数组上限
-- **修复**：在 validation.ts 中增加 MIME type 白名单、crop 坐标边界检查、merge 文件数量上限（建议 ≤20）
+- **修复**：在 validation.ts 中增加 MIME type 白名单、crop 坐标边界检查、merge 文件数量上限（≤20）
 - **预防**：新增 API 路由时，除参数类型外还需校验：文件类型、数值范围、数组长度
 
-## 核心协议
-
-| 协议 | 触发时机 | 操作 |
-|------|---------|------|
-| 3-Strike 上报 | agent 3 次失败 | 读其 progress.md → 给新方向或重新分配 |
-| 代码审查 | 大功能完成 | dev → reviewer 直接沟通 |
-| 阶段解锁 | B.1/B.2+B.3/D.1+D.3 完成 | db-dev/ai-dev 通知 team-lead |
-| Wave 推进 | Wave N 完成 | 读各 agent findings → 更新主 task_plan.md → 启动 Wave N+1 |
-| 上下文溢出 | agent 报告上下文过长 | 进度已存文件，恢复或生成后继者 |
+### E2E 测试需要真实 Supabase 认证
+- **症状**：E2E 测试在 CI 中认证超时
+- **根因**：测试需要真实 Supabase 账号登录
+- **修复**：通过 GitHub Secrets 配置 `E2E_TEST_EMAIL` / `E2E_TEST_PASSWORD`
+- **预防**：新增需认证的 E2E 测试必须用 `test.skip(!hasAuth, ...)` 门控
