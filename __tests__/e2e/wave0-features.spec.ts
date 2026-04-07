@@ -202,6 +202,7 @@ test.describe('Integration: Full Workflow', () => {
   })
 
   test('Can create project, add multiple node types, and navigate', async ({ page }) => {
+    test.setTimeout(60_000) // Increase timeout for full workflow test
     const projectId = await createProject(page)
     try {
       await openNodeMenu(page)

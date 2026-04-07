@@ -18,8 +18,8 @@ test.describe('Dashboard (authenticated)', () => {
   })
 
   test('shows dashboard with project list', async ({ page }) => {
-    // Wait for dashboard to load (heading appears after loading completes)
-    await expect(page.getByRole('heading')).toBeVisible({ timeout: 10_000 })
+    // Wait for dashboard to load - check for "My Projects" heading
+    await expect(page.getByRole('heading', { name: /my projects|我的项目/i })).toBeVisible({ timeout: 10_000 })
     // Wait for API fetch to complete: either project cards or empty-state message
     // .count() doesn't auto-wait, so use toBeVisible() on an .or() locator instead
     const projectCard = page.locator('[data-testid="project-card"]')

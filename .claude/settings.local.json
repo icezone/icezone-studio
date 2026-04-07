@@ -39,7 +39,10 @@
       "Bash(git merge:*)",
       "Bash(git commit:*)",
       "Bash(gh run:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "mcp__plugin_context-mode_context-mode__ctx_execute",
+      "mcp__plugin_context-mode_context-mode__ctx_search",
+      "Bash(npx playwright:*)"
     ]
   }
 }
