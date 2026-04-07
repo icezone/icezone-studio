@@ -71,9 +71,9 @@ function CanvasTopBar() {
   const { label, className } = statusMap[saveStatus] ?? { label: saveStatus, className: 'text-white/30' };
 
   return (
-    <div className="pointer-events-none absolute left-0 right-0 top-0 z-[50] flex items-center justify-between px-4 py-3">
+    <div className="pointer-events-none absolute left-12 right-0 top-0 z-[50] flex items-center justify-between px-4 py-3">
       {/* Project name — click to rename */}
-      <div className="pointer-events-auto flex items-center gap-2 pl-14">
+      <div className="pointer-events-auto flex items-center gap-2">
         {editing ? (
           <input
             ref={inputRef}
