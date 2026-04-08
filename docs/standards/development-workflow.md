@@ -2,7 +2,101 @@
 
 本文档说明 IceZone Studio 的开发工作流程和验证标准。
 
-## 工作流程
+## 标准工作流（OpenSpec + planning-with-files）
+
+IceZone Studio 采用两阶段工作流：
+
+### 阶段 1: 计划（使用 OpenSpec）
+
+**目的**：明确"为什么做"、"做什么"、"怎么做"
+
+**命令**：`/opsx:propose`
+
+**输出**：在 `openspec/changes/<change-id>/` 生成：
+
+```
+openspec/changes/<change-id>/
+├── proposal.md          # 变更提案
+│   ├── 问题陈述
+│   ├── 解决方案
+│   └── 影响范围
+├── specs/               # 需求文档
+│   ├── requirements.md  # 功能需求
+│   └── scenarios.md     # 使用场景
+├── design.md            # 技术设计
+│   ├── 架构决策
+│   ├── 数据模型
+│   └── API 设计
+└── tasks.md             # 实施清单
+    └── [ ] Task 1
+    └── [ ] Task 2
+    └── ...
+```
+
+**关键原则**：
+- ✅ 先规划后实施，避免返工
+- ✅ proposal 说明"为什么"，design 说明"怎么做"
+- ✅ tasks.md 是可执行的清单（checkbox 格式）
+- ❌ 不要跳过规划直接写代码
+
+---
+
+### 阶段 2: 实施（使用 planning-with-files）
+
+**目的**：基于 tasks.md 执行开发，自动同步任务状态
+
+**命令**：`/plan`
+
+**工作方式**：
+1. 读取 `openspec/changes/<change-id>/tasks.md`
+2. 逐个执行任务（TDD 流程）
+3. 完成后自动更新 tasks.md（标记 ✅）
+4. 每个里程碑后运行验证
+
+**关键原则**：
+- ✅ 严格遵循 tasks.md，不自行扩需求
+- ✅ TDD 流程：先写测试，再写实现
+- ✅ 小步提交：每完成一个任务就提交
+- ❌ 不要偏离 tasks.md 范围
+
+---
+
+### 完整流程示例
+
+```bash
+# 1. 创建变更提案
+/opsx:propose
+# 输入：我想添加视频导出功能
+# 输出：openspec/changes/001-add-video-export/
+#       ├── proposal.md
+#       ├── specs/
+#       ├── design.md
+#       └── tasks.md
+
+# 2. 审查提案（人工）
+# 检查 proposal/design/tasks 是否合理
+
+# 3. 执行开发
+/plan
+# 自动读取 tasks.md，逐个执行任务
+# 完成后自动标记 ✅
+
+# 4. 归档变更
+/opsx:archive
+# 变更完成后归档
+```
+
+---
+
+### 其他 OpenSpec 命令
+
+- `/opsx:explore` - 浏览现有变更
+- `/opsx:apply` - 应用变更到代码库
+- `/opsx:archive` - 归档已完成的变更
+
+---
+
+## 详细开发流程
 
 ### 1. 明确变更范围
 

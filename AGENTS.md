@@ -8,9 +8,27 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## 项目说明
 
 本仓库采用 harness 风格工作流：
-- OpenSpec 负责定义需求与变更工件
-- Claude Code 在项目规则内执行
+- **OpenSpec** 负责定义需求与变更工件
+- **planning-with-files** 负责执行开发任务
 - 实现与评审分离
+
+## 标准工作流
+
+### 阶段 1: 计划（使用 OpenSpec）
+
+使用 `/opsx:propose` 在 `openspec/changes/<change-id>/` 生成：
+- `proposal.md` — 为什么做这个变更，改什么
+- `specs/` — 需求文档和场景说明
+- `design.md` — 技术方案与架构决策
+- `tasks.md` — 实施任务清单（checkbox 格式）
+
+### 阶段 2: 实施（使用 planning-with-files）
+
+使用 `/plan` 基于 `tasks.md` 执行开发：
+- 自动同步 tasks.md 中的任务状态
+- TDD 流程：测试先行
+- 每个里程碑后运行验证
+- 遵守项目规范
 
 ## 首先阅读
 
@@ -18,17 +36,25 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 1. `docs/architecture/tech-stack.md` - 了解技术栈
 2. `docs/architecture/codebase-guide.md` - 理解代码组织
-3. `docs/standards/development-workflow.md` - 掌握开发流程
+3. `docs/standards/development-workflow.md` - 掌握 OpenSpec + planning-with-files 工作流
 4. `openspec/specs/` - 查看当前需求规格
-5. `openspec/changes/<change-id>/` - 查看具体变更任务
+5. `openspec/changes/<change-id>/` - 查看具体变更任务（proposal → design → tasks）
 
 ## 工作规则
 
-- 没有 OpenSpec change，不允许直接开始开发
-- 不允许超出 `tasks.md` 自行扩需求
-- 每完成一个里程碑，都必须运行相关检查
-- 修改数据库、配置、高风险业务时，必须明确说明影响范围
-- 合并前必须经过 review 和 verify
+**强制要求**：
+- ❌ 没有 OpenSpec change，不允许直接开始开发
+- ❌ 不允许超出 `tasks.md` 自行扩需求
+- ✅ 使用 `/opsx:propose` 创建变更提案
+- ✅ 使用 `/plan` 基于 tasks.md 执行开发
+- ✅ 每完成一个里程碑，必须运行相关检查
+- ✅ 修改数据库、配置、高风险业务时，必须明确说明影响范围
+- ✅ 合并前必须经过 review 和 verify
+
+**工作流命令**：
+- `/opsx:propose` - 创建新的变更提案（生成 proposal/specs/design/tasks）
+- `/opsx:explore` - 浏览现有变更
+- `/plan` - 基于 tasks.md 执行开发任务
 
 ## 完整文档索引
 

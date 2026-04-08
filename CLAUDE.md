@@ -14,29 +14,47 @@
 
 ## 必须遵守的工作流程
 
-### 开始前
+### 阶段 1: 计划（OpenSpec）
 
-1. **阅读 OpenSpec change**：
-   - `openspec/changes/<change-id>/proposal.md`
-   - `openspec/changes/<change-id>/design.md`
-   - `openspec/changes/<change-id>/tasks.md`
+1. **创建变更提案**：
+   ```bash
+   /opsx:propose
+   ```
+   
+   生成以下文件（在 `openspec/changes/<change-id>/`）：
+   - `proposal.md` — 为什么做、改什么
+   - `specs/` — 需求文档和场景
+   - `design.md` — 技术方案
+   - `tasks.md` — 实施清单（checkbox 格式）
 
-2. **总结需求范围**：明确本次改动边界
+2. **审查提案**：确认需求、设计、任务清单
 
-### 实施中
+### 阶段 2: 实施（planning-with-files）
 
-3. **严格遵循 tasks.md**：只实现明确列出的内容，不自行扩需求
+3. **启动开发**：
+   ```bash
+   /plan
+   ```
+   
+   基于 `tasks.md` 执行开发：
+   - 自动同步任务状态（✅ 完成的任务自动打勾）
+   - 严格遵循 tasks.md，不自行扩需求
+   - TDD 流程：测试先行
+   - 每个里程碑后验证
 
-4. **每个里程碑后验证**：运行对应的检查命令
-
-5. **遵守项目规范**：参考 `docs/standards/` 下的各项规范
+4. **遵守项目规范**：参考 `docs/standards/` 下的各项规范
 
 ### 完成后
 
-6. **输出简短总结**：
+5. **输出简短总结**：
    - 改动了哪些类/文件
    - 跑了哪些测试
    - 还存在哪些风险
+
+6. **归档变更**：
+   ```bash
+   /opsx:archive
+   ```
 
 ## 快速参考
 
