@@ -22,9 +22,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - `design.md` — 技术方案与架构决策
 - `tasks.md` — 实施任务清单（checkbox 格式）
 
-### 阶段 2: 实施（使用 planning-with-files）
+### 阶段 2: 实施（使用 OpenSpec + planning-with-files）
 
-使用 `/plan` 基于 `tasks.md` 执行开发：
+使用 `/opsx:apply` 应用变更，配合 planning-with-files 基于 `tasks.md` 执行开发：
+- `/opsx:apply` 应用变更到代码库
+- planning-with-files 基于 tasks.md 完成开发任务
 - 自动同步 tasks.md 中的任务状态
 - TDD 流程：测试先行
 - 每个里程碑后运行验证
@@ -54,7 +56,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 **工作流命令**：
 - `/opsx:propose` - 创建新的变更提案（生成 proposal/specs/design/tasks）
 - `/opsx:explore` - 浏览现有变更
-- `/plan` - 基于 tasks.md 执行开发任务
+- `/opsx:apply` - 应用变更到代码库（配合 planning-with-files 基于 tasks.md 开发）
+- `/opsx:archive` - 归档已完成的变更
 
 ## 完整文档索引
 

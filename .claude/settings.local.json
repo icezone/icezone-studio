@@ -42,7 +42,10 @@
       "Bash(git log:*)",
       "mcp__plugin_context-mode_context-mode__ctx_execute",
       "mcp__plugin_context-mode_context-mode__ctx_search",
-      "Bash(npx playwright:*)"
+      "Bash(npx playwright:*)",
+      "mcp__plugin_context-mode_context-mode__ctx_execute_file",
+      "Bash(ls -la /c/icezone/icezone-studio/docs/*.md)",
+      "Bash(ls:*)"
     ]
   }
 }

@@ -41,19 +41,22 @@ openspec/changes/<change-id>/
 
 ---
 
-### 阶段 2: 实施（使用 planning-with-files）
+### 阶段 2: 实施（使用 OpenSpec + planning-with-files）
 
-**目的**：基于 tasks.md 执行开发，自动同步任务状态
+**目的**：应用变更到代码库，并基于 tasks.md 执行开发
 
-**命令**：`/plan`
+**命令**：`/opsx:apply`
 
 **工作方式**：
-1. 读取 `openspec/changes/<change-id>/tasks.md`
-2. 逐个执行任务（TDD 流程）
-3. 完成后自动更新 tasks.md（标记 ✅）
-4. 每个里程碑后运行验证
+1. `/opsx:apply` 应用变更到代码库
+2. planning-with-files 读取 `openspec/changes/<change-id>/tasks.md`
+3. 逐个执行任务（TDD 流程）
+4. 完成后自动更新 tasks.md（标记 ✅）
+5. 每个里程碑后运行验证
 
 **关键原则**：
+- ✅ 使用 `/opsx:apply` 启动实施阶段
+- ✅ planning-with-files 基于 tasks.md 完成开发
 - ✅ 严格遵循 tasks.md，不自行扩需求
 - ✅ TDD 流程：先写测试，再写实现
 - ✅ 小步提交：每完成一个任务就提交
@@ -76,9 +79,10 @@ openspec/changes/<change-id>/
 # 2. 审查提案（人工）
 # 检查 proposal/design/tasks 是否合理
 
-# 3. 执行开发
-/plan
-# 自动读取 tasks.md，逐个执行任务
+# 3. 应用变更并执行开发
+/opsx:apply
+# 应用变更到代码库
+# planning-with-files 自动读取 tasks.md，逐个执行任务
 # 完成后自动标记 ✅
 
 # 4. 归档变更

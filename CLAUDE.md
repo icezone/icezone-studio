@@ -29,14 +29,15 @@
 
 2. **审查提案**：确认需求、设计、任务清单
 
-### 阶段 2: 实施（planning-with-files）
+### 阶段 2: 实施（OpenSpec + planning-with-files）
 
-3. **启动开发**：
+3. **应用变更并启动开发**：
    ```bash
-   /plan
+   /opsx:apply
    ```
    
-   基于 `tasks.md` 执行开发：
+   应用变更到代码库，并配合 planning-with-files 基于 `tasks.md` 执行开发：
+   - planning-with-files 读取 tasks.md 并逐个执行任务
    - 自动同步任务状态（✅ 完成的任务自动打勾）
    - 严格遵循 tasks.md，不自行扩需求
    - TDD 流程：测试先行
