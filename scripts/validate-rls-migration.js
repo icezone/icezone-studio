@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-var-requires */
 /**
  * validate-rls-migration.js
  *
@@ -24,7 +25,6 @@ function validateMigration(filePath) {
   }
 
   const content = fs.readFileSync(filePath, 'utf-8');
-  const lines = content.split('\n');
 
   // Extract table names from CREATE TABLE statements
   const createTableRegex = /create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?(\w+)/gi;
