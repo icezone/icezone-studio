@@ -90,18 +90,28 @@ openspec/changes/<change-id>/
 # 按 Added/Changed/Fixed/Removed 分类
 # 双语更新（English + 中文）
 
-# 5. 归档变更
+# 5. 确保 CI/CD 通过（必填）
+# 提交代码后，等待 CI 通过
+# 检查 GitHub Actions: https://github.com/icezone/icezone-studio/actions
+# 必须通过所有检查：TypeScript、Lint、Tests、Build
+
+# 6. 归档变更
 /opsx:archive
-# 归档前检查 CHANGELOG.md 已更新
-# 系统会提示确认 CHANGELOG 更新状态
+# 归档前检查：CHANGELOG 已更新 + CI 已通过
+# 系统会提示确认状态
 ```
 
 **归档前检查清单**：
 - [ ] 代码已提交到 git
 - [ ] **CHANGELOG.md 已更新**（必填）
-- [ ] 在 `[Unreleased]` 区块添加变更条目
-- [ ] 按 `Added` / `Changed` / `Fixed` / `Removed` 分组
-- [ ] 双语更新（English + 中文）
+  - [ ] 在 `[Unreleased]` 区块添加变更条目
+  - [ ] 按 `Added` / `Changed` / `Fixed` / `Removed` 分组
+  - [ ] 双语更新（English + 中文）
+- [ ] **CI/CD 已通过**（必填）
+  - [ ] TypeScript 类型检查通过
+  - [ ] ESLint 检查通过
+  - [ ] 单元测试通过
+  - [ ] 构建成功
 
 ---
 
