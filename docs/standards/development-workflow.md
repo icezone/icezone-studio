@@ -188,6 +188,45 @@ npx supabase db reset        # 重置并重跑迁移
 npx supabase migration new <name>  # 创建新迁移
 ```
 
+### 数据库迁移（Database Migrations）
+
+创建新表或修改数据库模式时，**必须遵守 RLS（Row-Level Security）要求**：
+
+```bash
+# 1. 创建新迁移文件
+npx supabase migration new add_my_table
+
+# 2. 编写迁移 SQL（参考模板：supabase/migrations/_TEMPLATE.sql）
+# 必须包含：
+# - CREATE TABLE statement
+# - ALTER TABLE ... ENABLE ROW LEVEL SECURITY;
+# - CREATE POLICY statements (至少一个)
+# - CREATE INDEX on user_id (如果表包含 user_id)
+
+# 3. 验证迁移文件符合 RLS 规范
+node scripts/validate-rls-migration.js supabase/migrations/NNN_add_my_table.sql
+
+# 4. 应用到本地数据库测试
+npx supabase db reset
+
+# 5. 测试 RLS 策略是否正确工作
+# - 测试用户可以访问自己的数据
+# - 测试用户不能访问他人的数据
+# - 测试公开数据可被所有人读取
+```
+
+**RLS 必填项检查清单**（每个新表都必须满足）：
+
+- [ ] `ALTER TABLE public.my_table ENABLE ROW LEVEL SECURITY;`
+- [ ] 至少一个 `CREATE POLICY` 语句（或明确使用 `USING (true)` 表示公开访问）
+- [ ] 如表包含 `user_id` 列，添加索引：`CREATE INDEX idx_my_table_user_id ON public.my_table(user_id);`
+- [ ] 运行验证脚本：`node scripts/validate-rls-migration.js <migration-file>`
+- [ ] 本地测试策略正确性
+
+**重要**：缺少 RLS 配置的表会触发安全漏洞警告，CI 会阻止合并。参考：
+- 完整 RLS 文档：`docs/standards/database-security.md`
+- 迁移模板：`supabase/migrations/_TEMPLATE.sql`
+
 ## 验证标准
 
 ### 快速检查（优先执行）

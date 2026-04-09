@@ -39,6 +39,20 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Validate database migrations (RLS check)
+        run: |
+          # Check if there are any new migration files
+          if ls supabase/migrations/*.sql 1> /dev/null 2>&1; then
+            echo "Validating database migrations for RLS policies..."
+            for migration in supabase/migrations/*.sql; do
+              echo "Checking: $migration"
+              node scripts/validate-rls-migration.js "$migration" || exit 1
+            done
+            echo "✅ All migrations validated"
+          else
+            echo "No migrations to validate"
+          fi
+
       - name: Unit tests
         run: npx vitest run
 
