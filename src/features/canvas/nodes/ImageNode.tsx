@@ -52,6 +52,7 @@ export const ImageNode = memo(({ id, data, selected, type, width, height }: Imag
   const updateNodeData = useCanvasStore((state) => state.updateNodeData);
   const { zoom } = useViewport();
   const [now, setNow] = useState(() => Date.now());
+  const IMAGE_NODE_DEFAULT_SIZE = 560;
   const isExportResultNode = type === CANVAS_NODE_TYPES.exportImage;
   const isGenerating = typeof data.isGenerating === 'boolean' ? data.isGenerating : false;
   const generationError =
@@ -69,14 +70,20 @@ export const ImageNode = memo(({ id, data, selected, type, width, height }: Imag
     minWidth: EXPORT_RESULT_NODE_MIN_WIDTH,
     minHeight: EXPORT_RESULT_NODE_MIN_HEIGHT,
   });
+  const defaultSize = isExportResultNode
+    ? compactSize
+    : resolveMinEdgeFittedSize(resolvedAspectRatio, {
+        minWidth: IMAGE_NODE_DEFAULT_SIZE,
+        minHeight: IMAGE_NODE_DEFAULT_SIZE,
+      });
   const resizeConstraints = resolveResizeMinConstraintsByAspect(resolvedAspectRatio, {
     minWidth: EXPORT_RESULT_NODE_MIN_WIDTH,
     minHeight: EXPORT_RESULT_NODE_MIN_HEIGHT,
   });
   const resizeMinWidth = resizeConstraints.minWidth;
   const resizeMinHeight = resizeConstraints.minHeight;
-  const resolvedWidth = resolveNodeDimension(width, compactSize.width);
-  const resolvedHeight = resolveNodeDimension(height, compactSize.height);
+  const resolvedWidth = resolveNodeDimension(width, defaultSize.width);
+  const resolvedHeight = resolveNodeDimension(height, defaultSize.height);
   const resolvedTitle = useMemo(
     () => resolveNodeDisplayName(type as CanvasNodeType, data, t),
     [data, type, t]

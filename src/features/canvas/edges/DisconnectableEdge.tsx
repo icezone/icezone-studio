@@ -133,10 +133,11 @@ export const DisconnectableEdge = memo(function DisconnectableEdge(props: EdgePr
         <EdgeLabelRenderer>
           <button
             type="button"
-            className="nodrag nopan absolute flex h-6 w-6 items-center justify-center text-[var(--canvas-node-fg-muted)] transition-colors hover:text-[var(--canvas-node-fg)]"
+            className="nodrag nopan absolute flex h-6 w-6 items-center justify-center rounded-full bg-[var(--canvas-node-bg)] text-[var(--canvas-node-fg-muted)] shadow-sm transition-colors hover:text-[var(--canvas-node-fg)]"
             style={{
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
               pointerEvents: 'all',
+              zIndex: 1000,
             }}
             onClick={(event) => {
               event.stopPropagation();

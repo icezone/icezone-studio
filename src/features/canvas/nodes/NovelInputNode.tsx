@@ -29,8 +29,8 @@ const MIN_WIDTH = 340;
 const MIN_HEIGHT = 400;
 const MAX_WIDTH = 900;
 const MAX_HEIGHT = 1200;
-const DEFAULT_WIDTH = 380;
-const DEFAULT_HEIGHT = 520;
+const DEFAULT_WIDTH = 560;
+const DEFAULT_HEIGHT = 420;
 
 const GRANULARITY_OPTIONS = ['coarse', 'medium', 'fine'] as const;
 const LANGUAGE_OPTIONS = ['auto', 'zh', 'en'] as const;
@@ -228,14 +228,13 @@ function NovelInputNodeComponent({
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-2">
         {/* Textarea */}
-        <div className="relative flex-shrink-0" style={{ minHeight: 120, maxHeight: 200 }}>
+        <div className="relative flex-1 min-h-0">
           <textarea
             value={data.text ?? ''}
             onChange={(e) => handleTextChange(e.target.value)}
             onMouseDown={(e) => e.stopPropagation()}
             placeholder={t('node.novelInput.placeholder')}
             className="nodrag nowheel ui-scrollbar h-full w-full resize-none rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-3 py-2 text-sm leading-6 text-[var(--canvas-node-fg)] outline-none placeholder:text-[var(--canvas-node-fg-muted)] focus:border-accent/50"
-            style={{ height: 140 }}
           />
         </div>
 

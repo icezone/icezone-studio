@@ -27,8 +27,8 @@ const MIN_WIDTH = 340;
 const MIN_HEIGHT = 400;
 const MAX_WIDTH = 900;
 const MAX_HEIGHT = 1200;
-const DEFAULT_WIDTH = 380;
-const DEFAULT_HEIGHT = 540;
+const DEFAULT_WIDTH = 560;
+const DEFAULT_HEIGHT = 420;
 
 function formatTime(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
@@ -219,7 +219,7 @@ function VideoAnalysisNodeComponent({
 
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-2">
         {hasVideo ? (
-          <div className="relative flex-shrink-0 rounded-lg overflow-hidden bg-black/20" style={{ height: 160 }}>
+          <div className="relative flex-1 min-h-0 rounded-lg overflow-hidden bg-black/20">
             <video
               src={data.videoUrl ?? undefined}
               className="h-full w-full object-contain"
@@ -230,8 +230,7 @@ function VideoAnalysisNodeComponent({
           </div>
         ) : (
           <label
-            className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] bg-[var(--canvas-drop-zone-hover-bg)] cursor-pointer hover:border-[var(--canvas-node-hover-border)] transition-colors"
-            style={{ height: 140 }}
+            className="flex flex-1 min-h-0 flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] bg-[var(--canvas-drop-zone-hover-bg)] cursor-pointer hover:border-[var(--canvas-node-hover-border)] transition-colors"
             onDrop={handleDrop}
             onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
           >

@@ -13,6 +13,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### [Unreleased]
 
+### [0.4.0] - 2026-04-12
+
 #### Added
 - Database security infrastructure with RLS validation and deployment tools
 - Automated migration validation in CI/CD pipeline to enforce RLS policies
@@ -23,6 +25,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 #### Fixed
 - Critical security vulnerability: enabled Row-Level Security on plans table
 - Added performance indexes on user_id columns for RLS policy optimization
+- **Canvas edge delete button** — delete button now renders above SVG edge path with proper z-index and circular background, making it reliably clickable
+- **Node price badge removed** — removed `NodePriceBadge` from ImageEditNode and StoryboardGenNode headers
+- **Storyboard grid fills panel** — frame grid now uses `1fr` columns and rows filling the full node width/height; no more blank margins in 2-column layout
+- **Storyboard textarea theme color** — cell background uses `var(--canvas-node-section-bg)` and border uses `var(--canvas-node-border)` for correct light/dark appearance
+- **Unified initial node sizes** — AI image (imageEdit) and AI video (videoGen) both default to 560×560; VideoAnalysis and NovelInput both default to 560×420
 
 #### Changed
 - Canvas nodes and UI components now respond instantly to global theme switching (`data-theme="light"` / `data-theme="dark"`) without page refresh
@@ -104,6 +111,8 @@ IceZone Studio 的所有重要变更都记录在此文件中。
 
 ### [未发布]
 
+### [0.4.0] - 2026-04-12
+
 #### 新增
 - 数据库安全基础设施，包含 RLS 验证和部署工具
 - CI/CD 中的自动迁移验证，强制执行 RLS 策略
@@ -114,6 +123,11 @@ IceZone Studio 的所有重要变更都记录在此文件中。
 #### 修复
 - 关键安全漏洞：在 plans 表上启用行级安全（Row-Level Security）
 - 在 user_id 列上添加性能索引，优化 RLS 策略执行
+- **连线删除按钮** — 删除按钮现在正确显示在 SVG 边之上，添加圆形背景和 z-index，点击可靠生效
+- **移除节点价格标注** — 从 AI 图片节点和分镜生成节点头部移除 `NodePriceBadge`
+- **分镜网格填满面板** — 帧网格改用 `1fr` 列宽和行高，填满节点完整宽高，2列布局不再留白
+- **分镜 textarea 主题颜色** — 格子背景改用 `var(--canvas-node-section-bg)`，边框改用 `var(--canvas-node-border)`，亮色/暗色主题下均正确显示
+- **统一节点初始尺寸** — AI 图片（imageEdit）与 AI 视频（videoGen）均默认 560×560；视频分析与剧本输入均默认 560×420
 
 #### 变更
 - Canvas 节点及 UI 组件现在可即时响应全局主题切换（`data-theme="light"` / `data-theme="dark"`），无需刷新页面
