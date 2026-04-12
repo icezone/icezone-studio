@@ -148,11 +148,11 @@ function VideoResultNodeComponent({
   return (
     <div
       className={`
-        flex flex-col rounded-xl border-2 bg-surface-dark shadow-xl transition-all p-3
+        flex flex-col rounded-xl border-2 bg-[var(--canvas-node-bg)] shadow-xl transition-all p-3
         ${
           selected
             ? 'border-accent shadow-accent/30'
-            : 'border-[rgba(15,23,42,0.45)] hover:border-[rgba(15,23,42,0.58)] dark:border-[rgba(255,255,255,0.22)] dark:hover:border-[rgba(255,255,255,0.34)]'
+            : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'
         }
       `}
       style={{ width: `${VIDEO_RESULT_NODE_WIDTH}px`, height: `${VIDEO_RESULT_NODE_HEIGHT}px` }}
@@ -166,7 +166,7 @@ function VideoResultNodeComponent({
       />
 
       {/* Video Preview */}
-      <div className="relative min-h-0 flex-1 rounded-lg border border-[rgba(15,23,42,0.15)] dark:border-[rgba(255,255,255,0.1)] bg-bg-dark/45 overflow-hidden">
+      <div className="relative min-h-0 flex-1 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] overflow-hidden">
         <video
           src={data.videoUrl}
           controls
@@ -195,7 +195,7 @@ function VideoResultNodeComponent({
               </UiButton>
             ))}
             {videoDownloadPresetPaths.length > 3 && (
-              <span className="text-xs text-text-muted">
+              <span className="text-xs text-[var(--canvas-node-fg-muted)]">
                 +{videoDownloadPresetPaths.length - 3} more
               </span>
             )}

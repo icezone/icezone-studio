@@ -208,10 +208,10 @@ function NovelInputNodeComponent({
   return (
     <div
       className={`
-        flex flex-col rounded-xl border-2 bg-surface-dark shadow-xl transition-all p-3 overflow-hidden
+        flex flex-col rounded-xl border-2 bg-[var(--canvas-node-bg)] shadow-xl transition-all p-3 overflow-hidden
         ${selected
           ? 'border-accent shadow-accent/30'
-          : 'border-[rgba(15,23,42,0.45)] hover:border-[rgba(15,23,42,0.58)] dark:border-[rgba(255,255,255,0.22)] dark:hover:border-[rgba(255,255,255,0.34)]'}
+          : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'}
       `}
       data-testid="node-novelInput"
       style={{ width: resolvedWidth, height: resolvedHeight }}
@@ -234,19 +234,19 @@ function NovelInputNodeComponent({
             onChange={(e) => handleTextChange(e.target.value)}
             onMouseDown={(e) => e.stopPropagation()}
             placeholder={t('node.novelInput.placeholder')}
-            className="nodrag nowheel ui-scrollbar h-full w-full resize-none rounded-lg border border-[rgba(15,23,42,0.15)] bg-bg-dark/45 px-3 py-2 text-sm leading-6 text-text-dark outline-none placeholder:text-text-muted/70 focus:border-accent/50 dark:border-[rgba(255,255,255,0.1)]"
+            className="nodrag nowheel ui-scrollbar h-full w-full resize-none rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-3 py-2 text-sm leading-6 text-[var(--canvas-node-fg)] outline-none placeholder:text-[var(--canvas-node-fg-muted)] focus:border-accent/50"
             style={{ height: 140 }}
           />
         </div>
 
         {/* Character counter */}
-        <div className={`text-xs px-1 ${isOverLimit ? 'text-red-400 font-medium' : 'text-text-muted'}`}>
+        <div className={`text-xs px-1 ${isOverLimit ? 'text-red-400 font-medium' : 'text-[var(--canvas-node-fg-muted)]'}`}>
           {t('node.novelInput.charCount', { count: textLength.toLocaleString(), max: MAX_CHARS.toLocaleString() })}
         </div>
 
         {/* Granularity */}
         <div className="flex items-center gap-2 px-1">
-          <span className="text-xs text-text-muted shrink-0">{t('node.novelInput.granularity')}:</span>
+          <span className="text-xs text-[var(--canvas-node-fg-muted)] shrink-0">{t('node.novelInput.granularity')}:</span>
           <div className="flex gap-1">
             {GRANULARITY_OPTIONS.map((g) => (
               <button
@@ -255,7 +255,7 @@ function NovelInputNodeComponent({
                 className={`rounded-md px-2 py-0.5 text-xs transition-colors ${
                   data.sceneGranularity === g
                     ? 'bg-accent text-white'
-                    : 'bg-bg-dark/60 text-text-muted hover:bg-bg-dark/80 dark:bg-white/10 dark:hover:bg-white/20'
+                    : 'bg-[var(--canvas-node-section-bg)] text-[var(--canvas-node-fg-muted)] hover:bg-[var(--canvas-menu-item-hover)]'
                 }`}
               >
                 {granularityLabel(g)}
@@ -266,7 +266,7 @@ function NovelInputNodeComponent({
 
         {/* Language */}
         <div className="flex items-center gap-2 px-1">
-          <span className="text-xs text-text-muted shrink-0">{t('node.novelInput.language')}:</span>
+          <span className="text-xs text-[var(--canvas-node-fg-muted)] shrink-0">{t('node.novelInput.language')}:</span>
           <select
             value={data.language ?? 'auto'}
             onChange={(e) => { e.stopPropagation(); handleLanguageChange(e.target.value as 'auto' | 'zh' | 'en'); }}
@@ -313,7 +313,7 @@ function NovelInputNodeComponent({
             {/* Characters */}
             {data.characters?.length > 0 && (
               <div className="mb-3">
-                <div className="mb-1.5 text-xs font-medium text-text-muted">
+                <div className="mb-1.5 text-xs font-medium text-[var(--canvas-node-fg-muted)]">
                   {t('node.novelInput.characters')} ({data.characters.length})
                 </div>
                 <div className="space-y-1">
@@ -321,7 +321,7 @@ function NovelInputNodeComponent({
                     <div key={char.id} className="flex items-start gap-1.5 text-xs text-text-dark">
                       <span className="font-medium shrink-0">{char.name}</span>
                       {char.description && (
-                        <span className="text-text-muted truncate">— {char.description}</span>
+                        <span className="text-[var(--canvas-node-fg-muted)] truncate">— {char.description}</span>
                       )}
                     </div>
                   ))}
@@ -333,7 +333,7 @@ function NovelInputNodeComponent({
             {data.scenes?.length > 0 && (
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
-                  <span className="text-xs font-medium text-text-muted">
+                  <span className="text-xs font-medium text-[var(--canvas-node-fg-muted)]">
                     {t('node.novelInput.scenes')} ({data.scenes.length})
                   </span>
                   <button
@@ -356,7 +356,7 @@ function NovelInputNodeComponent({
                       className={`flex w-full items-start gap-1.5 rounded px-1.5 py-1 text-left text-xs transition-colors ${
                         scene.selected
                           ? 'bg-accent/10 text-text-dark'
-                          : 'text-text-muted hover:bg-bg-dark/40'
+                          : 'text-[var(--canvas-node-fg-muted)] hover:bg-bg-dark/40'
                       }`}
                     >
                       {scene.selected ? (

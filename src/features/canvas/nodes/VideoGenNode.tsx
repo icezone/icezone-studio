@@ -677,11 +677,11 @@ function VideoGenNodeComponent({
   return (
     <div
       className={`
-        flex flex-col rounded-xl border-2 bg-surface-dark shadow-xl transition-all p-3 overflow-hidden
+        flex flex-col rounded-xl border-2 bg-[var(--canvas-node-bg)] shadow-xl transition-all p-3 overflow-hidden
         ${
           selected
             ? 'border-accent shadow-accent/30'
-            : 'border-[rgba(15,23,42,0.45)] hover:border-[rgba(15,23,42,0.58)] dark:border-[rgba(255,255,255,0.22)] dark:hover:border-[rgba(255,255,255,0.34)]'
+            : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'
         }
       `}
       style={{ width: `${resolvedWidth}px`, height: `${resolvedHeight}px` }}
@@ -698,24 +698,24 @@ function VideoGenNodeComponent({
       {/* Content Wrapper */}
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-2">
         {/* Prompt Input */}
-        <div className="rounded-lg border border-[rgba(15,23,42,0.15)] dark:border-[rgba(255,255,255,0.1)] bg-bg-dark/45 shrink-0">
+        <div className="rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] shrink-0">
           <button
             onClick={(e) => {
               e.stopPropagation();
               setPromptCollapsed(!promptCollapsed);
             }}
-            className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-text-muted hover:text-text-dark transition-colors"
+            className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)] transition-colors"
           >
             <span>{t('node.videoGen.promptPlaceholder')}</span>
             {promptCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
           </button>
           {!promptCollapsed && (
-            <div className="relative p-2 border-t border-[rgba(15,23,42,0.15)] dark:border-[rgba(255,255,255,0.1)]" style={{ height: '150px' }}>
+            <div className="relative p-2 border-t border-[var(--canvas-node-border)]" style={{ height: '150px' }}>
               <div className="relative h-full overflow-hidden">
                 <div
                   ref={promptHighlightRef}
                   aria-hidden="true"
-                  className="ui-scrollbar pointer-events-none absolute inset-0 overflow-y-auto overflow-x-hidden text-sm leading-6 text-text-dark"
+                  className="ui-scrollbar pointer-events-none absolute inset-0 overflow-y-auto overflow-x-hidden text-sm leading-6 text-[var(--canvas-node-fg)]"
                   style={{ scrollbarGutter: 'stable' }}
                 >
                   <div className="min-h-full whitespace-pre-wrap break-words px-1 py-0.5">
@@ -735,13 +735,13 @@ function VideoGenNodeComponent({
                   onScroll={syncPromptHighlightScroll}
                   onMouseDown={(event) => event.stopPropagation()}
                   placeholder={t('node.videoGen.promptPlaceholder')}
-                  className="ui-scrollbar nodrag nowheel relative z-10 h-full w-full resize-none overflow-y-auto overflow-x-hidden border-none bg-transparent px-1 py-0.5 text-sm leading-6 text-transparent caret-text-dark outline-none placeholder:text-text-muted/80 focus:border-transparent whitespace-pre-wrap break-words"
+                  className="ui-scrollbar nodrag nowheel relative z-10 h-full w-full resize-none overflow-y-auto overflow-x-hidden border-none bg-transparent px-1 py-0.5 text-sm leading-6 text-transparent caret-[var(--canvas-node-fg)] outline-none placeholder:text-[var(--canvas-node-fg-muted)]/80 focus:border-transparent whitespace-pre-wrap break-words"
                   style={{ scrollbarGutter: 'stable' }}
                 />
 
                 {showImagePicker && incomingImageItems.length > 0 && (
                   <div
-                    className="nowheel absolute z-30 w-[120px] overflow-hidden rounded-xl border border-[rgba(15,23,42,0.15)] bg-surface-dark shadow-xl dark:border-[rgba(255,255,255,0.16)]"
+                    className="nowheel absolute z-30 w-[120px] overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
                     style={{ left: pickerAnchor.left, top: pickerAnchor.top }}
                     onMouseDown={(event) => event.stopPropagation()}
                     onWheelCapture={(event) => event.stopPropagation()}
@@ -759,9 +759,9 @@ function VideoGenNodeComponent({
                             insertImageReference(index);
                           }}
                           onMouseEnter={() => setPickerActiveIndex(index)}
-                          className={`flex w-full items-center gap-2 border border-transparent bg-bg-dark/70 px-2 py-2 text-left text-sm text-text-dark transition-colors hover:border-[rgba(15,23,42,0.15)] dark:hover:border-[rgba(255,255,255,0.18)] ${
+                          className={`flex w-full items-center gap-2 border border-transparent bg-[var(--canvas-node-section-bg)] px-2 py-2 text-left text-sm text-[var(--canvas-node-fg)] transition-colors hover:border-[var(--canvas-node-border)] ${
                             pickerActiveIndex === index
-                              ? 'border-[rgba(15,23,42,0.2)] bg-bg-dark dark:border-[rgba(255,255,255,0.24)]'
+                              ? 'border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)]'
                               : ''
                           }`}
                         >
@@ -787,7 +787,7 @@ function VideoGenNodeComponent({
           <div className="flex shrink-0 gap-3 px-1">
             {/* Start Frame Slot */}
             <div className="relative flex-1">
-              <div className="mb-1.5 text-xs text-text-muted">{t('node.videoGen.startFrame')}</div>
+              <div className="mb-1.5 text-xs text-[var(--canvas-node-fg-muted)]">{t('node.videoGen.startFrame')}</div>
               {data.startFrameUrl ? (
                 <div className="relative aspect-video overflow-hidden rounded-lg border-2 border-accent ring-2 ring-accent/30">
                   <img
@@ -807,7 +807,7 @@ function VideoGenNodeComponent({
                 </div>
               ) : (
                 <button
-                  className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[rgba(15,23,42,0.25)] transition-colors hover:border-[rgba(15,23,42,0.4)] hover:bg-[rgba(15,23,42,0.04)] dark:border-[rgba(255,255,255,0.28)] dark:hover:border-[rgba(255,255,255,0.5)] dark:hover:bg-[rgba(255,255,255,0.04)]"
+                  className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] transition-colors hover:border-[var(--canvas-node-hover-border)] hover:bg-[var(--canvas-drop-zone-hover-bg)]"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (incomingImageItems.length > 0) {
@@ -819,19 +819,19 @@ function VideoGenNodeComponent({
                     }
                   }}
                 >
-                  <ImagePlus className="h-5 w-5 text-text-muted/60" />
+                  <ImagePlus className="h-5 w-5 text-[var(--canvas-node-fg-muted)]/60" />
                 </button>
               )}
               {startFramePickerOpen && incomingImageItems.length > 0 && !data.startFrameUrl && (
                 <div
-                  className="nowheel absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-xl border border-[rgba(15,23,42,0.15)] bg-surface-dark shadow-xl dark:border-[rgba(255,255,255,0.16)]"
+                  className="nowheel absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
                   onMouseDown={(e) => e.stopPropagation()}
                 >
                   <div className="ui-scrollbar nowheel max-h-[200px] overflow-y-auto p-1.5">
                     {incomingImageItems.map((item, index) => (
                       <button
                         key={`start-pick-${index}`}
-                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-text-dark transition-colors hover:bg-[rgba(15,23,42,0.06)] dark:hover:bg-[rgba(255,255,255,0.08)]"
+                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
                         onClick={(e) => {
                           e.stopPropagation();
                           updateNodeData(id, { startFrameUrl: item.imageUrl });
@@ -843,7 +843,7 @@ function VideoGenNodeComponent({
                       </button>
                     ))}
                     <button
-                      className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-text-muted transition-colors hover:bg-[rgba(15,23,42,0.06)] dark:hover:bg-[rgba(255,255,255,0.08)]"
+                      className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
                       onClick={(e) => {
                         e.stopPropagation();
                         setStartFramePickerOpen(false);
@@ -861,9 +861,9 @@ function VideoGenNodeComponent({
 
             {/* End Frame Slot */}
             <div className="relative flex-1">
-              <div className="mb-1.5 text-xs text-text-muted">
+              <div className="mb-1.5 text-xs text-[var(--canvas-node-fg-muted)]">
                 {t('node.videoGen.endFrame')}
-                <span className="ml-1 text-[10px] text-text-muted/60">({t('node.videoGen.optional')})</span>
+                <span className="ml-1 text-[10px] text-[var(--canvas-node-fg-muted)]/60">({t('node.videoGen.optional')})</span>
               </div>
               {data.endFrameUrl ? (
                 <div className="relative aspect-video overflow-hidden rounded-lg border-2 border-accent ring-2 ring-accent/30">
@@ -884,7 +884,7 @@ function VideoGenNodeComponent({
                 </div>
               ) : (
                 <button
-                  className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[rgba(15,23,42,0.25)] transition-colors hover:border-[rgba(15,23,42,0.4)] hover:bg-[rgba(15,23,42,0.04)] dark:border-[rgba(255,255,255,0.28)] dark:hover:border-[rgba(255,255,255,0.5)] dark:hover:bg-[rgba(255,255,255,0.04)]"
+                  className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] transition-colors hover:border-[var(--canvas-node-hover-border)] hover:bg-[var(--canvas-drop-zone-hover-bg)]"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (incomingImageItems.length > 0) {
@@ -896,19 +896,19 @@ function VideoGenNodeComponent({
                     }
                   }}
                 >
-                  <ImagePlus className="h-5 w-5 text-text-muted/60" />
+                  <ImagePlus className="h-5 w-5 text-[var(--canvas-node-fg-muted)]/60" />
                 </button>
               )}
               {endFramePickerOpen && incomingImageItems.length > 0 && !data.endFrameUrl && (
                 <div
-                  className="nowheel absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-xl border border-[rgba(15,23,42,0.15)] bg-surface-dark shadow-xl dark:border-[rgba(255,255,255,0.16)]"
+                  className="nowheel absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
                   onMouseDown={(e) => e.stopPropagation()}
                 >
                   <div className="ui-scrollbar nowheel max-h-[200px] overflow-y-auto p-1.5">
                     {incomingImageItems.map((item, index) => (
                       <button
                         key={`end-pick-${index}`}
-                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-text-dark transition-colors hover:bg-[rgba(15,23,42,0.06)] dark:hover:bg-[rgba(255,255,255,0.08)]"
+                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
                         onClick={(e) => {
                           e.stopPropagation();
                           updateNodeData(id, { endFrameUrl: item.imageUrl });
@@ -920,7 +920,7 @@ function VideoGenNodeComponent({
                       </button>
                     ))}
                     <button
-                      className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-text-muted transition-colors hover:bg-[rgba(15,23,42,0.06)] dark:hover:bg-[rgba(255,255,255,0.08)]"
+                      className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
                       onClick={(e) => {
                         e.stopPropagation();
                         setEndFramePickerOpen(false);
@@ -948,7 +948,7 @@ function VideoGenNodeComponent({
 
         {/* Video Preview */}
         {data.videoUrl && !data.isGenerating && (
-          <div className="rounded-lg border border-[rgba(15,23,42,0.15)] dark:border-[rgba(255,255,255,0.1)] bg-bg-dark/45 p-2 flex items-center justify-center flex-1 min-h-0">
+          <div className="rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-2 flex items-center justify-center flex-1 min-h-0">
             <video
               src={data.videoUrl}
               controls
@@ -980,7 +980,7 @@ function VideoGenNodeComponent({
                 </UiButton>
               ))}
               {videoDownloadPresetPaths.length > 3 && (
-                <span className="text-xs text-text-muted">
+                <span className="text-xs text-[var(--canvas-node-fg-muted)]">
                   +{videoDownloadPresetPaths.length - 3} more
                 </span>
               )}
@@ -1004,12 +1004,12 @@ function VideoGenNodeComponent({
 
         {/* Generation Progress */}
         {data.isGenerating && (
-          <div className="mt-2 rounded-lg border border-[rgba(15,23,42,0.15)] dark:border-[rgba(255,255,255,0.1)] bg-bg-dark/45 p-3 shrink-0">
-            <div className="mb-2 flex items-center justify-between text-sm text-text-muted">
+          <div className="mt-2 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-3 shrink-0">
+            <div className="mb-2 flex items-center justify-between text-sm text-[var(--canvas-node-fg-muted)]">
               <span>{t('node.videoGen.generating')}</span>
               <span>{Math.round(pollingProgress)}%</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-bg-dark">
+            <div className="h-2 overflow-hidden rounded-full bg-[var(--canvas-node-section-bg)]">
               <div
                 className="h-full bg-accent transition-all duration-300"
                 style={{ width: `${pollingProgress}%` }}
@@ -1107,7 +1107,7 @@ function VideoGenNodeComponent({
          Array.isArray(data.extraParams['kling_elements']) &&
          data.extraParams['kling_elements'].length > 0 ? (
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-text-muted">{t('node.videoGen.klingElements')}:</span>
+            <span className="text-xs text-[var(--canvas-node-fg-muted)]">{t('node.videoGen.klingElements')}:</span>
             {(data.extraParams['kling_elements'] as Array<{ name: string; description?: string }>)
               .filter((element) => element && typeof element === 'object' && 'name' in element)
               .map((element, index) => (

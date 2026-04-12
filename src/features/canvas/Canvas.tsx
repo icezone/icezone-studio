@@ -1615,8 +1615,8 @@ function CanvasInner() {
         <div className="flex max-w-3xl flex-col items-center gap-5 px-6 text-center">
           {configuredApiKeyCount === 0 && <MissingApiKeyHint />}
           <div>
-            <div className="mb-2 text-2xl text-text-muted">{t('canvas.emptyHintTitle')}</div>
-            <div className="text-sm text-text-muted opacity-60">{t('canvas.emptyHintSubtitle')}</div>
+            <div className="mb-2 text-2xl text-[var(--canvas-node-fg-muted)]">{t('canvas.emptyHintTitle')}</div>
+            <div className="text-sm text-[var(--canvas-node-fg-muted)] opacity-60">{t('canvas.emptyHintSubtitle')}</div>
           </div>
         </div>
       </div>
@@ -1858,11 +1858,11 @@ function CanvasInner() {
         panOnDrag={!isLocked}
         nodesDraggable={!isLocked}
         proOptions={{ hideAttribution: true }}
-        className="bg-bg-dark"
+        className="bg-[var(--canvas-node-section-bg)]"
       >
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#2a2a2a" />
         <MiniMap
-          className="canvas-minimap nopan nowheel !border-border-dark !bg-surface-dark"
+          className="canvas-minimap nopan nowheel !border-[var(--canvas-node-border)] !bg-[var(--canvas-menu-bg)]"
           style={{ pointerEvents: 'all', zIndex: 10000 }}
           nodeColor="rgba(120, 120, 120, 0.92)"
           maskColor="rgba(0, 0, 0, 0.62)"

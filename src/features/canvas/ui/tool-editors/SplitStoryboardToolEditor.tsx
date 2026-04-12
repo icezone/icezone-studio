@@ -197,11 +197,11 @@ function NumberStepper({ label, value, min, max, onChange }: NumberStepperProps)
 
   return (
     <div className="space-y-1.5">
-      <div className="text-xs text-text-muted">{label}</div>
+      <div className="text-xs text-[var(--canvas-node-fg-muted)]">{label}</div>
       <div className="flex items-center gap-2">
         <button
           type="button"
-          className="h-9 w-9 rounded-lg border border-[rgba(255,255,255,0.14)] bg-bg-dark/60 text-sm text-text-dark transition-colors hover:bg-bg-dark disabled:cursor-not-allowed disabled:opacity-45"
+          className="h-9 w-9 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] text-sm text-[var(--canvas-node-fg)] transition-colors hover:bg-[var(--canvas-menu-item-hover)] disabled:cursor-not-allowed disabled:opacity-45"
           onClick={() => onChange(value - 1)}
           disabled={decreaseDisabled}
         >
@@ -218,7 +218,7 @@ function NumberStepper({ label, value, min, max, onChange }: NumberStepperProps)
         />
         <button
           type="button"
-          className="h-9 w-9 rounded-lg border border-[rgba(255,255,255,0.14)] bg-bg-dark/60 text-sm text-text-dark transition-colors hover:bg-bg-dark disabled:cursor-not-allowed disabled:opacity-45"
+          className="h-9 w-9 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] text-sm text-[var(--canvas-node-fg)] transition-colors hover:bg-[var(--canvas-menu-item-hover)] disabled:cursor-not-allowed disabled:opacity-45"
           onClick={() => onChange(value + 1)}
           disabled={increaseDisabled}
         >
@@ -353,7 +353,7 @@ export function SplitStoryboardToolEditor({ sourceImageUrl, options, onOptionsCh
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs text-text-muted">
+        <div className="flex items-center justify-between text-xs text-[var(--canvas-node-fg-muted)]">
           <span>原图 + 切割预览</span>
           {naturalSize && (
             <span>
@@ -363,13 +363,13 @@ export function SplitStoryboardToolEditor({ sourceImageUrl, options, onOptionsCh
         </div>
 
         <div
-          className={`ui-scrollbar flex ${PREVIEW_VIEWPORT_HEIGHT} items-center justify-center overflow-auto rounded-xl border border-[rgba(255,255,255,0.12)] bg-bg-dark/70 p-3`}
+          className={`ui-scrollbar flex ${PREVIEW_VIEWPORT_HEIGHT} items-center justify-center overflow-auto rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-3`}
         >
           <div className="relative inline-flex items-center justify-center">
             <img
               src={displaySourceImageUrl}
               alt="split-preview"
-              className="max-h-full w-auto max-w-full rounded-lg border border-[rgba(255,255,255,0.08)] object-contain"
+              className="max-h-full w-auto max-w-full rounded-lg border border-[var(--canvas-node-border)] object-contain"
               onLoad={(event) => {
                 const target = event.currentTarget;
                 setNaturalSize({
@@ -411,7 +411,7 @@ export function SplitStoryboardToolEditor({ sourceImageUrl, options, onOptionsCh
           </div>
         </div>
 
-        <div className="flex items-center gap-3 text-xs text-text-muted">
+        <div className="flex items-center gap-3 text-xs text-[var(--canvas-node-fg-muted)]">
           <div className="inline-flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-sm bg-red-400/70" />
             红色区域为切割时会丢弃的分割线像素
@@ -419,8 +419,8 @@ export function SplitStoryboardToolEditor({ sourceImageUrl, options, onOptionsCh
         </div>
       </div>
 
-      <div className="space-y-4 rounded-xl border border-[rgba(255,255,255,0.12)] bg-bg-dark/75 p-3.5">
-        <div className="text-sm font-medium text-text-dark">切割参数</div>
+      <div className="space-y-4 rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-3.5">
+        <div className="text-sm font-medium text-[var(--canvas-node-fg)]">切割参数</div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
           <NumberStepper
@@ -440,7 +440,7 @@ export function SplitStoryboardToolEditor({ sourceImageUrl, options, onOptionsCh
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs text-text-muted">
+          <div className="flex items-center justify-between text-xs text-[var(--canvas-node-fg-muted)]">
             <span>分割线粗细</span>
             <span>
               {formatPercent(lineThicknessPercent)}
@@ -467,10 +467,10 @@ export function SplitStoryboardToolEditor({ sourceImageUrl, options, onOptionsCh
           />
         </div>
 
-        <div className="rounded-lg border border-[rgba(255,255,255,0.12)] bg-bg-dark/80 px-3 py-2 text-xs text-text-muted">
+        <div className="rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-3 py-2 text-xs text-[var(--canvas-node-fg-muted)]">
           <div className="flex items-center justify-between">
             <span>输出小格数量</span>
-            <span className="font-medium text-text-dark">{rows * cols}</span>
+            <span className="font-medium text-[var(--canvas-node-fg)]">{rows * cols}</span>
           </div>
           {layout && (
             <>

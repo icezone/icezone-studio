@@ -43,17 +43,17 @@ export const FrameControlEditor = memo(({
 
   return (
     <div
-      className="nowheel absolute z-30 w-[220px] overflow-hidden rounded-xl border border-[rgba(15,23,42,0.15)] bg-surface-dark shadow-xl dark:border-[rgba(255,255,255,0.1)]"
+      className="nowheel absolute z-30 w-[220px] overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
       onMouseDown={(e) => e.stopPropagation()}
     >
-      <div className="flex items-center justify-between border-b border-[rgba(15,23,42,0.15)] px-2 py-1.5 dark:border-[rgba(255,255,255,0.1)]">
-        <span className="text-[10px] font-medium text-text-dark">
+      <div className="flex items-center justify-between border-b border-[var(--canvas-node-border)] px-2 py-1.5">
+        <span className="text-[10px] font-medium text-[var(--canvas-node-fg)]">
           {t('node.storyboardGen.frameControl')}
         </span>
         <button
           type="button"
           onClick={onClose}
-          className="flex h-4 w-4 items-center justify-center rounded text-text-muted hover:bg-white/10"
+          className="flex h-4 w-4 items-center justify-center rounded text-[var(--canvas-node-fg-muted)] hover:bg-white/10"
         >
           <X className="h-3 w-3" />
         </button>
@@ -106,7 +106,7 @@ const FrameSlot = memo(({
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
-        <span className="text-[9px] font-medium text-text-dark">{label}</span>
+        <span className="text-[9px] font-medium text-[var(--canvas-node-fg)]">{label}</span>
         <div className="flex gap-0.5">
           {FRAME_MODE_OPTIONS.map((m) => (
             <button
@@ -116,7 +116,7 @@ const FrameSlot = memo(({
               className={`rounded px-1.5 py-0.5 text-[8px] transition-colors ${
                 mode === m
                   ? 'bg-accent/20 text-accent'
-                  : 'text-text-muted hover:bg-white/5'
+                  : 'text-[var(--canvas-node-fg-muted)] hover:bg-white/5'
               }`}
             >
               {modeLabel(m)}
@@ -128,7 +128,7 @@ const FrameSlot = memo(({
       {mode !== 'none' && (
         <div className="flex gap-1">
           {frameUrl ? (
-            <div className="relative h-10 w-10 overflow-hidden rounded border border-[rgba(15,23,42,0.15)] dark:border-[rgba(255,255,255,0.1)]">
+            <div className="relative h-10 w-10 overflow-hidden rounded border border-[var(--canvas-node-border)]">
               <CanvasNodeImage
                 src={resolveImageDisplayUrl(frameUrl)}
                 alt={label}
@@ -143,7 +143,7 @@ const FrameSlot = memo(({
               </button>
             </div>
           ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded border border-dashed border-[rgba(15,23,42,0.15)] text-text-muted dark:border-[rgba(255,255,255,0.1)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded border border-dashed border-[var(--canvas-drop-zone-border)] text-[var(--canvas-node-fg-muted)]">
               <Upload className="h-3 w-3" />
             </div>
           )}
@@ -157,7 +157,7 @@ const FrameSlot = memo(({
               className={`h-10 w-10 overflow-hidden rounded border transition-colors ${
                 frameUrl === url
                   ? 'border-accent'
-                  : 'border-[rgba(15,23,42,0.15)] hover:border-accent/50 dark:border-[rgba(255,255,255,0.1)]'
+                  : 'border-[var(--canvas-node-border)] hover:border-accent/50'
               }`}
             >
               <CanvasNodeImage

@@ -150,14 +150,14 @@ export const ImageNode = memo(({ id, data, selected, type, width, height }: Imag
   return (
     <div
       className={`
-        group relative overflow-visible rounded-[var(--node-radius)] border bg-surface-dark/85 p-0 transition-colors duration-150
+        group relative overflow-visible rounded-[var(--node-radius)] border bg-[var(--canvas-node-bg)] p-0 transition-colors duration-150
         ${hasGenerationError
           ? (selected
             ? 'border-red-400 shadow-[0_0_0_1px_rgba(248,113,113,0.42)]'
             : 'border-red-500/70 bg-[rgba(127,29,29,0.12)] hover:border-red-400/80 dark:border-red-500/70 dark:hover:border-red-400/80')
           : selected
           ? 'border-accent shadow-[0_0_0_1px_rgba(59,130,246,0.32)]'
-          : 'border-[rgba(15,23,42,0.45)] hover:border-[rgba(15,23,42,0.58)] dark:border-[rgba(255,255,255,0.22)] dark:hover:border-[rgba(255,255,255,0.34)]'}
+          : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'}
       `}
       style={{ width: resolvedWidth, height: resolvedHeight }}
       onClick={() => setSelectedNode(id)}
@@ -174,7 +174,7 @@ export const ImageNode = memo(({ id, data, selected, type, width, height }: Imag
       />
 
       <div
-        className={`relative h-full w-full overflow-hidden rounded-[var(--node-radius)] ${hasGenerationError ? 'bg-[rgba(127,29,29,0.2)]' : 'bg-bg-dark'}`}
+        className={`relative h-full w-full overflow-hidden rounded-[var(--node-radius)] ${hasGenerationError ? 'bg-[rgba(127,29,29,0.2)]' : 'bg-[var(--canvas-node-section-bg)]'}`}
       >
         {data.imageUrl ? (
           <CanvasNodeImage
@@ -194,7 +194,7 @@ export const ImageNode = memo(({ id, data, selected, type, width, height }: Imag
             </span>
           </div>
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-text-muted/85">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-[var(--canvas-node-fg-muted)]">
             {isExportResultNode ? (
               <ImageIcon className="h-7 w-7 opacity-60" />
             ) : (
@@ -208,7 +208,7 @@ export const ImageNode = memo(({ id, data, selected, type, width, height }: Imag
 
         {isGenerating && (
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div className="absolute inset-0 bg-bg-dark/55" />
+            <div className="absolute inset-0 bg-[var(--canvas-node-section-bg)]" />
             <div
               className="absolute left-0 top-0 h-full bg-gradient-to-r from-[rgba(255,255,255,0.4)] to-[rgba(255,255,255,0.06)] transition-[width] duration-100 ease-linear"
               style={{ width: `${simulatedProgress * 100}%` }}

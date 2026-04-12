@@ -183,14 +183,14 @@ export const ReversePromptDialog = memo(() => {
             <img
               src={dialogState.imageUrl}
               alt={t('reversePrompt.imagePreview')}
-              className="max-h-40 rounded-lg border border-[rgba(15,23,42,0.15)] object-contain dark:border-[rgba(255,255,255,0.1)]"
+              className="max-h-40 rounded-lg border border-[var(--canvas-node-border)] object-contain"
             />
           </div>
         )}
 
         {/* Style selector */}
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-text-dark">
+          <label className="mb-1.5 block text-xs font-medium text-[var(--canvas-node-fg)]">
             {t('reversePrompt.outputStyle')}
           </label>
           <div className="flex gap-2">
@@ -201,7 +201,7 @@ export const ReversePromptDialog = memo(() => {
                 className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
                   style === opt.value
                     ? 'border-accent/45 bg-accent/15 text-accent'
-                    : 'border-[rgba(15,23,42,0.15)] text-text-muted hover:bg-[rgba(15,23,42,0.05)] dark:border-[rgba(255,255,255,0.1)] dark:hover:bg-[rgba(255,255,255,0.05)]'
+                    : 'border-[var(--canvas-node-border)] text-[var(--canvas-node-fg-muted)] hover:bg-[var(--canvas-menu-item-hover)]'
                 }`}
                 onClick={() => setStyle(opt.value)}
               >
@@ -213,7 +213,7 @@ export const ReversePromptDialog = memo(() => {
 
         {/* Additional context */}
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-text-dark">
+          <label className="mb-1.5 block text-xs font-medium text-[var(--canvas-node-fg)]">
             {t('reversePrompt.additionalContext')}
           </label>
           <UiTextArea
@@ -250,10 +250,10 @@ export const ReversePromptDialog = memo(() => {
           <div className="space-y-3">
             {/* Main prompt */}
             <div>
-              <label className="mb-1 block text-xs font-medium text-text-dark">
+              <label className="mb-1 block text-xs font-medium text-[var(--canvas-node-fg)]">
                 {t('reversePrompt.resultPrompt')}
               </label>
-              <div className="max-h-32 overflow-y-auto rounded-lg border border-[rgba(15,23,42,0.15)] bg-[rgba(15,23,42,0.03)] px-3 py-2 text-xs leading-relaxed text-text-dark dark:border-[rgba(255,255,255,0.1)] dark:bg-[rgba(255,255,255,0.03)]">
+              <div className="max-h-32 overflow-y-auto rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-3 py-2 text-xs leading-relaxed text-[var(--canvas-node-fg)]">
                 {result.prompt}
               </div>
             </div>
@@ -261,10 +261,10 @@ export const ReversePromptDialog = memo(() => {
             {/* Negative prompt */}
             {result.negativePrompt && (
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-muted">
+                <label className="mb-1 block text-xs font-medium text-[var(--canvas-node-fg-muted)]">
                   {t('reversePrompt.negativePrompt')}
                 </label>
-                <div className="rounded-lg border border-[rgba(15,23,42,0.1)] bg-[rgba(15,23,42,0.02)] px-3 py-2 text-xs text-text-muted dark:border-[rgba(255,255,255,0.07)] dark:bg-[rgba(255,255,255,0.02)]">
+                <div className="rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-3 py-2 text-xs text-[var(--canvas-node-fg-muted)]">
                   {result.negativePrompt}
                 </div>
               </div>
@@ -273,14 +273,14 @@ export const ReversePromptDialog = memo(() => {
             {/* Tags */}
             {result.tags && result.tags.length > 0 && (
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-muted">
+                <label className="mb-1 block text-xs font-medium text-[var(--canvas-node-fg-muted)]">
                   {t('reversePrompt.tags')}
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {result.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full border border-[rgba(15,23,42,0.12)] bg-[rgba(15,23,42,0.04)] px-2 py-0.5 text-[10px] text-text-muted dark:border-[rgba(255,255,255,0.1)] dark:bg-[rgba(255,255,255,0.04)]"
+                      className="rounded-full border border-[var(--canvas-node-border)] bg-[var(--canvas-badge-bg)] px-2 py-0.5 text-[10px] text-[var(--canvas-node-fg-muted)]"
                     >
                       {tag}
                     </span>

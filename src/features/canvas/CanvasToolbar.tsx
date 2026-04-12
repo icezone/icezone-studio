@@ -32,7 +32,7 @@ export const CanvasToolbar = memo(({ isLocked, onToggleLock }: CanvasToolbarProp
   }, [addNode]);
 
   return (
-    <div className="absolute left-1/2 top-4 z-10 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-border-dark bg-surface-dark px-2 py-1.5 shadow-lg">
+    <div className="absolute left-1/2 top-4 z-10 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] px-2 py-1.5 shadow-lg">
       <button
         onClick={handleAddNode}
         disabled={isLocked}
@@ -40,7 +40,7 @@ export const CanvasToolbar = memo(({ isLocked, onToggleLock }: CanvasToolbarProp
           flex items-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium transition-colors duration-200
           ${
             isLocked
-              ? 'cursor-not-allowed bg-border-dark text-text-muted'
+              ? 'cursor-not-allowed bg-[var(--canvas-node-section-bg)] text-[var(--canvas-node-fg-muted)]'
               : 'bg-accent text-white hover:bg-accent/80'
           }
         `}
@@ -49,42 +49,42 @@ export const CanvasToolbar = memo(({ isLocked, onToggleLock }: CanvasToolbarProp
         {t('canvas.addImage')}
       </button>
 
-      <div className="h-6 w-px bg-border-dark" />
+      <div className="h-6 w-px bg-[var(--canvas-node-border)]" />
 
       <button
         onClick={() => zoomIn()}
         disabled={isLocked}
-        className="rounded p-1.5 transition-colors hover:bg-bg-dark disabled:opacity-50"
+        className="rounded p-1.5 transition-colors hover:bg-[var(--canvas-menu-item-hover)] disabled:opacity-50"
         title={t('canvas.toolbar.zoomIn')}
       >
-        <ZoomIn className="h-4 w-4 text-text-muted" />
+        <ZoomIn className="h-4 w-4 text-[var(--canvas-node-fg-muted)]" />
       </button>
 
       <button
         onClick={() => zoomOut()}
         disabled={isLocked}
-        className="rounded p-1.5 transition-colors hover:bg-bg-dark disabled:opacity-50"
+        className="rounded p-1.5 transition-colors hover:bg-[var(--canvas-menu-item-hover)] disabled:opacity-50"
         title={t('canvas.toolbar.zoomOut')}
       >
-        <ZoomOut className="h-4 w-4 text-text-muted" />
+        <ZoomOut className="h-4 w-4 text-[var(--canvas-node-fg-muted)]" />
       </button>
 
       <button
         onClick={() => fitView({ padding: 0.2 })}
-        className="rounded p-1.5 transition-colors hover:bg-bg-dark"
+        className="rounded p-1.5 transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
         title={t('canvas.toolbar.fitView')}
       >
-        <Maximize2 className="h-4 w-4 text-text-muted" />
+        <Maximize2 className="h-4 w-4 text-[var(--canvas-node-fg-muted)]" />
       </button>
 
-      <div className="h-6 w-px bg-border-dark" />
+      <div className="h-6 w-px bg-[var(--canvas-node-border)]" />
 
       <button
         onClick={onToggleLock}
-        className="rounded p-1.5 transition-colors hover:bg-bg-dark"
+        className="rounded p-1.5 transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
         title={isLocked ? t('canvas.toolbar.unlock') : t('canvas.toolbar.lock')}
       >
-        {isLocked ? <Lock className="h-4 w-4 text-accent" /> : <Unlock className="h-4 w-4 text-text-muted" />}
+        {isLocked ? <Lock className="h-4 w-4 text-accent" /> : <Unlock className="h-4 w-4 text-[var(--canvas-node-fg-muted)]" />}
       </button>
 
       <button

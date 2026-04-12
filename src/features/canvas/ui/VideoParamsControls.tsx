@@ -193,14 +193,14 @@ export const VideoParamsControls = memo(({
     ? 'min-w-0 truncate text-[10px] font-medium leading-none'
     : 'min-w-0 truncate font-medium';
   const providerTextClassName = isCompactTrigger
-    ? 'shrink-0 text-[10px] leading-none text-text-muted/80'
-    : 'shrink-0 text-text-muted/80';
+    ? 'shrink-0 text-[10px] leading-none text-[var(--canvas-node-fg-muted)]/80'
+    : 'shrink-0 text-[var(--canvas-node-fg-muted)]/80';
   const paramsPrimaryTextClassName = isCompactTrigger
     ? 'truncate text-[10px] leading-none'
     : 'truncate';
   const paramsSecondaryTextClassName = isCompactTrigger
-    ? 'text-[10px] leading-none text-text-muted/80'
-    : 'text-text-muted/80';
+    ? 'text-[10px] leading-none text-[var(--canvas-node-fg-muted)]/80'
+    : 'text-[var(--canvas-node-fg-muted)]/80';
 
   useEffect(() => {
     const animationDurationMs = 200;
@@ -581,7 +581,7 @@ export const VideoParamsControls = memo(({
               {selectedModel.supportsAudio && (
                 <div className="rounded-lg border border-white/8 bg-white/[0.04] px-3 py-2">
                   <label className="flex cursor-pointer items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-text-dark">{t('node.videoGen.enableAudio')}</span>
+                    <span className="text-xs font-medium text-[var(--canvas-node-fg)]">{t('node.videoGen.enableAudio')}</span>
                     <UiCheckbox
                       checked={enableAudio}
                       onCheckedChange={(checked) => onEnableAudioChange?.(checked)}
@@ -594,7 +594,7 @@ export const VideoParamsControls = memo(({
               {selectedModel.supportsSeed && (
                 <div className="rounded-lg border border-white/8 bg-white/[0.04] px-3 py-2">
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <label className="text-xs font-medium text-text-dark">{t('node.videoGen.seed')}</label>
+                    <label className="text-xs font-medium text-[var(--canvas-node-fg)]">{t('node.videoGen.seed')}</label>
                     <input
                       type="text"
                       inputMode="numeric"
@@ -605,10 +605,10 @@ export const VideoParamsControls = memo(({
                         onSeedChange?.(value ? Number(value) : null);
                       }}
                       placeholder="50000"
-                      className="h-7 w-[100px] rounded border border-white/14 bg-white/5 px-2 text-xs text-text-dark placeholder:text-white/25 focus:border-accent/60 focus:outline-none"
+                      className="h-7 w-[100px] rounded border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-2 text-xs text-[var(--canvas-node-fg)] placeholder:text-[var(--canvas-node-fg-muted)] focus:border-accent/60 focus:outline-none"
                     />
                   </div>
-                  <div className="text-[10px] leading-3 text-text-muted">
+                  <div className="text-[10px] leading-3 text-[var(--canvas-node-fg-muted)]">
                     {t('node.videoGen.seedDescription')} (10000-99999)
                   </div>
                 </div>
@@ -626,7 +626,7 @@ export const VideoParamsControls = memo(({
                     {definition.type === 'enum' && definition.options && (
                       <>
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <label className="text-xs font-medium text-text-dark">
+                          <label className="text-xs font-medium text-[var(--canvas-node-fg)]">
                             {translateParam(definition.key, 'label') || definition.label}
                           </label>
                           <div className="w-[100px]">
@@ -644,7 +644,7 @@ export const VideoParamsControls = memo(({
                           </div>
                         </div>
                         {definition.description && (
-                          <div className="text-[10px] leading-3 text-text-muted">
+                          <div className="text-[10px] leading-3 text-[var(--canvas-node-fg-muted)]">
                             {translateParam(definition.key, 'description') || definition.description}
                           </div>
                         )}
@@ -654,7 +654,7 @@ export const VideoParamsControls = memo(({
                     {definition.type === 'boolean' && (
                       <>
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <label className="text-xs font-medium text-text-dark">
+                          <label className="text-xs font-medium text-[var(--canvas-node-fg)]">
                             {translateParam(definition.key, 'label') || definition.label}
                           </label>
                           <UiCheckbox
@@ -665,7 +665,7 @@ export const VideoParamsControls = memo(({
                           />
                         </div>
                         {definition.description && (
-                          <div className="text-[10px] leading-3 text-text-muted">
+                          <div className="text-[10px] leading-3 text-[var(--canvas-node-fg-muted)]">
                             {translateParam(definition.key, 'description') || definition.description}
                           </div>
                         )}
@@ -675,7 +675,7 @@ export const VideoParamsControls = memo(({
                     {definition.type === 'number' && (
                       <>
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <label className="text-xs font-medium text-text-dark">
+                          <label className="text-xs font-medium text-[var(--canvas-node-fg)]">
                             {translateParam(definition.key, 'label') || definition.label}
                           </label>
                           <input
@@ -687,11 +687,11 @@ export const VideoParamsControls = memo(({
                             onChange={(event) =>
                               onExtraParamChange?.(definition.key, Number(event.target.value))
                             }
-                            className="h-7 w-24 rounded border border-[rgba(255,255,255,0.15)] bg-bg-dark/60 px-2 text-xs text-text-dark placeholder:text-text-muted/50 focus:border-accent/60 focus:outline-none"
+                            className="h-7 w-24 rounded border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-2 text-xs text-[var(--canvas-node-fg)] placeholder:text-[var(--canvas-node-fg-muted)] focus:border-accent/60 focus:outline-none"
                           />
                         </div>
                         {definition.description && (
-                          <div className="text-[10px] leading-3 text-text-muted">
+                          <div className="text-[10px] leading-3 text-[var(--canvas-node-fg-muted)]">
                             {translateParam(definition.key, 'description') || definition.description}
                           </div>
                         )}
@@ -701,7 +701,7 @@ export const VideoParamsControls = memo(({
                     {definition.type === 'string' && (
                       <>
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <label className="text-xs font-medium text-text-dark">
+                          <label className="text-xs font-medium text-[var(--canvas-node-fg)]">
                             {translateParam(definition.key, 'label') || definition.label}
                           </label>
                           <input
@@ -710,11 +710,11 @@ export const VideoParamsControls = memo(({
                             onChange={(event) =>
                               onExtraParamChange?.(definition.key, event.target.value)
                             }
-                            className="h-7 flex-1 rounded border border-[rgba(255,255,255,0.15)] bg-bg-dark/60 px-2 text-xs text-text-dark placeholder:text-text-muted/50 focus:border-accent/60 focus:outline-none"
+                            className="h-7 flex-1 rounded border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-2 text-xs text-[var(--canvas-node-fg)] placeholder:text-[var(--canvas-node-fg-muted)] focus:border-accent/60 focus:outline-none"
                           />
                         </div>
                         {definition.description && (
-                          <div className="text-[10px] leading-3 text-text-muted">
+                          <div className="text-[10px] leading-3 text-[var(--canvas-node-fg-muted)]">
                             {translateParam(definition.key, 'description') || definition.description}
                           </div>
                         )}
@@ -727,7 +727,7 @@ export const VideoParamsControls = memo(({
               {/* Kling Elements */}
               {hasKlingElements && (
                 <div className="rounded-lg border border-white/8 bg-white/[0.04] px-3 py-2">
-                  <div className="mb-2 text-xs font-medium text-text-dark">{t('node.videoGen.klingElements')}</div>
+                  <div className="mb-2 text-xs font-medium text-[var(--canvas-node-fg)]">{t('node.videoGen.klingElements')}</div>
                   <KlingElementsEditor
                     elements={(klingElements as Parameters<typeof KlingElementsEditor>[0]['elements']) ?? []}
                     incomingImages={incomingImages}
@@ -771,7 +771,7 @@ export const VideoParamsControls = memo(({
             </>
           )}
         >
-          <p className="text-sm text-text-muted">
+          <p className="text-sm text-[var(--canvas-node-fg-muted)]">
             {t('modelParams.providerKeyRequiredDesc', { provider: missingKeyProviderName ?? '' })}
           </p>
         </UiModal>,

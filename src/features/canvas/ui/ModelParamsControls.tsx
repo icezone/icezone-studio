@@ -230,14 +230,14 @@ export const ModelParamsControls = memo(({
     ? 'min-w-0 truncate text-[10px] font-medium leading-none'
     : 'min-w-0 truncate font-medium';
   const providerTextClassName = isCompactTrigger
-    ? 'shrink-0 text-[10px] leading-none text-text-muted/80'
-    : 'shrink-0 text-text-muted/80';
+    ? 'shrink-0 text-[10px] leading-none text-[var(--canvas-node-fg-muted)]/80'
+    : 'shrink-0 text-[var(--canvas-node-fg-muted)]/80';
   const paramsPrimaryTextClassName = isCompactTrigger
     ? 'truncate text-[10px] leading-none'
     : 'truncate';
   const paramsSecondaryTextClassName = isCompactTrigger
-    ? 'text-[10px] leading-none text-text-muted/80'
-    : 'text-text-muted/80';
+    ? 'text-[10px] leading-none text-[var(--canvas-node-fg-muted)]/80'
+    : 'text-[var(--canvas-node-fg-muted)]/80';
   const extraParamSchema = selectedModel.extraParamsSchema ?? [];
   const inlineExtraParamSchema = useMemo(
     () =>
@@ -634,11 +634,11 @@ export const ModelParamsControls = memo(({
                     );
 
                     return (
-                      <div key={definition.key} className="space-y-2 rounded-lg border border-[rgba(255,255,255,0.08)] bg-black/10 p-2">
+                      <div key={definition.key} className="space-y-2 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-2">
                         <div>
-                          <div className="text-xs font-medium text-text-dark">{translatedLabel}</div>
+                          <div className="text-xs font-medium text-[var(--canvas-node-fg)]">{translatedLabel}</div>
                           {translatedDescription && (
-                            <div className="mt-0.5 text-[11px] leading-4 text-text-muted">
+                            <div className="mt-0.5 text-[11px] leading-4 text-[var(--canvas-node-fg-muted)]">
                               {translatedDescription}
                             </div>
                           )}
@@ -661,7 +661,7 @@ export const ModelParamsControls = memo(({
                         )}
 
                         {definition.type === 'boolean' && (
-                          <label className="flex cursor-pointer items-center gap-2 text-sm text-text-dark">
+                          <label className="flex cursor-pointer items-center gap-2 text-sm text-[var(--canvas-node-fg)]">
                             <UiCheckbox
                               checked={Boolean(resolvedValue)}
                               onCheckedChange={(checked) =>
@@ -716,14 +716,14 @@ export const ModelParamsControls = memo(({
           <UiPanel className={OTHER_PARAMS_PANEL_CLASS_NAME}>
             <div className="space-y-3">
               {showWebSearchToggle && (
-                <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[rgba(255,255,255,0.08)] bg-bg-dark/65 px-3 py-2">
+                <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-3 py-2">
                   <UiCheckbox
                     checked={webSearchEnabled}
                     onCheckedChange={(checked) => onWebSearchToggle?.(checked)}
                     className="mt-0.5"
                   />
                   <div className="min-w-0">
-                    <div className="text-xs font-medium text-text-dark">
+                    <div className="text-xs font-medium text-[var(--canvas-node-fg)]">
                       {webSearchLabel ?? t('modelParams.enableWebSearch')}
                     </div>
                   </div>
@@ -749,12 +749,12 @@ export const ModelParamsControls = memo(({
                 return (
                   <div
                     key={definition.key}
-                    className="space-y-2 rounded-lg border border-[rgba(255,255,255,0.08)] bg-bg-dark/65 p-3"
+                    className="space-y-2 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-3"
                   >
                     <div>
-                      <div className="text-xs font-medium text-text-dark">{translatedLabel}</div>
+                      <div className="text-xs font-medium text-[var(--canvas-node-fg)]">{translatedLabel}</div>
                       {translatedDescription && (
-                        <div className="mt-0.5 text-[11px] leading-4 text-text-muted">
+                        <div className="mt-0.5 text-[11px] leading-4 text-[var(--canvas-node-fg-muted)]">
                           {translatedDescription}
                         </div>
                       )}
@@ -809,7 +809,7 @@ export const ModelParamsControls = memo(({
             </>
           )}
         >
-          <p className="text-sm text-text-muted">
+          <p className="text-sm text-[var(--canvas-node-fg-muted)]">
             {t('modelParams.providerKeyRequiredDesc', { provider: missingKeyProviderName ?? '' })}
           </p>
         </UiModal>,

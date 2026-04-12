@@ -125,12 +125,12 @@ const STORYBOARD_GEN_NODE_MIN_HEIGHT_PX = 480;
 const STORYBOARD_GEN_HEADER_ADJUST = { x: 0, y: 0, scale: 1 };
 const STORYBOARD_GEN_ICON_ADJUST = { x: 0, y: 0, scale: 0.95 };
 const STORYBOARD_GEN_TITLE_ADJUST = { x: 0, y: 0, scale: 1 };
-const GRID_CONTROL_CONTAINER_CLASS = 'flex h-5 items-center gap-0.5 rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.04)] px-1';
-const GRID_CONTROL_LABEL_CLASS = 'text-[9px] text-text-muted';
-const GRID_CONTROL_BUTTON_CLASS = 'flex h-3 w-3 items-center justify-center rounded text-text-muted transition-colors hover:bg-white/10 hover:text-text-dark';
+const GRID_CONTROL_CONTAINER_CLASS = 'flex h-5 items-center gap-0.5 rounded-full border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-1';
+const GRID_CONTROL_LABEL_CLASS = 'text-[9px] text-[var(--canvas-node-fg-muted)]';
+const GRID_CONTROL_BUTTON_CLASS = 'flex h-3 w-3 items-center justify-center rounded text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-white/10 hover:text-[var(--canvas-node-fg)]';
 const GRID_CONTROL_ICON_CLASS = 'h-1.5 w-1.5';
-const GRID_CONTROL_VALUE_CLASS = 'min-w-[14px] text-center text-[9px] font-semibold text-text-dark';
-const GRID_SUMMARY_CLASS = 'flex h-5 items-center rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.05)] px-1.5 text-[9px] text-text-muted';
+const GRID_CONTROL_VALUE_CLASS = 'min-w-[14px] text-center text-[9px] font-semibold text-[var(--canvas-node-fg)]';
+const GRID_SUMMARY_CLASS = 'flex h-5 items-center rounded-full border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-1.5 text-[9px] text-[var(--canvas-node-fg-muted)]';
 const FRAME_GRID_GAP_PX = 2;
 const CONTROL_ROW_HEIGHT_PX = 20;
 const CONTROL_ROW_MARGIN_BOTTOM_PX = 10;
@@ -1569,10 +1569,10 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
       ref={rootRef}
       data-testid="node-storyboardGen"
       className={`
-        group relative flex h-full flex-col overflow-visible rounded-[var(--node-radius)] border bg-surface-dark/95 p-3 transition-colors duration-150
+        group relative flex h-full flex-col overflow-visible rounded-[var(--node-radius)] border bg-[var(--canvas-node-bg)] p-3 transition-colors duration-150
         ${selected
           ? 'border-accent shadow-[0_0_0_1px_rgba(59,130,246,0.32)]'
-          : 'border-[rgba(15,23,42,0.45)] hover:border-[rgba(15,23,42,0.58)] dark:border-[rgba(255,255,255,0.22)] dark:hover:border-[rgba(255,255,255,0.34)]'
+          : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'
         }
       `}
       style={{
@@ -1619,7 +1619,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
         </div>
 
         {showStoryboardGenAdvancedRatioControls && (
-          <div className="min-w-0 flex-1 rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] px-2 py-0.5 text-center text-[10px] text-text-muted">
+          <div className="min-w-0 flex-1 rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] px-2 py-0.5 text-center text-[10px] text-[var(--canvas-node-fg-muted)]">
             <span>{t('node.storyboardGen.cellAspectRatio')}: {resolvedAspectRatios.cellAspectRatioLabel}</span>
             <span className="mx-1 text-[rgba(255,255,255,0.22)]">|</span>
             <span>{t('node.storyboardGen.overallAspectRatio')}: {resolvedAspectRatios.overallAspectRatioLabel}</span>
@@ -1632,8 +1632,8 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
               <button
                 type="button"
                 className={`${RATIO_CONTROL_MODE_BUTTON_CLASS} ${ratioControlMode === 'overall'
-                  ? 'border-accent/55 bg-accent/18 text-text-dark'
-                  : 'border-transparent bg-transparent text-text-muted hover:bg-white/5'
+                  ? 'border-accent/55 bg-accent/18 text-[var(--canvas-node-fg)]'
+                  : 'border-transparent bg-transparent text-[var(--canvas-node-fg-muted)] hover:bg-white/5'
                   }`}
                 onClick={(event) => {
                   event.stopPropagation();
@@ -1645,8 +1645,8 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
               <button
                 type="button"
                 className={`${RATIO_CONTROL_MODE_BUTTON_CLASS} ${ratioControlMode === 'cell'
-                  ? 'border-accent/55 bg-accent/18 text-text-dark'
-                  : 'border-transparent bg-transparent text-text-muted hover:bg-white/5'
+                  ? 'border-accent/55 bg-accent/18 text-[var(--canvas-node-fg)]'
+                  : 'border-transparent bg-transparent text-[var(--canvas-node-fg-muted)] hover:bg-white/5'
                   }`}
                 onClick={(event) => {
                   event.stopPropagation();
@@ -1685,7 +1685,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
                     frameHighlightRefs.current[frame.id] = element;
                   }}
                   aria-hidden="true"
-                  className="ui-scrollbar pointer-events-none absolute inset-0 overflow-y-auto overflow-x-hidden text-[10px] leading-4 text-text-dark"
+                  className="ui-scrollbar pointer-events-none absolute inset-0 overflow-y-auto overflow-x-hidden text-[10px] leading-4 text-[var(--canvas-node-fg)]"
                   style={{ scrollbarGutter: 'stable' }}
                 >
                   <div className="min-h-full whitespace-pre-wrap break-words px-1.5 py-1 text-left">
@@ -1717,7 +1717,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
                     index: String(index + 1).padStart(2, '0'),
                   })}
                   wrap="soft"
-                  className="ui-scrollbar nodrag nowheel relative z-10 h-full w-full resize-none overflow-y-auto overflow-x-hidden bg-transparent px-1.5 py-1 text-left text-[10px] leading-4 text-transparent caret-text-dark placeholder:text-text-muted/40 focus:border-accent/50 focus:outline-none whitespace-pre-wrap break-words"
+                  className="ui-scrollbar nodrag nowheel relative z-10 h-full w-full resize-none overflow-y-auto overflow-x-hidden bg-transparent px-1.5 py-1 text-left text-[10px] leading-4 text-transparent caret-text-dark placeholder:text-[var(--canvas-node-fg-muted)]/40 focus:border-accent/50 focus:outline-none whitespace-pre-wrap break-words"
                   style={{ scrollbarGutter: 'stable' }}
                 />
 
@@ -1735,7 +1735,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
                     className={`absolute bottom-0.5 left-0.5 z-20 flex h-4 w-4 items-center justify-center rounded transition-colors ${
                       frame.startFrameMode !== 'none' || frame.endFrameMode !== 'none'
                         ? 'bg-accent/30 text-accent'
-                        : 'text-text-muted/40 hover:bg-white/10 hover:text-text-muted'
+                        : 'text-[var(--canvas-node-fg-muted)]/40 hover:bg-white/10 hover:text-[var(--canvas-node-fg-muted)]'
                     }`}
                     title={t('node.storyboardGen.frameControl')}
                   >
@@ -1757,7 +1757,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
                     className={`absolute bottom-0.5 right-0.5 z-20 flex h-4 w-4 items-center justify-center rounded transition-colors ${
                       frame.referenceImageUrls && frame.referenceImageUrls.length > 0
                         ? 'bg-accent/30 text-accent'
-                        : 'text-text-muted/40 hover:bg-white/10 hover:text-text-muted'
+                        : 'text-[var(--canvas-node-fg-muted)]/40 hover:bg-white/10 hover:text-[var(--canvas-node-fg-muted)]'
                     }`}
                     title={t('node.storyboardGen.multiReference')}
                   >
@@ -1820,7 +1820,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
                   insertImageReference(imageIndex);
                 }}
                 onMouseEnter={() => setPickerActiveIndex(imageIndex)}
-                className={`flex w-full items-center gap-2 border border-transparent bg-bg-dark/70 px-2 py-2 text-left text-sm text-text-dark transition-colors hover:border-[rgba(255,255,255,0.18)] ${pickerActiveIndex === imageIndex
+                className={`flex w-full items-center gap-2 border border-transparent bg-bg-dark/70 px-2 py-2 text-left text-sm text-[var(--canvas-node-fg)] transition-colors hover:border-[rgba(255,255,255,0.18)] ${pickerActiveIndex === imageIndex
                   ? 'border-[rgba(255,255,255,0.24)] bg-bg-dark'
                   : ''
                   }`}
@@ -1930,7 +1930,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
               style={{ width: `${batchProgress.total > 0 ? (batchProgress.completed / batchProgress.total) * 100 : 0}%` }}
             />
           </div>
-          <span className="shrink-0 text-[9px] text-text-muted">
+          <span className="shrink-0 text-[9px] text-[var(--canvas-node-fg-muted)]">
             {batchProgress.completed}/{batchProgress.total}
           </span>
         </div>

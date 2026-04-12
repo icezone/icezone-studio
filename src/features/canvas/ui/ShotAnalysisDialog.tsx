@@ -134,8 +134,8 @@ export const ShotAnalysisDialog = memo(({
         className={`relative w-[520px] max-h-[85vh] overflow-hidden transition-opacity duration-200 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[rgba(15,23,42,0.15)] dark:border-[rgba(255,255,255,0.1)] px-4 py-3">
-          <h2 className="text-sm font-medium text-text-dark">{t('shotAnalysis.title')}</h2>
+        <div className="flex items-center justify-between border-b border-[var(--canvas-node-border)] px-4 py-3">
+          <h2 className="text-sm font-medium text-[var(--canvas-node-fg)]">{t('shotAnalysis.title')}</h2>
           <UiIconButton className="h-8 w-8" onClick={handleClose}>
             <X className="h-4 w-4" />
           </UiIconButton>
@@ -145,7 +145,7 @@ export const ShotAnalysisDialog = memo(({
         <div className="overflow-y-auto px-4 py-4 ui-scrollbar" style={{ maxHeight: 'calc(85vh - 120px)' }}>
           {/* Image preview */}
           {imageUrl && (
-            <div className="mb-4 overflow-hidden rounded-lg border border-[rgba(15,23,42,0.15)] dark:border-[rgba(255,255,255,0.1)]">
+            <div className="mb-4 overflow-hidden rounded-lg border border-[var(--canvas-node-border)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={imageUrl}
@@ -159,7 +159,7 @@ export const ShotAnalysisDialog = memo(({
           {state.status === 'loading' && (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
               <Loader2 className="h-6 w-6 animate-spin text-accent" />
-              <p className="text-sm text-text-muted">{t('shotAnalysis.analyzing')}</p>
+              <p className="text-sm text-[var(--canvas-node-fg-muted)]">{t('shotAnalysis.analyzing')}</p>
             </div>
           )}
 
@@ -193,9 +193,9 @@ export const ShotAnalysisDialog = memo(({
               <AnalysisRow label={t('shotAnalysis.composition')} value={state.result.composition} />
 
               {/* Director's Note */}
-              <div className="mt-4 rounded-lg border border-[rgba(15,23,42,0.15)] dark:border-[rgba(255,255,255,0.1)] p-3">
-                <p className="mb-1.5 text-xs font-medium text-text-muted">{t('shotAnalysis.directorNote')}</p>
-                <p className="text-sm leading-relaxed text-text-dark">{state.result.directorNote}</p>
+              <div className="mt-4 rounded-lg border border-[var(--canvas-node-border)] p-3">
+                <p className="mb-1.5 text-xs font-medium text-[var(--canvas-node-fg-muted)]">{t('shotAnalysis.directorNote')}</p>
+                <p className="text-sm leading-relaxed text-[var(--canvas-node-fg)]">{state.result.directorNote}</p>
               </div>
             </div>
           )}
@@ -203,7 +203,7 @@ export const ShotAnalysisDialog = memo(({
 
         {/* Footer */}
         {state.status === 'success' && (
-          <div className="flex justify-end gap-2 border-t border-[rgba(15,23,42,0.15)] dark:border-[rgba(255,255,255,0.1)] px-4 py-3">
+          <div className="flex justify-end gap-2 border-t border-[var(--canvas-node-border)] px-4 py-3">
             <UiButton
               variant="muted"
               size="sm"
@@ -245,11 +245,11 @@ function AnalysisRow({
   if (!value) return null;
   return (
     <div className="flex gap-3 text-sm">
-      <span className="w-20 shrink-0 text-right text-text-muted">{label}</span>
+      <span className="w-20 shrink-0 text-right text-[var(--canvas-node-fg-muted)]">{label}</span>
       <div className="flex-1">
-        <span className="text-text-dark">{value}</span>
+        <span className="text-[var(--canvas-node-fg)]">{value}</span>
         {children}
-        {detail && <p className="mt-0.5 text-xs text-text-muted">{detail}</p>}
+        {detail && <p className="mt-0.5 text-xs text-[var(--canvas-node-fg-muted)]">{detail}</p>}
       </div>
     </div>
   );
@@ -259,12 +259,12 @@ function ColorPaletteRow({ label, colors }: { label: string; colors: string[] })
   if (!colors || colors.length === 0) return null;
   return (
     <div className="flex gap-3 text-sm">
-      <span className="w-20 shrink-0 text-right text-text-muted">{label}</span>
+      <span className="w-20 shrink-0 text-right text-[var(--canvas-node-fg-muted)]">{label}</span>
       <div className="flex items-center gap-1.5">
         {colors.map((color, index) => (
           <div
             key={`${color}-${index}`}
-            className="h-6 w-6 rounded border border-[rgba(15,23,42,0.15)] dark:border-[rgba(255,255,255,0.1)]"
+            className="h-6 w-6 rounded border border-[var(--canvas-node-border)]"
             style={{ backgroundColor: color }}
             title={color}
           />

@@ -984,8 +984,8 @@ export function AnnotateToolEditor({ options, onOptionsChange, sourceImageUrl }:
               }}
               className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs transition-colors ${
                 active
-                  ? 'border-accent/45 bg-accent/15 text-text-dark'
-                  : 'border-[rgba(255,255,255,0.14)] text-text-muted hover:bg-bg-dark'
+                  ? 'border-accent/45 bg-accent/15 text-[var(--canvas-node-fg)]'
+                  : 'border-[var(--canvas-node-border)] text-[var(--canvas-node-fg-muted)] hover:bg-[var(--canvas-menu-item-hover)]'
               }`}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -1003,7 +1003,7 @@ export function AnnotateToolEditor({ options, onOptionsChange, sourceImageUrl }:
               type="color"
               value={color}
               onChange={(event) => handleStyleInputChange({ color: event.target.value })}
-              className="h-9 w-10 cursor-pointer rounded-md border border-[rgba(255,255,255,0.18)] bg-transparent p-1"
+              className="h-9 w-10 cursor-pointer rounded-md border border-[var(--canvas-node-border)] bg-transparent p-1"
             />
             {activeStyleKind === 'shape' && (
               <>
@@ -1015,7 +1015,7 @@ export function AnnotateToolEditor({ options, onOptionsChange, sourceImageUrl }:
                   value={Number(lineWidthPercent.toFixed(1))}
                   onChange={(event) => handleStyleInputChange({ lineWidthPercent: Number(event.target.value) })}
                 />
-                <span className="w-10 text-xs text-text-muted">{lineWidthPercent.toFixed(1)}%</span>
+                <span className="w-10 text-xs text-[var(--canvas-node-fg-muted)]">{lineWidthPercent.toFixed(1)}%</span>
               </>
             )}
             {activeStyleKind === 'text' && (
@@ -1029,16 +1029,16 @@ export function AnnotateToolEditor({ options, onOptionsChange, sourceImageUrl }:
                   onChange={(event) =>
                     handleStyleInputChange({ fontSizePercent: Number(event.target.value) })
                   }
-                  className="h-9 w-24 rounded-lg border border-[rgba(255,255,255,0.14)] bg-bg-dark/80 px-2 text-sm text-text-dark outline-none"
+                  className="h-9 w-24 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-2 text-sm text-[var(--canvas-node-fg)] outline-none"
                 />
-                <span className="text-xs text-text-muted">%</span>
+                <span className="text-xs text-[var(--canvas-node-fg-muted)]">%</span>
               </div>
             )}
           </>
         )}
         <button
           type="button"
-          className="inline-flex items-center gap-1 rounded-lg border border-[rgba(255,255,255,0.14)] px-2.5 py-1.5 text-xs text-text-muted transition-colors hover:bg-bg-dark"
+          className="inline-flex items-center gap-1 rounded-lg border border-[rgba(255,255,255,0.14)] px-2.5 py-1.5 text-xs text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
           onClick={handleUndo}
           disabled={undoStack.length === 0}
         >
@@ -1047,7 +1047,7 @@ export function AnnotateToolEditor({ options, onOptionsChange, sourceImageUrl }:
         </button>
         <button
           type="button"
-          className="inline-flex items-center gap-1 rounded-lg border border-[rgba(255,255,255,0.14)] px-2.5 py-1.5 text-xs text-text-muted transition-colors hover:bg-bg-dark"
+          className="inline-flex items-center gap-1 rounded-lg border border-[rgba(255,255,255,0.14)] px-2.5 py-1.5 text-xs text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
           onClick={handleRedo}
           disabled={redoStack.length === 0}
         >
@@ -1059,7 +1059,7 @@ export function AnnotateToolEditor({ options, onOptionsChange, sourceImageUrl }:
         </button>
         <button
           type="button"
-          className="inline-flex items-center gap-1 rounded-lg border border-[rgba(255,255,255,0.14)] px-2.5 py-1.5 text-xs text-text-muted transition-colors hover:bg-bg-dark"
+          className="inline-flex items-center gap-1 rounded-lg border border-[rgba(255,255,255,0.14)] px-2.5 py-1.5 text-xs text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
           onClick={handleDeleteSelected}
           disabled={!selectedId}
         >
@@ -1068,7 +1068,7 @@ export function AnnotateToolEditor({ options, onOptionsChange, sourceImageUrl }:
         </button>
         <button
           type="button"
-          className="inline-flex items-center gap-1 rounded-lg border border-[rgba(255,255,255,0.14)] px-2.5 py-1.5 text-xs text-text-muted transition-colors hover:bg-bg-dark"
+          className="inline-flex items-center gap-1 rounded-lg border border-[rgba(255,255,255,0.14)] px-2.5 py-1.5 text-xs text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
           onClick={() => {
             setUndoStack((prev) => [...prev, annotations].slice(-40));
             setRedoStack([]);
@@ -1084,7 +1084,7 @@ export function AnnotateToolEditor({ options, onOptionsChange, sourceImageUrl }:
 
       <div
         ref={viewportRef}
-        className="relative h-[min(62vh,640px)] overflow-hidden rounded-xl border border-[rgba(255,255,255,0.12)] bg-bg-dark/85"
+        className="relative h-[min(62vh,640px)] overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)]"
       >
         <div
           ref={stageHostRef}
@@ -1148,7 +1148,7 @@ export function AnnotateToolEditor({ options, onOptionsChange, sourceImageUrl }:
 
           {textEditorState && textEditorStagePos && (
             <div
-              className="absolute z-20 flex flex-col gap-2 rounded-md border border-[rgba(255,255,255,0.2)] bg-black/75 p-2 backdrop-blur-sm"
+              className="absolute z-20 flex flex-col gap-2 rounded-md border border-[var(--canvas-node-border)] bg-[var(--canvas-overlay-bg)] p-2 backdrop-blur-sm"
               style={{
                 left: `${textEditorStagePos.x}px`,
                 top: `${textEditorStagePos.y}px`,
@@ -1182,19 +1182,19 @@ export function AnnotateToolEditor({ options, onOptionsChange, sourceImageUrl }:
                   }
                 }}
                 rows={3}
-                className="w-full resize-none rounded border border-[rgba(255,255,255,0.18)] bg-bg-dark/90 px-2 py-1.5 text-sm text-text-dark outline-none focus:border-accent"
+                className="w-full resize-none rounded border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-2 py-1.5 text-sm text-[var(--canvas-node-fg)] outline-none focus:border-accent"
               />
               <div className="flex items-center justify-end gap-2">
                 <button
                   type="button"
-                  className="rounded border border-[rgba(255,255,255,0.22)] px-2 py-1 text-xs text-text-muted hover:bg-bg-dark"
+                  className="rounded border border-[rgba(255,255,255,0.22)] px-2 py-1 text-xs text-[var(--canvas-node-fg-muted)] hover:bg-[var(--canvas-menu-item-hover)]"
                   onClick={handleCancelTextEditor}
                 >
                   取消
                 </button>
                 <button
                   type="button"
-                  className="rounded border border-accent/45 bg-accent/20 px-2 py-1 text-xs text-text-dark hover:bg-accent/30"
+                  className="rounded border border-accent/45 bg-accent/20 px-2 py-1 text-xs text-[var(--canvas-node-fg)] hover:bg-accent/30"
                   onClick={handleCommitTextEditor}
                 >
                   确认

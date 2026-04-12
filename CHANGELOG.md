@@ -18,10 +18,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Automated migration validation in CI/CD pipeline to enforce RLS policies
 - Comprehensive RLS documentation with 6 common access patterns
 - Migration template with RLS boilerplate for future database changes
+- **Canvas Light/Dark Theme System** — 15 CSS design tokens (`--canvas-*`) for node backgrounds, borders, shadows, headers, and overlays; all 35+ canvas components migrated from hardcoded `rgba()` values to CSS custom properties
 
 #### Fixed
 - Critical security vulnerability: enabled Row-Level Security on plans table
 - Added performance indexes on user_id columns for RLS policy optimization
+
+#### Changed
+- Canvas nodes and UI components now respond instantly to global theme switching (`data-theme="light"` / `data-theme="dark"`) without page refresh
 
 ### [0.3.0] - 2026-04-05
 
@@ -105,10 +109,14 @@ IceZone Studio 的所有重要变更都记录在此文件中。
 - CI/CD 中的自动迁移验证，强制执行 RLS 策略
 - 完整的 RLS 文档，包含 6 种常见访问模式
 - 带有 RLS 样板代码的迁移模板，用于未来的数据库变更
+- **Canvas 明暗主题系统** — 新增 15 个 `--canvas-*` CSS 设计 token（节点背景、边框、阴影、头部、遮罩等），35+ 个 canvas 组件从硬编码 `rgba()` 颜色迁移至 CSS 自定义属性
 
 #### 修复
 - 关键安全漏洞：在 plans 表上启用行级安全（Row-Level Security）
 - 在 user_id 列上添加性能索引，优化 RLS 策略执行
+
+#### 变更
+- Canvas 节点及 UI 组件现在可即时响应全局主题切换（`data-theme="light"` / `data-theme="dark"`），无需刷新页面
 
 ### [0.3.0] - 2026-04-05
 

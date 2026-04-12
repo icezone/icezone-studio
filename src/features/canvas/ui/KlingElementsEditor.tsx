@@ -119,13 +119,13 @@ export const KlingElementsEditor = memo(({ elements, incomingImages, onChange }:
         >
           <div className="ui-scrollbar max-h-[500px] overflow-y-auto space-y-4">
             {incomingImages.length === 0 ? (
-              <div className="text-center py-8 text-text-muted">
+              <div className="text-center py-8 text-[var(--canvas-node-fg-muted)]">
                 <p className="text-sm">No images available</p>
                 <p className="text-xs mt-1">Connect image nodes to this video node to select images</p>
               </div>
             ) : (
               <>
-                <p className="text-xs text-text-muted mb-3">
+                <p className="text-xs text-[var(--canvas-node-fg-muted)] mb-3">
                   Define elements that can be referenced in prompts using @element_name. Select 2-50
                   images from connected nodes for each element.
                 </p>
@@ -133,12 +133,12 @@ export const KlingElementsEditor = memo(({ elements, incomingImages, onChange }:
                 {editingElements.map((element, elementIndex) => (
                   <div
                     key={elementIndex}
-                    className="p-3 rounded-lg border border-[rgba(255,255,255,0.15)] bg-bg-dark/45 space-y-3"
+                    className="p-3 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] space-y-3"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 space-y-2">
                         <div>
-                          <label className="block text-xs text-text-muted mb-1">
+                          <label className="block text-xs text-[var(--canvas-node-fg-muted)] mb-1">
                             Element Name *
                           </label>
                           <input
@@ -148,12 +148,12 @@ export const KlingElementsEditor = memo(({ elements, incomingImages, onChange }:
                               handleUpdateElement(elementIndex, 'name', e.target.value)
                             }
                             placeholder="element_dog"
-                            className="w-full rounded border border-[rgba(255,255,255,0.15)] bg-bg-dark/60 px-2 py-1.5 text-xs text-text-dark placeholder:text-text-muted/50 focus:border-accent focus:outline-none"
+                            className="w-full rounded border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-2 py-1.5 text-xs text-[var(--canvas-node-fg)] placeholder:text-[var(--canvas-node-fg-muted)] focus:border-accent focus:outline-none"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs text-text-muted mb-1">
+                          <label className="block text-xs text-[var(--canvas-node-fg-muted)] mb-1">
                             Description
                           </label>
                           <input
@@ -163,14 +163,14 @@ export const KlingElementsEditor = memo(({ elements, incomingImages, onChange }:
                               handleUpdateElement(elementIndex, 'description', e.target.value)
                             }
                             placeholder="A cute dog"
-                            className="w-full rounded border border-[rgba(255,255,255,0.15)] bg-bg-dark/60 px-2 py-1.5 text-xs text-text-dark placeholder:text-text-muted/50 focus:border-accent focus:outline-none"
+                            className="w-full rounded border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-2 py-1.5 text-xs text-[var(--canvas-node-fg)] placeholder:text-[var(--canvas-node-fg-muted)] focus:border-accent focus:outline-none"
                           />
                         </div>
                       </div>
 
                       <button
                         onClick={() => handleRemoveElement(elementIndex)}
-                        className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
+                        className="p-1.5 text-[var(--canvas-node-fg-muted)] hover:text-red-400 transition-colors"
                         title="Remove element"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -179,7 +179,7 @@ export const KlingElementsEditor = memo(({ elements, incomingImages, onChange }:
 
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <label className="text-xs text-text-muted">
+                        <label className="text-xs text-[var(--canvas-node-fg-muted)]">
                           Select Images ({element.element_input_urls.length} / 2-50 required)
                         </label>
                       </div>
@@ -194,7 +194,7 @@ export const KlingElementsEditor = memo(({ elements, incomingImages, onChange }:
                               className={`relative aspect-square rounded-lg border-2 overflow-hidden transition-all ${
                                 selected
                                   ? 'border-accent ring-2 ring-accent/30'
-                                  : 'border-[rgba(255,255,255,0.15)] hover:border-[rgba(255,255,255,0.3)]'
+                                  : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'
                               }`}
                             >
                               <img
@@ -220,7 +220,7 @@ export const KlingElementsEditor = memo(({ elements, incomingImages, onChange }:
                 {incomingImages.length > 0 && (
                   <button
                     onClick={handleAddElement}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-dashed border-[rgba(255,255,255,0.2)] text-text-muted hover:border-accent hover:text-text-dark transition-colors"
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-dashed border-[var(--canvas-drop-zone-border)] text-[var(--canvas-node-fg-muted)] hover:border-accent hover:text-[var(--canvas-node-fg)] transition-colors"
                   >
                     <Plus className="h-4 w-4" />
                     Add Element

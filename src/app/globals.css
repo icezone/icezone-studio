@@ -86,6 +86,23 @@
   --accent-rgb:         91, 118, 254;
 
   --node-radius: 10px;
+
+  /* Canvas semantic tokens — light mode */
+  --canvas-node-bg:             #ffffff;
+  --canvas-node-border:         rgba(199,202,213,0.6);
+  --canvas-node-shadow:         rgb(224,226,232) 0px 0px 0px 1px;
+  --canvas-node-header-bg:      rgba(245,247,250,0.95);
+  --canvas-node-section-bg:     rgba(245,247,250,0.7);
+  --canvas-node-hover-border:   rgba(91,118,254,0.4);
+  --canvas-node-selected-border:#5b76fe;
+  --canvas-drop-zone-border:    rgba(15,23,42,0.2);
+  --canvas-drop-zone-hover-bg:  rgba(15,23,42,0.04);
+  --canvas-node-fg:             #1c1c1e;
+  --canvas-node-fg-muted:       #555a6a;
+  --canvas-badge-bg:            rgba(245,247,250,0.9);
+  --canvas-overlay-bg:          rgba(255,255,255,0.85);
+  --canvas-menu-bg:             #ffffff;
+  --canvas-menu-item-hover:     rgba(15,23,42,0.06);
 }
 
 /* ─── Dark mode overrides ───────────────────────────────── */
@@ -113,6 +130,23 @@
   --ui-border-strong:   rgba(255, 255, 255, 0.28);
   --ui-shadow-panel:    0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
   --accent-rgb:         91, 118, 254;
+
+  /* Canvas semantic tokens — dark mode */
+  --canvas-node-bg:             #111827;
+  --canvas-node-border:         rgba(255,255,255,0.1);
+  --canvas-node-shadow:         rgba(0,0,0,0.4) 0px 2px 8px;
+  --canvas-node-header-bg:      rgba(26,38,64,0.95);
+  --canvas-node-section-bg:     rgba(13,21,37,0.45);
+  --canvas-node-hover-border:   rgba(91,118,254,0.5);
+  --canvas-node-selected-border:#5b76fe;
+  --canvas-drop-zone-border:    rgba(255,255,255,0.25);
+  --canvas-drop-zone-hover-bg:  rgba(255,255,255,0.04);
+  --canvas-node-fg:             #e2e8f0;
+  --canvas-node-fg-muted:       #6b7fa0;
+  --canvas-badge-bg:            rgba(26,38,64,0.9);
+  --canvas-overlay-bg:          rgba(17,24,39,0.85);
+  --canvas-menu-bg:             #1c1c21;
+  --canvas-menu-item-hover:     rgba(255,255,255,0.08);
 }
 
 body {

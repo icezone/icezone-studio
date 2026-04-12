@@ -49,7 +49,7 @@ const toolIconMap: Record<ToolIconKey, typeof Crop> = {
 
 const TOOLBAR_BUTTON_RADIUS_CLASS = 'rounded-full';
 const TOOLBAR_NEUTRAL_BUTTON_CLASS =
-  'border-[rgba(255,255,255,0.18)] bg-bg-dark/70 text-text-dark hover:border-[rgba(255,255,255,0.32)] hover:bg-bg-dark';
+  'border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] text-[var(--canvas-node-fg)] hover:border-[var(--canvas-node-hover-border)] hover:bg-[var(--canvas-menu-item-hover)]';
 
 export const NodeActionToolbar = memo(({ node }: NodeActionToolbarProps) => {
   const { t, i18n } = useTranslation();
@@ -471,12 +471,12 @@ export const NodeActionToolbar = memo(({ node }: NodeActionToolbarProps) => {
       {!isImageEdit && downloadMenu && (
         <div
           ref={downloadMenuRef}
-          className={`fixed z-[120] min-w-[280px] rounded-xl border border-[rgba(255,255,255,0.18)] bg-surface-dark/95 p-2 shadow-2xl backdrop-blur-sm transition-opacity duration-150 ${isDownloadMenuVisible ? 'opacity-100' : 'opacity-0'}`}
+          className={`fixed z-[120] min-w-[280px] rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] p-2 shadow-2xl backdrop-blur-sm transition-opacity duration-150 ${isDownloadMenuVisible ? 'opacity-100' : 'opacity-0'}`}
           style={{ left: `${downloadMenu.x}px`, top: `${downloadMenu.y}px` }}
         >
           <button
             type="button"
-            className="flex h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-sm text-text-dark transition-colors hover:bg-bg-dark"
+            className="flex h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-sm text-[var(--canvas-node-fg)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
             onClick={() => {
               void handleDownloadSaveAs();
             }}
@@ -486,24 +486,24 @@ export const NodeActionToolbar = memo(({ node }: NodeActionToolbarProps) => {
           </button>
 
           {downloadPresetPaths.length > 0 ? (
-            <div className="mt-1 space-y-1 border-t border-[rgba(255,255,255,0.1)] pt-2">
+            <div className="mt-1 space-y-1 border-t border-[var(--canvas-node-border)] pt-2">
               {downloadPresetPaths.map((path) => (
                 <button
                   key={path}
                   type="button"
-                  className="flex h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-xs text-text-dark transition-colors hover:bg-bg-dark"
+                  className="flex h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-xs text-[var(--canvas-node-fg)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
                   onClick={() => {
                     void handleDownloadToPreset(path);
                   }}
                   title={path}
                 >
-                  <FolderOpen className="h-3.5 w-3.5 shrink-0 text-text-muted" />
+                  <FolderOpen className="h-3.5 w-3.5 shrink-0 text-[var(--canvas-node-fg-muted)]" />
                   <span className="truncate">{path}</span>
                 </button>
               ))}
             </div>
           ) : (
-            <div className="mt-1 border-t border-[rgba(255,255,255,0.1)] px-2.5 pt-2 text-xs text-text-muted">
+            <div className="mt-1 border-t border-[var(--canvas-node-border)] px-2.5 pt-2 text-xs text-[var(--canvas-node-fg-muted)]">
               {t('nodeToolbar.noDownloadPresetPathsHint')}
             </div>
           )}

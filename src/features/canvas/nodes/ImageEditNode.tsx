@@ -714,10 +714,10 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
     <div
       ref={rootRef}
       className={`
-        group relative flex h-full flex-col overflow-visible rounded-[var(--node-radius)] border bg-surface-dark/90 p-2 transition-colors duration-150
+        group relative flex h-full flex-col overflow-visible rounded-[var(--node-radius)] border bg-[var(--canvas-node-bg)] p-2 transition-colors duration-150
         ${selected
           ? 'border-accent shadow-[0_0_0_1px_rgba(59,130,246,0.32)]'
-          : 'border-[rgba(15,23,42,0.45)] hover:border-[rgba(15,23,42,0.58)] dark:border-[rgba(255,255,255,0.22)] dark:hover:border-[rgba(255,255,255,0.34)]'}
+          : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'}
       `}
       style={{ width: `${resolvedWidth}px`, height: `${resolvedHeight}px` }}
       onClick={() => setSelectedNode(id)}
@@ -738,12 +738,12 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
         onTitleChange={(nextTitle) => updateNodeData(id, { displayName: nextTitle })}
       />
 
-      <div className="relative min-h-0 flex-1 rounded-lg border border-[rgba(15,23,42,0.15)] dark:border-[rgba(255,255,255,0.1)] bg-bg-dark/45 p-2">
+      <div className="relative min-h-0 flex-1 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-2">
         <div className="relative h-full min-h-0">
           <div
             ref={promptHighlightRef}
             aria-hidden="true"
-            className="ui-scrollbar pointer-events-none absolute inset-0 overflow-y-auto overflow-x-hidden text-sm leading-6 text-text-dark"
+            className="ui-scrollbar pointer-events-none absolute inset-0 overflow-y-auto overflow-x-hidden text-sm leading-6 text-[var(--canvas-node-fg)]"
             style={{ scrollbarGutter: 'stable' }}
           >
             <div className="min-h-full whitespace-pre-wrap break-words px-1 py-0.5">
@@ -763,14 +763,14 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
             onScroll={syncPromptHighlightScroll}
             onMouseDown={(event) => event.stopPropagation()}
             placeholder={t('node.imageEdit.promptPlaceholder')}
-            className="ui-scrollbar nodrag nowheel relative z-10 h-full w-full resize-none overflow-y-auto overflow-x-hidden border-none bg-transparent px-1 py-0.5 text-sm leading-6 text-transparent caret-text-dark outline-none placeholder:text-text-muted/80 focus:border-transparent whitespace-pre-wrap break-words"
+            className="ui-scrollbar nodrag nowheel relative z-10 h-full w-full resize-none overflow-y-auto overflow-x-hidden border-none bg-transparent px-1 py-0.5 text-sm leading-6 text-transparent caret-[var(--canvas-node-fg)] outline-none placeholder:text-[var(--canvas-node-fg-muted)]/80 focus:border-transparent whitespace-pre-wrap break-words"
             style={{ scrollbarGutter: 'stable' }}
           />
         </div>
 
         {showImagePicker && incomingImageItems.length > 0 && (
           <div
-            className="nowheel absolute z-30 w-[120px] overflow-hidden rounded-xl border border-[rgba(15,23,42,0.15)] bg-surface-dark shadow-xl dark:border-[rgba(255,255,255,0.16)]"
+            className="nowheel absolute z-30 w-[120px] overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
             style={{ left: pickerAnchor.left, top: pickerAnchor.top }}
             onMouseDown={(event) => event.stopPropagation()}
             onWheelCapture={(event) => event.stopPropagation()}
@@ -788,8 +788,8 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
                     insertImageReference(index);
                   }}
                   onMouseEnter={() => setPickerActiveIndex(index)}
-                  className={`flex w-full items-center gap-2 border border-transparent bg-bg-dark/70 px-2 py-2 text-left text-sm text-text-dark transition-colors hover:border-[rgba(255,255,255,0.18)] ${pickerActiveIndex === index
-                      ? 'border-[rgba(255,255,255,0.24)] bg-bg-dark'
+                  className={`flex w-full items-center gap-2 border border-transparent bg-[var(--canvas-node-section-bg)] px-2 py-2 text-left text-sm text-[var(--canvas-node-fg)] transition-colors hover:border-[var(--canvas-node-border)] ${pickerActiveIndex === index
+                      ? 'border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)]'
                       : ''
                     }`}
                 >

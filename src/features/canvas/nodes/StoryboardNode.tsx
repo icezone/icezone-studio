@@ -336,7 +336,7 @@ const FrameCard = memo(
           onSortHover(frame.id);
         }}
         onMouseDown={(event) => event.stopPropagation()}
-        className={`nodrag relative bg-bg-dark/85 transition-colors ${dragging
+        className={`nodrag relative bg-[var(--canvas-node-section-bg)] transition-colors ${dragging
           ? 'z-10 opacity-55 ring-1 ring-accent/65'
           : asDropTarget
             ? 'z-10 ring-1 ring-emerald-400/70'
@@ -344,7 +344,7 @@ const FrameCard = memo(
           }`}
       >
         <div
-          className={`group/frame relative overflow-hidden bg-surface-dark ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          className={`group/frame relative overflow-hidden bg-[var(--canvas-node-section-bg)] ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
           style={{ aspectRatio: frameAspectRatioCss }}
           onPointerDown={(event) => {
             if (event.button !== 0) {
@@ -365,7 +365,7 @@ const FrameCard = memo(
               draggable={false}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-[11px] text-text-muted">
+            <div className="flex h-full w-full items-center justify-center text-[11px] text-[var(--canvas-node-fg-muted)]">
               空分镜
             </div>
           )}
@@ -408,7 +408,7 @@ const FrameCard = memo(
           onMouseDown={(event) => event.stopPropagation()}
           onWheelCapture={(event) => event.stopPropagation()}
           placeholder={`分镜 ${String(index + 1).padStart(2, '0')} 描述`}
-          className="ui-scrollbar nodrag nowheel h-10 w-full resize-none overflow-y-auto border-0 border-t border-[rgba(255,255,255,0.12)] bg-bg-dark/90 px-2 py-1 text-[10px] text-text-dark outline-none focus:border-accent"
+          className="ui-scrollbar nodrag nowheel h-10 w-full resize-none overflow-y-auto border-0 border-t border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-2 py-1 text-[10px] text-[var(--canvas-node-fg)] outline-none focus:border-accent"
         />
       </div>
     );
@@ -991,10 +991,10 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
     <div
       ref={rootRef}
       className={`
-        group relative flex h-full flex-col overflow-visible rounded-[var(--node-radius)] border bg-surface-dark/90 p-2 transition-colors duration-150
+        group relative flex h-full flex-col overflow-visible rounded-[var(--node-radius)] border bg-[var(--canvas-node-bg)] p-2 transition-colors duration-150
         ${selected
           ? 'border-accent shadow-[0_0_0_1px_rgba(59,130,246,0.32)]'
-          : 'border-[rgba(15,23,42,0.45)] hover:border-[rgba(15,23,42,0.58)] dark:border-[rgba(255,255,255,0.22)] dark:hover:border-[rgba(255,255,255,0.34)]'}
+          : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'}
       `}
       style={{ width: `${resolvedNodeWidth}px`, height: `${resolvedNodeHeight}px` }}
       onClick={() => setSelectedNode(id)}
@@ -1015,7 +1015,7 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
         onWheelCapture={(event) => event.stopPropagation()}
       >
         <div
-          className="grid overflow-hidden rounded-lg border border-[rgba(255,255,255,0.16)] bg-[rgba(255,255,255,0.14)]"
+          className="grid overflow-hidden rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)]"
           style={{
             gap: `${STORYBOARD_GRID_GAP_PX}px`,
             gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
@@ -1061,7 +1061,7 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
                   <button
                     key={`${pickerState.frameId}-${item.imageUrl}`}
                     type="button"
-                    className="flex w-full items-center gap-2 border border-transparent bg-bg-dark/70 px-2 py-2 text-left text-sm text-text-dark transition-colors hover:border-[rgba(255,255,255,0.18)]"
+                    className="flex w-full items-center gap-2 border border-transparent bg-bg-dark/70 px-2 py-2 text-left text-sm text-[var(--canvas-node-fg)] transition-colors hover:border-[rgba(255,255,255,0.18)]"
                     onClick={(event) => {
                       event.stopPropagation();
                       handleReplaceFromInput(pickerState.frameId, item.imageUrl);
@@ -1081,7 +1081,7 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
                 ))}
               </div>
             ) : (
-              <div className="px-2 py-2 text-sm text-text-muted">
+              <div className="px-2 py-2 text-sm text-[var(--canvas-node-fg-muted)]">
                 暂无输入图片
               </div>
             )}
@@ -1111,7 +1111,7 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
             </UiChipButton>
           </div>
 
-          <div className="truncate text-[11px] text-text-muted/80">
+          <div className="truncate text-[11px] text-[var(--canvas-node-fg-muted)]/80">
             {gridRows} x {gridCols} | {totalFrames} 格
           </div>
         </div>
@@ -1161,7 +1161,7 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
           onMouseDown={(event) => event.stopPropagation()}
         >
           <UiPanel className="p-2.5">
-            <div className="space-y-2 text-xs text-text-muted">
+            <div className="space-y-2 text-xs text-[var(--canvas-node-fg-muted)]">
               <label className="flex items-center gap-2">
                 <UiCheckbox
                   checked={exportOptions.showFrameIndex}
@@ -1299,9 +1299,9 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
           <div className="fixed inset-0 z-[220] flex items-center justify-center">
             <div className="absolute inset-0 bg-black/55" />
             <UiPanel className="relative w-[440px] p-4">
-              <div className="text-sm font-medium text-text-dark">导出完成</div>
-              <div className="mt-2 text-xs text-text-muted">图片已导出到以下路径：</div>
-              <div className="mt-1 break-all rounded border border-[rgba(255,255,255,0.12)] bg-bg-dark/70 px-2 py-1.5 text-xs text-text-dark">
+              <div className="text-sm font-medium text-[var(--canvas-node-fg)]">导出完成</div>
+              <div className="mt-2 text-xs text-[var(--canvas-node-fg-muted)]">图片已导出到以下路径：</div>
+              <div className="mt-1 break-all rounded border border-[rgba(255,255,255,0.12)] bg-bg-dark/70 px-2 py-1.5 text-xs text-[var(--canvas-node-fg)]">
                 {packOutputDir}
               </div>
               <div className="mt-4 flex justify-end gap-2">

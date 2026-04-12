@@ -351,8 +351,8 @@ export function CropToolEditor({ plugin, sourceImageUrl, options, onOptionsChang
               type="button"
               className={`rounded-lg border px-3 py-1.5 text-xs transition-colors ${
                 active
-                  ? 'border-accent/45 bg-accent/15 text-text-dark'
-                  : 'border-[rgba(255,255,255,0.15)] text-text-muted hover:bg-bg-dark'
+                  ? 'border-accent/45 bg-accent/15 text-[var(--canvas-node-fg)]'
+                  : 'border-[var(--canvas-node-border)] text-[var(--canvas-node-fg-muted)] hover:bg-[var(--canvas-menu-item-hover)]'
               }`}
               onClick={() =>
                 onOptionsChange({
@@ -370,8 +370,8 @@ export function CropToolEditor({ plugin, sourceImageUrl, options, onOptionsChang
           type="button"
           className={`rounded-lg border px-3 py-1.5 text-xs transition-colors ${
             aspectMode === 'custom'
-              ? 'border-accent/45 bg-accent/15 text-text-dark'
-              : 'border-[rgba(255,255,255,0.15)] text-text-muted hover:bg-bg-dark'
+              ? 'border-accent/45 bg-accent/15 text-[var(--canvas-node-fg)]'
+              : 'border-[var(--canvas-node-border)] text-[var(--canvas-node-fg-muted)] hover:bg-[var(--canvas-menu-item-hover)]'
           }`}
           onClick={() =>
             onOptionsChange({
@@ -399,7 +399,7 @@ export function CropToolEditor({ plugin, sourceImageUrl, options, onOptionsChang
               });
             }}
             placeholder="输入比例，如 3:2 或 1.5"
-            className="h-9 w-[220px] rounded-lg border border-[rgba(255,255,255,0.15)] bg-bg-dark/80 px-3 text-sm text-text-dark outline-none"
+            className="h-9 w-[220px] rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-3 text-sm text-[var(--canvas-node-fg)] outline-none"
           />
           {customRatioError && <span className="text-xs text-red-400">{customRatioError}</span>}
         </div>
@@ -407,7 +407,7 @@ export function CropToolEditor({ plugin, sourceImageUrl, options, onOptionsChang
 
       <div
         ref={viewportRef}
-        className="relative h-[min(62vh,640px)] rounded-xl border border-[rgba(255,255,255,0.12)] bg-bg-dark/85"
+        className="relative h-[min(62vh,640px)] rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)]"
       >
         <div className="flex h-full w-full items-center justify-center p-3">
           {renderedImageSize && (

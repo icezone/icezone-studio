@@ -200,10 +200,10 @@ function VideoAnalysisNodeComponent({
   return (
     <div
       className={`
-        flex flex-col rounded-xl border-2 bg-surface-dark shadow-xl transition-all p-3 overflow-hidden
+        flex flex-col rounded-xl border-2 bg-[var(--canvas-node-bg)] shadow-xl transition-all p-3 overflow-hidden
         ${selected
           ? 'border-accent shadow-accent/30'
-          : 'border-[rgba(15,23,42,0.45)] hover:border-[rgba(15,23,42,0.58)] dark:border-[rgba(255,255,255,0.22)] dark:hover:border-[rgba(255,255,255,0.34)]'}
+          : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'}
       `}
       data-testid="node-videoAnalysis"
       style={{ width: resolvedWidth, height: resolvedHeight }}
@@ -230,35 +230,35 @@ function VideoAnalysisNodeComponent({
           </div>
         ) : (
           <label
-            className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[rgba(15,23,42,0.2)] bg-bg-dark/30 cursor-pointer hover:border-accent/40 transition-colors dark:border-[rgba(255,255,255,0.15)]"
+            className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] bg-[var(--canvas-drop-zone-hover-bg)] cursor-pointer hover:border-[var(--canvas-node-hover-border)] transition-colors"
             style={{ height: 140 }}
             onDrop={handleDrop}
             onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
           >
-            <Upload className="h-8 w-8 text-text-muted/60" />
-            <span className="text-xs text-text-muted">{t('node.videoAnalysis.uploadHint')}</span>
+            <Upload className="h-8 w-8 text-[var(--canvas-node-fg-muted)]/60" />
+            <span className="text-xs text-[var(--canvas-node-fg-muted)]">{t('node.videoAnalysis.uploadHint')}</span>
             <input type="file" accept="video/*" className="hidden" onChange={handleVideoUpload} />
           </label>
         )}
 
         {data.videoFileName && (
-          <div className="text-xs text-text-muted px-1 truncate">{data.videoFileName}</div>
+          <div className="text-xs text-[var(--canvas-node-fg-muted)] px-1 truncate">{data.videoFileName}</div>
         )}
 
         <div className="flex items-center gap-2 px-1">
-          <span className="text-xs text-text-muted shrink-0 w-16">{t('node.videoAnalysis.sensitivity')}:</span>
+          <span className="text-xs text-[var(--canvas-node-fg-muted)] shrink-0 w-16">{t('node.videoAnalysis.sensitivity')}:</span>
           <input type="range" min={0.1} max={1.0} step={0.05} value={data.sensitivityThreshold}
             onChange={(e) => { e.stopPropagation(); handleSensitivityChange(parseFloat(e.target.value)); }}
             onMouseDown={(e) => e.stopPropagation()} className="nodrag flex-1 h-1.5 accent-accent" />
-          <span className="text-xs text-text-dark w-8 text-right">{data.sensitivityThreshold.toFixed(2)}</span>
+          <span className="text-xs text-[var(--canvas-node-fg)] w-8 text-right">{data.sensitivityThreshold.toFixed(2)}</span>
         </div>
 
         <div className="flex items-center gap-2 px-1">
-          <span className="text-xs text-text-muted shrink-0 w-16">{t('node.videoAnalysis.minDuration')}:</span>
+          <span className="text-xs text-[var(--canvas-node-fg-muted)] shrink-0 w-16">{t('node.videoAnalysis.minDuration')}:</span>
           <select value={data.minSceneDurationMs}
             onChange={(e) => { e.stopPropagation(); handleMinDurationChange(parseInt(e.target.value, 10)); }}
             onMouseDown={(e) => e.stopPropagation()}
-            className="nodrag rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/45 px-2 py-0.5 text-xs text-text-dark outline-none dark:border-[rgba(255,255,255,0.1)]">
+            className="nodrag rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/45 px-2 py-0.5 text-xs text-[var(--canvas-node-fg)] outline-none dark:border-[rgba(255,255,255,0.1)]">
             <option value={200}>200ms</option>
             <option value={500}>500ms</option>
             <option value={1000}>1s</option>
@@ -267,11 +267,11 @@ function VideoAnalysisNodeComponent({
         </div>
 
         <div className="flex items-center gap-2 px-1">
-          <span className="text-xs text-text-muted shrink-0 w-16">{t('node.videoAnalysis.maxKeyframes')}:</span>
+          <span className="text-xs text-[var(--canvas-node-fg-muted)] shrink-0 w-16">{t('node.videoAnalysis.maxKeyframes')}:</span>
           <input type="number" min={1} max={200} value={data.maxKeyframes}
             onChange={(e) => { e.stopPropagation(); handleMaxKeyframesChange(parseInt(e.target.value, 10) || 50); }}
             onMouseDown={(e) => e.stopPropagation()}
-            className="nodrag w-16 rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/45 px-2 py-0.5 text-xs text-text-dark outline-none dark:border-[rgba(255,255,255,0.1)]" />
+            className="nodrag w-16 rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/45 px-2 py-0.5 text-xs text-[var(--canvas-node-fg)] outline-none dark:border-[rgba(255,255,255,0.1)]" />
         </div>
 
         <div className="px-1">
@@ -300,7 +300,7 @@ function VideoAnalysisNodeComponent({
         {data.scenes?.length > 0 && (
           <>
             <div className="px-1 flex items-center justify-between">
-              <span className="text-xs font-medium text-text-muted">
+              <span className="text-xs font-medium text-[var(--canvas-node-fg-muted)]">
                 {t('node.videoAnalysis.scenesDetected', { count: data.scenes.length })}
               </span>
               <button onClick={(e) => { e.stopPropagation(); toggleAllScenes(selectedCount < data.scenes.length); }}
@@ -324,7 +324,7 @@ function VideoAnalysisNodeComponent({
                         className="w-full aspect-video object-cover" />
                     ) : (
                       <div className="w-full aspect-video bg-bg-dark/60 flex items-center justify-center">
-                        <Film className="h-4 w-4 text-text-muted/40" />
+                        <Film className="h-4 w-4 text-[var(--canvas-node-fg-muted)]/40" />
                       </div>
                     )}
                     <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1 py-0.5 text-[9px] text-white text-center">

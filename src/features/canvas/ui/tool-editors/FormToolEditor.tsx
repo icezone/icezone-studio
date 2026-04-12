@@ -57,7 +57,7 @@ export function FormToolEditor({ fields, options, onOptionsChange }: FormToolEdi
             type="color"
             value={readTextOption(options, field.key)}
             onChange={(event) => updateOption(field.key, event.target.value)}
-            className="h-10 w-full rounded-lg border border-[rgba(255,255,255,0.12)] bg-bg-dark/90 p-1"
+            className="h-10 w-full rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-1"
           />
         );
       }
@@ -66,7 +66,7 @@ export function FormToolEditor({ fields, options, onOptionsChange }: FormToolEdi
         <UiSelect
           value={readTextOption(options, field.key)}
           onChange={(event) => updateOption(field.key, event.target.value)}
-          className="h-10 border-[rgba(255,255,255,0.12)] bg-bg-dark/90 text-sm"
+          className="h-10 border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] text-sm"
         >
           {field.options.map((option) => (
             <option key={option.value} value={option.value}>
@@ -83,7 +83,7 @@ export function FormToolEditor({ fields, options, onOptionsChange }: FormToolEdi
     <div className="space-y-4">
       {fields.map((field) => (
         <div key={field.key}>
-          <label className="mb-1 block text-xs text-text-muted">{field.label}</label>
+          <label className="mb-1 block text-xs text-[var(--canvas-node-fg-muted)]">{field.label}</label>
           {renderField(field)}
         </div>
       ))}
