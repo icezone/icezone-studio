@@ -429,5 +429,73 @@
     "videoRebuildDesc": "分析视频关键帧，重新生成分镜",
     "batchImageGen": "批量图片生成",
     "batchImageGenDesc": "批量生成多张 AI 图片"
+  },
+  "landing": {
+    "nav": {
+      "features": "功能",
+      "canvas": "画布演示",
+      "signIn": "登录",
+      "startFree": "免费开始 →"
+    },
+    "hero": {
+      "headline": "AI 原生创作画布",
+      "subtitle": "在节点式工作流中，将文字转化为分镜、图片与视频。专为创作者而生。",
+      "cta": "立即免费创建",
+      "ctaSecondary": "查看演示"
+    },
+    "canvas": {
+      "heading": "节点式 AI 工作流",
+      "subtitle": "将创意拆解为节点，让 AI 在每个环节协作生成，从小说到分镜一键直达。",
+      "nodeNovel": "小说文本",
+      "nodeAI": "AI 分镜生成",
+      "nodeStoryboard": "分镜画面",
+      "nodeImage": "AI 图片",
+      "generate": "生成",
+      "tryFree": "免费体验完整版",
+      "dragHint": "← 拖拽节点体验",
+      "fullApp": "在完整 App 中体验全部功能",
+      "canvasTitle": "IceZone Studio — 小说转分镜",
+      "nodeUploadTitle": "参考图片",
+      "nodeUploadMeta": "上传图片",
+      "nodeImageTitle": "AI 图片生成",
+      "nodeVideoTitle": "AI 视频生成",
+      "nodeImagePrompt": "生成梦幻风格的 AI 艺术图...",
+      "nodeVideoRef": "@图1 · 参考图片",
+      "download": "下载",
+      "addImage": "添加"
+    },
+    "features": {
+      "heading": "一个画布，全套 AI 创作",
+      "subtitle": "从文字到画面，所有 AI 能力汇聚于同一节点画布，无缝协作。",
+      "imageGen": {
+        "title": "AI 图片生成",
+        "desc": "通过文字描述生成高质量图片，支持 Flux、SDXL 等主流模型，直接在画布节点中完成。"
+      },
+      "videoGen": {
+        "title": "AI 视频生成",
+        "desc": "将静态图片或文字一键生成流畅视频，支持 Kling、万象、Vidu 等视频 AI 模型。"
+      },
+      "canvas": {
+        "title": "节点式创作画布",
+        "desc": "可视化节点工作流，自由连接输入、处理、输出节点，构建专属 AI 创作流程。"
+      },
+      "storyboard": {
+        "title": "智能分镜工具",
+        "desc": "从小说文本自动生成分镜脚本，支持镜头分析、画面预览与一键导出。"
+      }
+    },
+    "cta": {
+      "heading": "开始你的 AI 创作之旅",
+      "desc": "免费注册，立即体验节点式 AI 创作画布，将你的故事变成视觉作品。",
+      "signup": "免费注册",
+      "login": "已有账号？登录"
+    },
+    "footer": {
+      "tagline": "AI 原生创作画布，为创作者而生。",
+      "product": "产品",
+      "company": "关于",
+      "legal": "法律",
+      "copyright": "© {{year}} IceZone Studio. 保留所有权利。"
+    }
   }
 }

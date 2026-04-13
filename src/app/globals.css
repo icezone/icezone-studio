@@ -24,6 +24,13 @@
   --color-border: rgba(255, 255, 255, 0.08);
   --color-border-subtle: rgba(255, 255, 255, 0.05);
 
+  /* Landing v2 — hero & glass tokens */
+  --color-hero-overlay: rgba(7, 10, 16, 0.65);
+  --color-glass: rgba(255, 255, 255, 0.04);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-text-hero: #ffffff;
+  --color-text-secondary: #94a3b8;
+
   /* Canvas dark palette (static — always dark) */
   --color-bg-dark: #111113;
   --color-surface-dark: #1c1c21;
@@ -210,6 +217,10 @@ body {
 /* ─── Utility Classes ───────────────────────────────────── */
 .animate-reveal-up  { animation: reveal-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .animate-reveal-in  { animation: reveal-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* IntersectionObserver-triggered scroll reveal */
+.scroll-reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+.scroll-reveal.revealed { opacity: 1; transform: translateY(0); }
 .animate-float      { animation: float-y 5s ease-in-out infinite; }
 .animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
 .animate-gradient   { background-size: 200% 200%; animation: gradient-drift 4s ease infinite; }

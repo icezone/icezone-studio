@@ -429,5 +429,73 @@
     "videoRebuildDesc": "Analyze video keyframes and regenerate storyboard",
     "batchImageGen": "Batch Image Generation",
     "batchImageGenDesc": "Generate multiple AI images in batch"
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "canvas": "Canvas",
+      "signIn": "Sign in",
+      "startFree": "Start free →"
+    },
+    "hero": {
+      "headline": "AI-Native Creative Canvas",
+      "subtitle": "Transform ideas into storyboards, images, and videos inside a node-based workflow. Built for creators.",
+      "cta": "Start Creating Free",
+      "ctaSecondary": "See it in action"
+    },
+    "canvas": {
+      "heading": "Node-Based AI Workflow",
+      "subtitle": "Break your creative process into nodes. Let AI collaborate at every step — from novel to storyboard in one click.",
+      "nodeNovel": "Novel Text",
+      "nodeAI": "AI Storyboard Gen",
+      "nodeStoryboard": "Storyboard Frames",
+      "nodeImage": "AI Image",
+      "generate": "Generate",
+      "tryFree": "Try Full App Free",
+      "dragHint": "← Drag nodes to explore",
+      "fullApp": "Experience all features in the full app",
+      "canvasTitle": "IceZone Studio — Novel to Storyboard",
+      "nodeUploadTitle": "Reference Image",
+      "nodeUploadMeta": "Upload Image",
+      "nodeImageTitle": "AI Image Generation",
+      "nodeVideoTitle": "AI Video Generation",
+      "nodeImagePrompt": "Generate dreamy AI art style...",
+      "nodeVideoRef": "@img1 · Reference Image",
+      "download": "Download",
+      "addImage": "Add"
+    },
+    "features": {
+      "heading": "One Canvas, All AI Capabilities",
+      "subtitle": "From text to visuals, all AI tools converge on a single node canvas for seamless creative collaboration.",
+      "imageGen": {
+        "title": "AI Image Generation",
+        "desc": "Generate high-quality images from text prompts using Flux, SDXL, and more — directly within canvas nodes."
+      },
+      "videoGen": {
+        "title": "AI Video Generation",
+        "desc": "Turn images or text into smooth videos with Kling, Wan, Vidu, and other leading video AI models."
+      },
+      "canvas": {
+        "title": "Node-Based Creative Canvas",
+        "desc": "Visual node workflow — freely connect input, processing, and output nodes to build your own AI pipeline."
+      },
+      "storyboard": {
+        "title": "Smart Storyboard Tools",
+        "desc": "Auto-generate storyboard scripts from novel text, with shot analysis, frame preview, and one-click export."
+      }
+    },
+    "cta": {
+      "heading": "Start Your AI Creative Journey",
+      "desc": "Sign up free and experience the node-based AI creative canvas — turn your story into stunning visuals.",
+      "signup": "Sign up free",
+      "login": "Already have an account? Log in"
+    },
+    "footer": {
+      "tagline": "AI-native creative canvas, built for creators.",
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal",
+      "copyright": "© {{year}} IceZone Studio. All rights reserved."
+    }
   }
 }
