@@ -1,0 +1,1044 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "logo" [ref=e5] [cursor=pointer]:
+          - /url: /zh
+          - img [ref=e6]
+        - generic [ref=e15]:
+          - link "功能" [ref=e16] [cursor=pointer]:
+            - /url: ""
+            - generic [ref=e17]: 功能
+          - generic:
+            - generic:
+              - link "参考生视频":
+                - /url: /zh/ai-reference-to-video
+            - generic:
+              - link "图生视频":
+                - /url: /zh/ai-image-to-video
+            - generic:
+              - link "文生视频":
+                - /url: /zh/ai-text-to-video
+            - generic:
+              - link "AI音效":
+                - /url: /zh/ai-sound-effect-generator
+            - generic:
+              - link "AI生图":
+                - /url: /zh/ai-image-generator
+            - generic:
+              - link "Vidu Q3":
+                - /url: /zh/vidu-q3
+            - generic:
+              - link "Vidu Claw":
+                - /url: /zh/vidu-claw
+        - link "模板" [ref=e19] [cursor=pointer]:
+          - /url: /zh/templates
+          - generic [ref=e20]: 模板
+        - link "订阅套餐" [ref=e22] [cursor=pointer]:
+          - /url: /zh/pricing
+          - generic [ref=e23]: 订阅套餐
+        - link "艺术家计划" [ref=e25] [cursor=pointer]:
+          - /url: /zh/cpp
+          - generic [ref=e26]: 艺术家计划
+        - link "API开放平台" [ref=e28] [cursor=pointer]:
+          - /url: https://platform.vidu.com/
+          - generic [ref=e29]: API开放平台
+        - generic [ref=e30]:
+          - link "资源" [ref=e31] [cursor=pointer]:
+            - /url: ""
+            - generic [ref=e32]: 资源
+          - generic:
+            - generic:
+              - link "帮助中心":
+                - /url: /zh/help-center
+            - generic:
+              - link "教程":
+                - /url: /zh/home/tutorial
+      - generic [ref=e33] [cursor=pointer]:
+        - generic [ref=e34]:
+          - img [ref=e35]
+          - generic [ref=e38]: 语言
+          - img [ref=e39]
+        - button "下载App" [ref=e41]:
+          - img [ref=e42]
+          - generic [ref=e44]: 下载App
+        - link "trynow" [ref=e45]:
+          - /url: /zh/home
+          - text: 立即体验
+    - generic [ref=e46]:
+      - generic [ref=e63]:
+        - img "indicator_poster_0" [ref=e64] [cursor=pointer]
+        - img "indicator_poster_1" [ref=e65] [cursor=pointer]
+        - img "indicator_poster_2" [ref=e66] [cursor=pointer]
+        - img "indicator_poster_3" [ref=e67] [cursor=pointer]
+        - img "indicator_poster_4" [ref=e68] [cursor=pointer]
+      - generic [ref=e69]:
+        - heading "Vidu，让想象发生" [level=1] [ref=e70]
+        - generic [ref=e72]:
+          - generic [ref=e73]:
+            - img "banner-img" [ref=e74]
+            - generic [ref=e75]: "|"
+          - textbox [ref=e76]
+          - button "创作" [ref=e77] [cursor=pointer]:
+            - generic [ref=e78]: 创作
+          - generic:
+            - paragraph: 一位年轻的旅人站在金色沙漠中，身旁矗立着两座高耸的机器人，正凝望着地平线上缓缓升起的蘑菇云。镜头从他们身后开始，以低角度缓缓向前推进，沙尘在脚边盘旋。其中一具机器人微微移动，机械关节嘶鸣着向前迈出一步，沙粒在金属足底发出碎裂声。孩子的发丝与衣摆在暖风中轻轻飘动。光线极具电影质感——金色暮光晕染着柔和的镜头光晕与体积雾效果。寂静中张力渐增。广角镜头，电影级画幅，缓慢运镜，史诗级场景规模，凝重的情绪与机械的紧绷感交织，4K级照片写实主义。
+    - generic [ref=e79]:
+      - generic [ref=e80]:
+        - generic [ref=e81]:
+          - heading "参考生视频" [level=2] [ref=e82]
+          - generic [ref=e84]: 全球首个参考生视频功能，让您创作的角色、物体、场景等始终保持一致
+        - generic [ref=e86]:
+          - img [ref=e88] [cursor=pointer]
+          - generic [ref=e91]:
+            - generic [ref=e96]:
+              - generic [ref=e98]:
+                - img "poster-0" [ref=e99]
+                - img [ref=e101]
+                - img "poster-1" [ref=e103]
+                - img [ref=e105]
+                - img "poster-2" [ref=e107]
+              - generic [ref=e109]:
+                - img "poster-0" [ref=e110]
+                - img [ref=e112]
+                - img "poster-1" [ref=e114]
+                - img [ref=e116]
+                - img "poster-2" [ref=e118]
+            - generic [ref=e126]:
+              - generic [ref=e128]:
+                - img "poster-0" [ref=e129]
+                - img [ref=e131]
+                - img "poster-1" [ref=e133]
+                - img [ref=e135]
+                - img "poster-2" [ref=e137]
+              - generic [ref=e139]:
+                - img "poster-0" [ref=e140]
+                - img [ref=e142]
+                - img "poster-1" [ref=e144]
+                - img [ref=e146]
+                - img "poster-2" [ref=e148]
+            - generic [ref=e156]:
+              - generic [ref=e158]:
+                - img "poster-0" [ref=e159]
+                - img [ref=e161]
+                - img "poster-1" [ref=e163]
+                - img [ref=e165]
+                - img "poster-2" [ref=e167]
+              - generic [ref=e169]:
+                - img "poster-0" [ref=e170]
+                - img [ref=e172]
+                - img "poster-1" [ref=e174]
+                - img [ref=e176]
+                - img "poster-2" [ref=e178]
+          - img [ref=e183] [cursor=pointer]
+        - generic [ref=e185]:
+          - generic [ref=e186]:
+            - generic [ref=e187]:
+              - img [ref=e188]
+              - heading "多主体一致性" [level=3] [ref=e193]
+              - generic [ref=e194]: 确保人物、物体、场景在视频中始终保持一致，上传最多 7 张主体图片以确保准确性
+            - link "立即体验" [ref=e195] [cursor=pointer]:
+              - /url: /zh/create/character2video
+              - text: 立即体验
+              - img [ref=e196]
+            - img "多主体一致性" [ref=e198]
+          - generic [ref=e199]:
+            - generic [ref=e200]:
+              - img [ref=e201]
+              - heading "主体库" [level=3] [ref=e204]
+              - generic [ref=e205]: 将角色、道具和场景保存在主体库中，一键选择参考主体，提升创作效率与视频质量
+            - link "立即体验" [ref=e206] [cursor=pointer]:
+              - /url: /zh/create/character2video
+              - text: 立即体验
+              - img [ref=e207]
+            - img "主体库" [ref=e209]
+      - generic [ref=e210]:
+        - generic [ref=e211]:
+          - heading "图生视频" [level=2] [ref=e212]
+          - generic [ref=e214]: 基于任意图片描述您想象的画面，即刻动态呈现，让您的创意栩栩如生
+        - generic [ref=e216]:
+          - img [ref=e218] [cursor=pointer]
+          - generic [ref=e221]:
+            - generic [ref=e226]:
+              - generic [ref=e228]:
+                - img "poster-0" [ref=e229]
+                - img "lineArrow" [ref=e231]
+                - img "poster-1" [ref=e232]
+              - generic [ref=e234]:
+                - img "poster-0" [ref=e235]
+                - img "lineArrow" [ref=e237]
+                - img "poster-1" [ref=e238]
+            - generic [ref=e246]:
+              - generic [ref=e248]:
+                - img "poster-0" [ref=e249]
+                - img "lineArrow" [ref=e251]
+                - img "poster-1" [ref=e252]
+              - generic [ref=e254]:
+                - img "poster-0" [ref=e255]
+                - img "lineArrow" [ref=e257]
+                - img "poster-1" [ref=e258]
+            - generic [ref=e266]:
+              - generic [ref=e268]:
+                - img "poster-0" [ref=e269]
+                - img "lineArrow" [ref=e271]
+                - img "poster-1" [ref=e272]
+              - generic [ref=e274]:
+                - img "poster-0" [ref=e275]
+                - img "lineArrow" [ref=e277]
+                - img "poster-1" [ref=e278]
+          - img [ref=e283] [cursor=pointer]
+        - generic [ref=e285]:
+          - generic [ref=e286]:
+            - generic [ref=e287]:
+              - img [ref=e288]
+              - heading "首尾帧功能" [level=3] [ref=e294]
+              - generic [ref=e295]: 上传首帧和尾帧图片，Vidu AI 自动填充流畅过渡
+            - link "立即体验" [ref=e296] [cursor=pointer]:
+              - /url: /zh/create/img2video
+              - text: 立即体验
+              - img [ref=e297]
+            - img "首尾帧功能" [ref=e299]
+          - generic [ref=e300]:
+            - generic [ref=e301]:
+              - img [ref=e302]
+              - heading "漫画图片生成动画" [level=3] [ref=e305]
+              - generic [ref=e306]: 将漫画图片转化为角色动作流畅自然的动画视频
+            - link "立即体验" [ref=e307] [cursor=pointer]:
+              - /url: /zh/create/img2video
+              - text: 立即体验
+              - img [ref=e308]
+            - img "漫画图片生成动画" [ref=e310]
+    - generic [ref=e312]:
+      - heading "为什么选择 Vidu？" [level=2] [ref=e313]
+      - generic [ref=e314]: Vidu AI 实现他人所不能——全球数千万人信赖
+      - generic [ref=e315]:
+        - generic [ref=e316]:
+          - img [ref=e318]
+          - generic [ref=e320]:
+            - heading "极速生成" [level=3] [ref=e321]
+            - generic [ref=e322]: 视频
+          - generic [ref=e323]: 10 秒生成视频——快速、轻松、高效
+        - generic [ref=e325]:
+          - img [ref=e327]
+          - generic [ref=e330]:
+            - heading "流畅动漫" [level=3] [ref=e331]
+            - generic [ref=e332]: 画质
+          - generic [ref=e333]: 高品质动漫动画视频，角色动作自然流畅
+        - generic [ref=e335]:
+          - img [ref=e337]
+          - generic [ref=e339]:
+            - heading "错峰无限" [level=3] [ref=e340]
+            - generic [ref=e341]: 积分
+          - generic [ref=e342]: 错峰模式无限积分，无限次免费生成视频
+      - generic [ref=e346]:
+        - img "why-vidu" [ref=e347]
+        - img "why-vidu" [ref=e348]
+        - img "why-vidu" [ref=e349]
+        - img "why-vidu" [ref=e350]
+        - img "why-vidu" [ref=e351]
+        - img "why-vidu" [ref=e352]
+        - img "why-vidu" [ref=e353]
+        - img "why-vidu" [ref=e354]
+        - img "why-vidu" [ref=e355]
+        - img "why-vidu" [ref=e356]
+        - img "why-vidu" [ref=e357]
+        - img "why-vidu" [ref=e358]
+        - img "why-vidu" [ref=e359]
+        - img "why-vidu" [ref=e360]
+        - img "why-vidu" [ref=e361]
+        - img "why-vidu" [ref=e362]
+        - img "why-vidu" [ref=e363]
+        - img "why-vidu" [ref=e364]
+        - img "why-vidu" [ref=e365]
+        - img "why-vidu" [ref=e366]
+        - img "why-vidu" [ref=e367]
+        - img "why-vidu" [ref=e368]
+        - img "why-vidu" [ref=e369]
+        - img "why-vidu" [ref=e370]
+        - img "why-vidu" [ref=e371]
+        - img "why-vidu" [ref=e372]
+        - img "why-vidu" [ref=e373]
+        - img "why-vidu" [ref=e374]
+        - img "why-vidu" [ref=e375]
+        - img "why-vidu" [ref=e376]
+        - img "why-vidu" [ref=e377]
+        - img "why-vidu" [ref=e378]
+        - img "why-vidu" [ref=e379]
+        - img "why-vidu" [ref=e380]
+        - img "why-vidu" [ref=e381]
+        - img "why-vidu" [ref=e382]
+        - img "why-vidu" [ref=e383]
+        - img "why-vidu" [ref=e384]
+        - img "why-vidu" [ref=e385]
+    - generic [ref=e387]:
+      - generic [ref=e388]:
+        - img [ref=e390]
+        - heading "模板库" [level=2] [ref=e394]
+        - generic [ref=e395]: 尝试 Vidu 的爆款视频模板。亲吻、拥抱、万物生花、AI 换装等趣味玩法，轻松制作爆款短视频
+        - link "立即创作" [ref=e397] [cursor=pointer]:
+          - /url: /zh/templates
+      - generic [ref=e398]:
+        - img "视频封面" [ref=e401]
+        - img "视频封面" [ref=e404]
+        - img "视频封面" [ref=e407]
+        - img "视频封面" [ref=e410]
+        - img "视频封面" [ref=e413]
+        - img "视频封面" [ref=e416]
+    - generic [ref=e420]:
+      - heading "Vidu 场景案例" [level=2] [ref=e421]
+      - generic [ref=e425]:
+        - generic [ref=e427] [cursor=pointer]: 动漫创作
+        - generic [ref=e429] [cursor=pointer]: 广告营销
+        - generic [ref=e431] [cursor=pointer]: 互动娱乐
+        - generic [ref=e433] [cursor=pointer]: 文旅宣传
+        - generic [ref=e435] [cursor=pointer]: 影视制作
+      - generic [ref=e439]:
+        - generic [ref=e440]:
+          - img "视频封面" [ref=e443]
+          - img "视频封面" [ref=e446]
+        - generic [ref=e448]:
+          - img "视频封面" [ref=e451]
+          - img "视频封面" [ref=e454]
+        - generic [ref=e456]:
+          - img "视频封面" [ref=e459]
+          - img "视频封面" [ref=e462]
+        - generic [ref=e464]:
+          - img "视频封面" [ref=e467]
+          - img "视频封面" [ref=e470]
+        - generic [ref=e472]:
+          - img "视频封面" [ref=e475]
+          - img "视频封面" [ref=e478]
+    - generic [ref=e482]:
+      - generic:
+        - generic:
+          - generic:
+            - img
+          - heading "加入 Vidu" [level=2]
+          - generic: 创意社区
+          - generic:
+            - generic [ref=e484] [cursor=pointer]:
+              - img [ref=e485]
+              - generic [ref=e487]: 加入Discord
+            - link "加入艺术家计划" [ref=e488] [cursor=pointer]:
+              - /url: /zh/cpp
+              - generic [ref=e489]: 加入艺术家计划
+      - generic [ref=e490]:
+        - img "global_title13" [ref=e492]
+        - img "global_title1" [ref=e494]
+        - img "global_title12" [ref=e496]
+        - img "global_title4" [ref=e498]
+        - img "global_title5" [ref=e500]
+        - img "global_title8" [ref=e502]
+        - img "global_title10" [ref=e504]
+        - img "global_title11" [ref=e506]
+        - img "global_title15" [ref=e508]
+        - img "global_title14" [ref=e510]
+    - generic [ref=e512]:
+      - img [ref=e514]
+      - heading "用户声音" [level=2] [ref=e518]
+      - generic [ref=e521]:
+        - generic [ref=e522]:
+          - generic [ref=e523]:
+            - generic [ref=e524]:
+              - img "quote" [ref=e525]
+              - img [ref=e526]
+            - generic [ref=e529]: Experience a dynamic array of futuristic scenes that showcase the groundbreaking capabilities of the Vidu AI generation tool. Video created using Vidu AI. Thanks for this video making technology.
+            - generic [ref=e531]:
+              - generic [ref=e532]: "@JollyNutlet"
+              - img [ref=e533]
+              - generic [ref=e536]: JollyNutlet | AI Video Clips
+              - img "头像" [ref=e537]
+          - generic [ref=e538]:
+            - generic [ref=e539]:
+              - img "quote" [ref=e540]
+              - img [ref=e541]
+            - generic [ref=e544]: Vidu Best AI creation tool for fast speed Anime Style!
+            - generic [ref=e546]:
+              - generic [ref=e547]: "@RockzAiLab"
+              - img [ref=e548]
+              - generic [ref=e551]: Rockzheart.AI.ART
+              - img "头像" [ref=e552]
+        - generic [ref=e553]:
+          - generic [ref=e554]:
+            - generic [ref=e555]:
+              - img "quote" [ref=e556]
+              - img [ref=e557]
+            - generic [ref=e560]: I'm testing a new AI tool named 'Vidu'. The quality is really superb!
+            - generic [ref=e562]:
+              - generic [ref=e563]: "@naegiko"
+              - img [ref=e564]
+              - generic [ref=e567]: Naegiko | AI Animator
+              - img "头像" [ref=e568]
+          - generic [ref=e569]:
+            - generic [ref=e570]:
+              - img "quote" [ref=e571]
+              - img [ref=e572]
+            - generic [ref=e575]: This is crazy! Big studios might spend over a week creating this scene... but with Vidu, it's done in no time! Vidu is the best AI creation tool you can find—unbelievably fast, insanely impressive.
+            - generic [ref=e577]:
+              - generic [ref=e578]: "@BloodyR64240"
+              - img [ref=e579]
+              - generic [ref=e582]: Edixo
+              - img "头像" [ref=e583]
+        - generic [ref=e584]:
+          - generic [ref=e585]:
+            - generic [ref=e586]:
+              - img "quote" [ref=e587]
+              - img [ref=e588]
+            - generic [ref=e591]: "Vidu brings us something new and really interesting: the Multi Entity Consistency."
+            - generic [ref=e593]:
+              - generic [ref=e594]: "@RoyalKongz"
+              - img [ref=e595]
+              - generic [ref=e598]: RoyalKongZ (Laurent)
+              - img "头像" [ref=e599]
+          - generic [ref=e600]:
+            - generic [ref=e601]:
+              - img "quote" [ref=e602]
+              - img [ref=e603]
+            - generic [ref=e606]: VIDU AI's Reference to Video model is NEXT-LEVEL.. Take 3 images, and AI generates a smooth, cinematic sequence with perfect character consistency. The future of AI filmmaking is unfolding before our eyes...
+            - generic [ref=e608]:
+              - generic [ref=e609]: "@FutureVibesAi"
+              - img [ref=e610]
+              - generic [ref=e613]: Future AI World
+              - img "头像" [ref=e614]
+        - generic [ref=e615]:
+          - generic [ref=e616]:
+            - generic [ref=e617]:
+              - img "quote" [ref=e618]
+              - img [ref=e619]
+            - generic [ref=e622]: This is crazy! Big studios might spend over a week creating this scene... but with Vidu, it's done in no time! Vidu is the best AI creation tool you can find—unbelievably fast, insanely impressive.
+            - generic [ref=e624]:
+              - generic [ref=e625]: "@BloodyR64240"
+              - img [ref=e626]
+              - generic [ref=e629]: Edixo
+              - img "头像" [ref=e630]
+          - generic [ref=e631]:
+            - generic [ref=e632]:
+              - img "quote" [ref=e633]
+              - img [ref=e634]
+            - generic [ref=e637]: I'm gonna keep claiming Vidu is THE BEST ai video generator for Anime. This is just sick.
+            - generic [ref=e639]:
+              - generic [ref=e640]: "@patriciostar_"
+              - img [ref=e641]
+              - generic [ref=e644]: Nikola|imakegames&music
+              - img "头像" [ref=e645]
+        - generic [ref=e646]:
+          - generic [ref=e647]:
+            - generic [ref=e648]:
+              - img "quote" [ref=e649]
+              - img [ref=e650]
+            - generic [ref=e653]: Vidu is the best AI creation tool you can find, with impressive speed!
+            - generic [ref=e655]:
+              - generic [ref=e656]: "@Lars_pragmata"
+              - img [ref=e657]
+              - generic [ref=e660]: Kathleen "Melody Prism"
+              - img "头像" [ref=e661]
+          - generic [ref=e662]:
+            - generic [ref=e663]:
+              - img "quote" [ref=e664]
+              - img [ref=e665]
+            - generic [ref=e668]: VIDU Multi-Entity Consistency. Give Vidu 2/3 images and it'll turn them into a video—it's pure magic! Your own characters interacting with objects and in the exact environment you want! Ads, movies…are endless possibilities, and this is just the beginning! Thanks @Viduforhuman. The future is a carrot!
+            - generic [ref=e670]:
+              - generic [ref=e671]: "@hungrydonke"
+              - img [ref=e672]
+              - generic [ref=e675]: Hungry Donk-E
+              - img "头像" [ref=e676]
+        - generic [ref=e677]:
+          - generic [ref=e678]:
+            - generic [ref=e679]:
+              - img "quote" [ref=e680]
+              - img [ref=e681]
+            - generic [ref=e684]: Vidu Best AI creation tool for fast speed Anime Style!
+            - generic [ref=e686]:
+              - generic [ref=e687]: "@RockzAiLab"
+              - img [ref=e688]
+              - generic [ref=e691]: Rockzheart.AI.ART
+              - img "头像" [ref=e692]
+          - generic [ref=e693]:
+            - generic [ref=e694]:
+              - img "quote" [ref=e695]
+              - img [ref=e696]
+            - generic [ref=e699]: "Vidu brings us something new and really interesting: the Multi Entity Consistency."
+            - generic [ref=e701]:
+              - generic [ref=e702]: "@RoyalKongz"
+              - img [ref=e703]
+              - generic [ref=e706]: RoyalKongZ (Laurent)
+              - img "头像" [ref=e707]
+        - generic [ref=e708]:
+          - generic [ref=e709]:
+            - generic [ref=e710]:
+              - img "quote" [ref=e711]
+              - img [ref=e712]
+            - generic [ref=e715]: VIDU Multi-Entity Consistency. Give Vidu 2/3 images and it'll turn them into a video—it's pure magic! Your own characters interacting with objects and in the exact environment you want! Ads, movies…are endless possibilities, and this is just the beginning! Thanks @Viduforhuman. The future is a carrot!
+            - generic [ref=e717]:
+              - generic [ref=e718]: "@hungrydonke"
+              - img [ref=e719]
+              - generic [ref=e722]: Hungry Donk-E
+              - img "头像" [ref=e723]
+          - generic [ref=e724]:
+            - generic [ref=e725]:
+              - img "quote" [ref=e726]
+              - img [ref=e727]
+            - generic [ref=e730]: I'm testing a new AI tool named 'Vidu'. The quality is really superb!
+            - generic [ref=e732]:
+              - generic [ref=e733]: "@naegiko"
+              - img [ref=e734]
+              - generic [ref=e737]: Naegiko | AI Animator
+              - img "头像" [ref=e738]
+        - generic [ref=e739]:
+          - generic [ref=e740]:
+            - generic [ref=e741]:
+              - img "quote" [ref=e742]
+              - img [ref=e743]
+            - generic [ref=e746]: I'm gonna keep claiming Vidu is THE BEST ai video generator for Anime. This is just sick.
+            - generic [ref=e748]:
+              - generic [ref=e749]: "@patriciostar_"
+              - img [ref=e750]
+              - generic [ref=e753]: Nikola|imakegames&music
+              - img "头像" [ref=e754]
+          - generic [ref=e755]:
+            - generic [ref=e756]:
+              - img "quote" [ref=e757]
+              - img [ref=e758]
+            - generic [ref=e761]: Vidu is the best AI creation tool you can find, with impressive speed!
+            - generic [ref=e763]:
+              - generic [ref=e764]: "@Lars_pragmata"
+              - img [ref=e765]
+              - generic [ref=e768]: Kathleen "Melody Prism"
+              - img "头像" [ref=e769]
+        - generic [ref=e770]:
+          - generic [ref=e771]:
+            - generic [ref=e772]:
+              - img "quote" [ref=e773]
+              - img [ref=e774]
+            - generic [ref=e777]: VIDU AI's Reference to Video model is NEXT-LEVEL.. Take 3 images, and AI generates a smooth, cinematic sequence with perfect character consistency. The future of AI filmmaking is unfolding before our eyes...
+            - generic [ref=e779]:
+              - generic [ref=e780]: "@FutureVibesAi"
+              - img [ref=e781]
+              - generic [ref=e784]: Future AI World
+              - img "头像" [ref=e785]
+          - generic [ref=e786]:
+            - generic [ref=e787]:
+              - img "quote" [ref=e788]
+              - img [ref=e789]
+            - generic [ref=e792]: This is crazy! Big studios might spend over a week creating this scene... but with Vidu, it's done in no time! Vidu is the best AI creation tool you can find—unbelievably fast, insanely impressive.
+            - generic [ref=e794]:
+              - generic [ref=e795]: "@BloodyR64240"
+              - img [ref=e796]
+              - generic [ref=e799]: Edixo
+              - img "头像" [ref=e800]
+        - generic [ref=e801]:
+          - generic [ref=e802]:
+            - generic [ref=e803]:
+              - img "quote" [ref=e804]
+              - img [ref=e805]
+            - generic [ref=e808]: Experience a dynamic array of futuristic scenes that showcase the groundbreaking capabilities of the Vidu AI generation tool. Video created using Vidu AI. Thanks for this video making technology.
+            - generic [ref=e810]:
+              - generic [ref=e811]: "@JollyNutlet"
+              - img [ref=e812]
+              - generic [ref=e815]: JollyNutlet | AI Video Clips
+              - img "头像" [ref=e816]
+          - generic [ref=e817]:
+            - generic [ref=e818]:
+              - img "quote" [ref=e819]
+              - img [ref=e820]
+            - generic [ref=e823]: Vidu Best AI creation tool for fast speed Anime Style!
+            - generic [ref=e825]:
+              - generic [ref=e826]: "@RockzAiLab"
+              - img [ref=e827]
+              - generic [ref=e830]: Rockzheart.AI.ART
+              - img "头像" [ref=e831]
+        - generic [ref=e832]:
+          - generic [ref=e833]:
+            - generic [ref=e834]:
+              - img "quote" [ref=e835]
+              - img [ref=e836]
+            - generic [ref=e839]: I'm testing a new AI tool named 'Vidu'. The quality is really superb!
+            - generic [ref=e841]:
+              - generic [ref=e842]: "@naegiko"
+              - img [ref=e843]
+              - generic [ref=e846]: Naegiko | AI Animator
+              - img "头像" [ref=e847]
+          - generic [ref=e848]:
+            - generic [ref=e849]:
+              - img "quote" [ref=e850]
+              - img [ref=e851]
+            - generic [ref=e854]: This is crazy! Big studios might spend over a week creating this scene... but with Vidu, it's done in no time! Vidu is the best AI creation tool you can find—unbelievably fast, insanely impressive.
+            - generic [ref=e856]:
+              - generic [ref=e857]: "@BloodyR64240"
+              - img [ref=e858]
+              - generic [ref=e861]: Edixo
+              - img "头像" [ref=e862]
+        - generic [ref=e863]:
+          - generic [ref=e864]:
+            - generic [ref=e865]:
+              - img "quote" [ref=e866]
+              - img [ref=e867]
+            - generic [ref=e870]: "Vidu brings us something new and really interesting: the Multi Entity Consistency."
+            - generic [ref=e872]:
+              - generic [ref=e873]: "@RoyalKongz"
+              - img [ref=e874]
+              - generic [ref=e877]: RoyalKongZ (Laurent)
+              - img "头像" [ref=e878]
+          - generic [ref=e879]:
+            - generic [ref=e880]:
+              - img "quote" [ref=e881]
+              - img [ref=e882]
+            - generic [ref=e885]: VIDU AI's Reference to Video model is NEXT-LEVEL.. Take 3 images, and AI generates a smooth, cinematic sequence with perfect character consistency. The future of AI filmmaking is unfolding before our eyes...
+            - generic [ref=e887]:
+              - generic [ref=e888]: "@FutureVibesAi"
+              - img [ref=e889]
+              - generic [ref=e892]: Future AI World
+              - img "头像" [ref=e893]
+        - generic [ref=e894]:
+          - generic [ref=e895]:
+            - generic [ref=e896]:
+              - img "quote" [ref=e897]
+              - img [ref=e898]
+            - generic [ref=e901]: This is crazy! Big studios might spend over a week creating this scene... but with Vidu, it's done in no time! Vidu is the best AI creation tool you can find—unbelievably fast, insanely impressive.
+            - generic [ref=e903]:
+              - generic [ref=e904]: "@BloodyR64240"
+              - img [ref=e905]
+              - generic [ref=e908]: Edixo
+              - img "头像" [ref=e909]
+          - generic [ref=e910]:
+            - generic [ref=e911]:
+              - img "quote" [ref=e912]
+              - img [ref=e913]
+            - generic [ref=e916]: I'm gonna keep claiming Vidu is THE BEST ai video generator for Anime. This is just sick.
+            - generic [ref=e918]:
+              - generic [ref=e919]: "@patriciostar_"
+              - img [ref=e920]
+              - generic [ref=e923]: Nikola|imakegames&music
+              - img "头像" [ref=e924]
+        - generic [ref=e925]:
+          - generic [ref=e926]:
+            - generic [ref=e927]:
+              - img "quote" [ref=e928]
+              - img [ref=e929]
+            - generic [ref=e932]: Vidu is the best AI creation tool you can find, with impressive speed!
+            - generic [ref=e934]:
+              - generic [ref=e935]: "@Lars_pragmata"
+              - img [ref=e936]
+              - generic [ref=e939]: Kathleen "Melody Prism"
+              - img "头像" [ref=e940]
+          - generic [ref=e941]:
+            - generic [ref=e942]:
+              - img "quote" [ref=e943]
+              - img [ref=e944]
+            - generic [ref=e947]: VIDU Multi-Entity Consistency. Give Vidu 2/3 images and it'll turn them into a video—it's pure magic! Your own characters interacting with objects and in the exact environment you want! Ads, movies…are endless possibilities, and this is just the beginning! Thanks @Viduforhuman. The future is a carrot!
+            - generic [ref=e949]:
+              - generic [ref=e950]: "@hungrydonke"
+              - img [ref=e951]
+              - generic [ref=e954]: Hungry Donk-E
+              - img "头像" [ref=e955]
+        - generic [ref=e956]:
+          - generic [ref=e957]:
+            - generic [ref=e958]:
+              - img "quote" [ref=e959]
+              - img [ref=e960]
+            - generic [ref=e963]: Vidu Best AI creation tool for fast speed Anime Style!
+            - generic [ref=e965]:
+              - generic [ref=e966]: "@RockzAiLab"
+              - img [ref=e967]
+              - generic [ref=e970]: Rockzheart.AI.ART
+              - img "头像" [ref=e971]
+          - generic [ref=e972]:
+            - generic [ref=e973]:
+              - img "quote" [ref=e974]
+              - img [ref=e975]
+            - generic [ref=e978]: "Vidu brings us something new and really interesting: the Multi Entity Consistency."
+            - generic [ref=e980]:
+              - generic [ref=e981]: "@RoyalKongz"
+              - img [ref=e982]
+              - generic [ref=e985]: RoyalKongZ (Laurent)
+              - img "头像" [ref=e986]
+        - generic [ref=e987]:
+          - generic [ref=e988]:
+            - generic [ref=e989]:
+              - img "quote" [ref=e990]
+              - img [ref=e991]
+            - generic [ref=e994]: VIDU Multi-Entity Consistency. Give Vidu 2/3 images and it'll turn them into a video—it's pure magic! Your own characters interacting with objects and in the exact environment you want! Ads, movies…are endless possibilities, and this is just the beginning! Thanks @Viduforhuman. The future is a carrot!
+            - generic [ref=e996]:
+              - generic [ref=e997]: "@hungrydonke"
+              - img [ref=e998]
+              - generic [ref=e1001]: Hungry Donk-E
+              - img "头像" [ref=e1002]
+          - generic [ref=e1003]:
+            - generic [ref=e1004]:
+              - img "quote" [ref=e1005]
+              - img [ref=e1006]
+            - generic [ref=e1009]: I'm testing a new AI tool named 'Vidu'. The quality is really superb!
+            - generic [ref=e1011]:
+              - generic [ref=e1012]: "@naegiko"
+              - img [ref=e1013]
+              - generic [ref=e1016]: Naegiko | AI Animator
+              - img "头像" [ref=e1017]
+        - generic [ref=e1018]:
+          - generic [ref=e1019]:
+            - generic [ref=e1020]:
+              - img "quote" [ref=e1021]
+              - img [ref=e1022]
+            - generic [ref=e1025]: I'm gonna keep claiming Vidu is THE BEST ai video generator for Anime. This is just sick.
+            - generic [ref=e1027]:
+              - generic [ref=e1028]: "@patriciostar_"
+              - img [ref=e1029]
+              - generic [ref=e1032]: Nikola|imakegames&music
+              - img "头像" [ref=e1033]
+          - generic [ref=e1034]:
+            - generic [ref=e1035]:
+              - img "quote" [ref=e1036]
+              - img [ref=e1037]
+            - generic [ref=e1040]: Vidu is the best AI creation tool you can find, with impressive speed!
+            - generic [ref=e1042]:
+              - generic [ref=e1043]: "@Lars_pragmata"
+              - img [ref=e1044]
+              - generic [ref=e1047]: Kathleen "Melody Prism"
+              - img "头像" [ref=e1048]
+        - generic [ref=e1049]:
+          - generic [ref=e1050]:
+            - generic [ref=e1051]:
+              - img "quote" [ref=e1052]
+              - img [ref=e1053]
+            - generic [ref=e1056]: VIDU AI's Reference to Video model is NEXT-LEVEL.. Take 3 images, and AI generates a smooth, cinematic sequence with perfect character consistency. The future of AI filmmaking is unfolding before our eyes...
+            - generic [ref=e1058]:
+              - generic [ref=e1059]: "@FutureVibesAi"
+              - img [ref=e1060]
+              - generic [ref=e1063]: Future AI World
+              - img "头像" [ref=e1064]
+          - generic [ref=e1065]:
+            - generic [ref=e1066]:
+              - img "quote" [ref=e1067]
+              - img [ref=e1068]
+            - generic [ref=e1071]: This is crazy! Big studios might spend over a week creating this scene... but with Vidu, it's done in no time! Vidu is the best AI creation tool you can find—unbelievably fast, insanely impressive.
+            - generic [ref=e1073]:
+              - generic [ref=e1074]: "@BloodyR64240"
+              - img [ref=e1075]
+              - generic [ref=e1078]: Edixo
+              - img "头像" [ref=e1079]
+        - generic [ref=e1080]:
+          - generic [ref=e1081]:
+            - generic [ref=e1082]:
+              - img "quote" [ref=e1083]
+              - img [ref=e1084]
+            - generic [ref=e1087]: Experience a dynamic array of futuristic scenes that showcase the groundbreaking capabilities of the Vidu AI generation tool. Video created using Vidu AI. Thanks for this video making technology.
+            - generic [ref=e1089]:
+              - generic [ref=e1090]: "@JollyNutlet"
+              - img [ref=e1091]
+              - generic [ref=e1094]: JollyNutlet | AI Video Clips
+              - img "头像" [ref=e1095]
+          - generic [ref=e1096]:
+            - generic [ref=e1097]:
+              - img "quote" [ref=e1098]
+              - img [ref=e1099]
+            - generic [ref=e1102]: Vidu Best AI creation tool for fast speed Anime Style!
+            - generic [ref=e1104]:
+              - generic [ref=e1105]: "@RockzAiLab"
+              - img [ref=e1106]
+              - generic [ref=e1109]: Rockzheart.AI.ART
+              - img "头像" [ref=e1110]
+        - generic [ref=e1111]:
+          - generic [ref=e1112]:
+            - generic [ref=e1113]:
+              - img "quote" [ref=e1114]
+              - img [ref=e1115]
+            - generic [ref=e1118]: I'm testing a new AI tool named 'Vidu'. The quality is really superb!
+            - generic [ref=e1120]:
+              - generic [ref=e1121]: "@naegiko"
+              - img [ref=e1122]
+              - generic [ref=e1125]: Naegiko | AI Animator
+              - img "头像" [ref=e1126]
+          - generic [ref=e1127]:
+            - generic [ref=e1128]:
+              - img "quote" [ref=e1129]
+              - img [ref=e1130]
+            - generic [ref=e1133]: This is crazy! Big studios might spend over a week creating this scene... but with Vidu, it's done in no time! Vidu is the best AI creation tool you can find—unbelievably fast, insanely impressive.
+            - generic [ref=e1135]:
+              - generic [ref=e1136]: "@BloodyR64240"
+              - img [ref=e1137]
+              - generic [ref=e1140]: Edixo
+              - img "头像" [ref=e1141]
+        - generic [ref=e1142]:
+          - generic [ref=e1143]:
+            - generic [ref=e1144]:
+              - img "quote" [ref=e1145]
+              - img [ref=e1146]
+            - generic [ref=e1149]: "Vidu brings us something new and really interesting: the Multi Entity Consistency."
+            - generic [ref=e1151]:
+              - generic [ref=e1152]: "@RoyalKongz"
+              - img [ref=e1153]
+              - generic [ref=e1156]: RoyalKongZ (Laurent)
+              - img "头像" [ref=e1157]
+          - generic [ref=e1158]:
+            - generic [ref=e1159]:
+              - img "quote" [ref=e1160]
+              - img [ref=e1161]
+            - generic [ref=e1164]: VIDU AI's Reference to Video model is NEXT-LEVEL.. Take 3 images, and AI generates a smooth, cinematic sequence with perfect character consistency. The future of AI filmmaking is unfolding before our eyes...
+            - generic [ref=e1166]:
+              - generic [ref=e1167]: "@FutureVibesAi"
+              - img [ref=e1168]
+              - generic [ref=e1171]: Future AI World
+              - img "头像" [ref=e1172]
+        - generic [ref=e1173]:
+          - generic [ref=e1174]:
+            - generic [ref=e1175]:
+              - img "quote" [ref=e1176]
+              - img [ref=e1177]
+            - generic [ref=e1180]: This is crazy! Big studios might spend over a week creating this scene... but with Vidu, it's done in no time! Vidu is the best AI creation tool you can find—unbelievably fast, insanely impressive.
+            - generic [ref=e1182]:
+              - generic [ref=e1183]: "@BloodyR64240"
+              - img [ref=e1184]
+              - generic [ref=e1187]: Edixo
+              - img "头像" [ref=e1188]
+          - generic [ref=e1189]:
+            - generic [ref=e1190]:
+              - img "quote" [ref=e1191]
+              - img [ref=e1192]
+            - generic [ref=e1195]: I'm gonna keep claiming Vidu is THE BEST ai video generator for Anime. This is just sick.
+            - generic [ref=e1197]:
+              - generic [ref=e1198]: "@patriciostar_"
+              - img [ref=e1199]
+              - generic [ref=e1202]: Nikola|imakegames&music
+              - img "头像" [ref=e1203]
+        - generic [ref=e1204]:
+          - generic [ref=e1205]:
+            - generic [ref=e1206]:
+              - img "quote" [ref=e1207]
+              - img [ref=e1208]
+            - generic [ref=e1211]: Vidu is the best AI creation tool you can find, with impressive speed!
+            - generic [ref=e1213]:
+              - generic [ref=e1214]: "@Lars_pragmata"
+              - img [ref=e1215]
+              - generic [ref=e1218]: Kathleen "Melody Prism"
+              - img "头像" [ref=e1219]
+          - generic [ref=e1220]:
+            - generic [ref=e1221]:
+              - img "quote" [ref=e1222]
+              - img [ref=e1223]
+            - generic [ref=e1226]: VIDU Multi-Entity Consistency. Give Vidu 2/3 images and it'll turn them into a video—it's pure magic! Your own characters interacting with objects and in the exact environment you want! Ads, movies…are endless possibilities, and this is just the beginning! Thanks @Viduforhuman. The future is a carrot!
+            - generic [ref=e1228]:
+              - generic [ref=e1229]: "@hungrydonke"
+              - img [ref=e1230]
+              - generic [ref=e1233]: Hungry Donk-E
+              - img "头像" [ref=e1234]
+        - generic [ref=e1235]:
+          - generic [ref=e1236]:
+            - generic [ref=e1237]:
+              - img "quote" [ref=e1238]
+              - img [ref=e1239]
+            - generic [ref=e1242]: Vidu Best AI creation tool for fast speed Anime Style!
+            - generic [ref=e1244]:
+              - generic [ref=e1245]: "@RockzAiLab"
+              - img [ref=e1246]
+              - generic [ref=e1249]: Rockzheart.AI.ART
+              - img "头像" [ref=e1250]
+          - generic [ref=e1251]:
+            - generic [ref=e1252]:
+              - img "quote" [ref=e1253]
+              - img [ref=e1254]
+            - generic [ref=e1257]: "Vidu brings us something new and really interesting: the Multi Entity Consistency."
+            - generic [ref=e1259]:
+              - generic [ref=e1260]: "@RoyalKongz"
+              - img [ref=e1261]
+              - generic [ref=e1264]: RoyalKongZ (Laurent)
+              - img "头像" [ref=e1265]
+        - generic [ref=e1266]:
+          - generic [ref=e1267]:
+            - generic [ref=e1268]:
+              - img "quote" [ref=e1269]
+              - img [ref=e1270]
+            - generic [ref=e1273]: VIDU Multi-Entity Consistency. Give Vidu 2/3 images and it'll turn them into a video—it's pure magic! Your own characters interacting with objects and in the exact environment you want! Ads, movies…are endless possibilities, and this is just the beginning! Thanks @Viduforhuman. The future is a carrot!
+            - generic [ref=e1275]:
+              - generic [ref=e1276]: "@hungrydonke"
+              - img [ref=e1277]
+              - generic [ref=e1280]: Hungry Donk-E
+              - img "头像" [ref=e1281]
+          - generic [ref=e1282]:
+            - generic [ref=e1283]:
+              - img "quote" [ref=e1284]
+              - img [ref=e1285]
+            - generic [ref=e1288]: I'm testing a new AI tool named 'Vidu'. The quality is really superb!
+            - generic [ref=e1290]:
+              - generic [ref=e1291]: "@naegiko"
+              - img [ref=e1292]
+              - generic [ref=e1295]: Naegiko | AI Animator
+              - img "头像" [ref=e1296]
+        - generic [ref=e1297]:
+          - generic [ref=e1298]:
+            - generic [ref=e1299]:
+              - img "quote" [ref=e1300]
+              - img [ref=e1301]
+            - generic [ref=e1304]: I'm gonna keep claiming Vidu is THE BEST ai video generator for Anime. This is just sick.
+            - generic [ref=e1306]:
+              - generic [ref=e1307]: "@patriciostar_"
+              - img [ref=e1308]
+              - generic [ref=e1311]: Nikola|imakegames&music
+              - img "头像" [ref=e1312]
+          - generic [ref=e1313]:
+            - generic [ref=e1314]:
+              - img "quote" [ref=e1315]
+              - img [ref=e1316]
+            - generic [ref=e1319]: Vidu is the best AI creation tool you can find, with impressive speed!
+            - generic [ref=e1321]:
+              - generic [ref=e1322]: "@Lars_pragmata"
+              - img [ref=e1323]
+              - generic [ref=e1326]: Kathleen "Melody Prism"
+              - img "头像" [ref=e1327]
+        - generic [ref=e1328]:
+          - generic [ref=e1329]:
+            - generic [ref=e1330]:
+              - img "quote" [ref=e1331]
+              - img [ref=e1332]
+            - generic [ref=e1335]: VIDU AI's Reference to Video model is NEXT-LEVEL.. Take 3 images, and AI generates a smooth, cinematic sequence with perfect character consistency. The future of AI filmmaking is unfolding before our eyes...
+            - generic [ref=e1337]:
+              - generic [ref=e1338]: "@FutureVibesAi"
+              - img [ref=e1339]
+              - generic [ref=e1342]: Future AI World
+              - img "头像" [ref=e1343]
+          - generic [ref=e1344]:
+            - generic [ref=e1345]:
+              - img "quote" [ref=e1346]
+              - img [ref=e1347]
+            - generic [ref=e1350]: This is crazy! Big studios might spend over a week creating this scene... but with Vidu, it's done in no time! Vidu is the best AI creation tool you can find—unbelievably fast, insanely impressive.
+            - generic [ref=e1352]:
+              - generic [ref=e1353]: "@BloodyR64240"
+              - img [ref=e1354]
+              - generic [ref=e1357]: Edixo
+              - img "头像" [ref=e1358]
+    - generic [ref=e1360]:
+      - generic [ref=e1362]:
+        - generic [ref=e1363]:
+          - heading "常见问答" [level=2] [ref=e1364]
+          - generic [ref=e1365]: 您可以在这里找到关于 Vidu 的常见问题解答，帮助您更好地了解和使用 Vidu。
+        - generic [ref=e1366]:
+          - generic [ref=e1367]:
+            - generic [ref=e1368]:
+              - generic [ref=e1369]: 什么是 Vidu？
+              - img [ref=e1370]
+            - generic [ref=e1372]:
+              - generic [ref=e1374]: Vidu 是北京生数科技有限公司联合清华大学发布的中国首个长时长、高一致性、高动态性视频大模型。Vidu 可以将文本和图片转化为高质量视频，支持多种创作模式，包括文生视频、图生视频和参考生视频。Vidu 专为独立创作者和团队打造，简化了动态视频、2D 动画及多种艺术风格的制作流程，让用户轻松实现创意表达。
+              - generic [ref=e1376]: Vidu 具备强大的语义理解能力和高级镜头运动设计，消除了复杂的制作流程，让创作者可以专注于创意本身。从低分辨率到高清 1080p 输出，Vidu 提供极高的灵活性和效率，为创作提供更广阔的空间。
+          - generic [ref=e1377]:
+            - generic [ref=e1378]:
+              - generic [ref=e1379]: Vidu 的用途是什么？
+              - img [ref=e1380]
+            - generic [ref=e1382]:
+              - generic [ref=e1383]:
+                - generic [ref=e1384]: Vidu AI 是一款强大的 AI 视频生成工具，以卓越的主体一致性和高速生成能力闻名，广泛应用于多个行业，包括社交媒体内容创作、专业视频制作和商业广告等。
+                - list [ref=e1386]:
+                  - listitem [ref=e1387]: 许多创作者使用 Vidu AI 生成病毒式传播的短视频，如亲吻、拥抱等热门内容。
+                  - listitem [ref=e1388]: 影视工作室和动画团队利用 Vidu AI 制作电影级动画和专业级内容。
+                  - listitem [ref=e1389]: 企业使用 Vidu AI 优化营销视频，例如通过图片转视频让产品图像动起来，或使用参考图转视频更改广告背景，使视频广告更加生动有趣。
+              - generic [ref=e1391]: 凭借先进的 AI 能力，Vidu AI 为创作者、影视团队和商业用户提供了高效视频创作解决方案。
+          - generic [ref=e1392]:
+            - generic [ref=e1393]:
+              - generic [ref=e1394]: Vidu 的参考生视频和图生视频有什么区别？
+              - img [ref=e1395]
+            - generic [ref=e1397]:
+              - generic [ref=e1398]:
+                - generic [ref=e1399]: 图生视频：
+                - list [ref=e1401]:
+                  - listitem [ref=e1402]: 允许用户从静态图片生成 AI 视频，让画面动起来，赋予其动画效果。用户还可以自定义视频的首帧和尾帧，优化视频的流畅度。这一功能大大简化了视频和动画制作过程，生成结果往往充满创意和惊喜。
+              - generic [ref=e1403]:
+                - generic [ref=e1404]: 参考生视频：
+                - list [ref=e1406]:
+                  - listitem [ref=e1407]: 允许用户上传 3 张或更多张参考图片，Vidu 会根据提示词将多个视觉元素融合，生成一个无缝衔接的视频。用户还可以上传同一人物或物体的多个角度，确保视频中的主体一致性。Vidu 还提供主体库功能，用户可以将人物、道具、物体等添加到主体库，提高视频生成效率。这一功能适用于需要高度一致性的视频生成任务，完美融合多张参考图，实现自然流畅的动画效果。
+          - generic [ref=e1408]:
+            - generic [ref=e1409]:
+              - generic [ref=e1410]: Vidu 是免费的吗？
+              - img [ref=e1411]
+            - generic [ref=e1415]: 所有用户可获得一定数量的免费积分，无需付费即可生成视频。
+          - generic [ref=e1416]:
+            - generic [ref=e1417]:
+              - generic [ref=e1418]: Vidu AI 是否安全？
+              - img [ref=e1419]
+            - generic [ref=e1423]: 是的，Vidu AI 完全安全可用。我们高度重视用户数据安全和隐私，确保所有上传的内容都保持机密。
+          - generic [ref=e1424]:
+            - generic [ref=e1425]:
+              - generic [ref=e1426]: 如果我对Vidu有更多问题，应该如何联系你们？
+              - img [ref=e1427]
+            - generic [ref=e1430]:
+              - generic [ref=e1431]: 您可以通过以下方式联系我们：
+              - list [ref=e1433]:
+                - listitem [ref=e1434]: 加入我们的官方微信群社区，与其他用户和团队直接交流，获取最新动态和支持。
+                - listitem [ref=e1435]:
+                  - text: 请访问我们的
+                  - link "帮助中心" [ref=e1436] [cursor=pointer]:
+                    - /url: /zh/help-center
+                  - text: 获取答案和支持。
+      - generic [ref=e1437]:
+        - img "视频封面" [ref=e1439]
+        - generic [ref=e1440]:
+          - heading "让创意自由，让创作高效" [level=2] [ref=e1441]
+          - link "立即体验" [ref=e1443] [cursor=pointer]:
+            - /url: /zh/home
+      - img "视频封面" [ref=e1446]
+    - generic [ref=e1451]:
+      - heading "品牌资讯" [level=2] [ref=e1452]
+      - heading "获取 20 个免费积分 - 立即订阅" [level=3] [ref=e1453]
+      - generic [ref=e1455]:
+        - textbox "您的电子邮件地址" [ref=e1456]:
+          - /placeholder: "您的电子邮件地址 "
+        - button "订阅" [disabled] [ref=e1457]
+      - paragraph [ref=e1458]: 订阅我们的品牌资讯，获取产品更新、提示和特别优惠。
+    - contentinfo [ref=e1459]:
+      - generic [ref=e1460]:
+        - generic [ref=e1461]:
+          - generic [ref=e1462]:
+            - img [ref=e1463]
+            - generic [ref=e1467]:
+              - paragraph [ref=e1468]: Vidu，让想象发生
+              - generic [ref=e1469]:
+                - link "X" [ref=e1471] [cursor=pointer]:
+                  - /url: https://x.com/ViduAI_official
+                  - img [ref=e1472]
+                - link "Youtube" [ref=e1476] [cursor=pointer]:
+                  - /url: https://www.youtube.com/channel/UChF9964qVeqdSL9MkzBwCig
+                  - img [ref=e1477]
+                - link "Tiktok" [ref=e1480] [cursor=pointer]:
+                  - /url: https://www.tiktok.com/@vidu_ai?lang=en
+                  - img [ref=e1481]
+                - link "Discord" [ref=e1484] [cursor=pointer]:
+                  - /url: https://discord.gg/3pDU8fmQ8Y
+                  - img [ref=e1485]
+          - generic [ref=e1487]:
+            - generic [ref=e1488]: 功能
+            - link "参考生视频" [ref=e1489] [cursor=pointer]:
+              - /url: /zh/ai-reference-to-video
+            - link "图生视频" [ref=e1490] [cursor=pointer]:
+              - /url: /zh/ai-image-to-video
+            - link "文生视频" [ref=e1491] [cursor=pointer]:
+              - /url: /zh/ai-text-to-video
+            - link "AI音效" [ref=e1492] [cursor=pointer]:
+              - /url: /zh/ai-sound-effect-generator
+            - link "AI生图" [ref=e1493] [cursor=pointer]:
+              - /url: /zh/ai-image-generator
+            - link "Vidu Q3" [ref=e1494] [cursor=pointer]:
+              - /url: /zh/vidu-q3
+          - generic [ref=e1495]:
+            - generic [ref=e1496]: 企业服务
+            - link "API开放平台" [ref=e1497] [cursor=pointer]:
+              - /url: https://platform.vidu.com
+          - generic [ref=e1498]:
+            - generic [ref=e1499]: 支持
+            - link "帮助中心" [ref=e1501] [cursor=pointer]:
+              - /url: /zh/help-center
+            - link "教程" [ref=e1503] [cursor=pointer]:
+              - /url: https://shengshu.feishu.cn/docx/Dtv8dbnUKo5glfxDoLXcEwzSnyd
+          - generic [ref=e1504]:
+            - generic [ref=e1505]: 公司
+            - link "关于我们" [ref=e1506] [cursor=pointer]:
+              - /url: https://www.shengshu.com/zh
+            - link "联系我们：support@vidu.com" [ref=e1507] [cursor=pointer]:
+              - /url: mailto:support@vidu.com
+            - link "艺术家计划" [ref=e1508] [cursor=pointer]:
+              - /url: /zh/cpp
+        - generic [ref=e1509]:
+          - generic [ref=e1511]: Copyright © 2026 Vidu®
+          - generic [ref=e1512]:
+            - link "服务协议" [ref=e1513] [cursor=pointer]:
+              - /url: /zh/terms
+            - link "隐私政策" [ref=e1514] [cursor=pointer]:
+              - /url: /zh/privacy
+  - region "Notifications (F8)":
+    - list
+  - alert [ref=e1515]
