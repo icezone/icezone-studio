@@ -73,7 +73,8 @@ export function VideoHero() {
         >
           <Link
             href="/signup"
-            className="w-full sm:w-auto text-sm font-semibold bg-amber text-ink px-7 py-3 rounded-xl hover:bg-amber/90 transition-colors animate-pulse-glow"
+            className="w-full sm:w-auto text-sm font-semibold text-white px-7 py-3 rounded-xl transition-all duration-200 hover:brightness-110 hover:scale-105"
+            style={{ background: 'linear-gradient(135deg, var(--color-electric), var(--color-violet))', boxShadow: '0 4px 24px rgba(91,118,254,0.35)' }}
           >
             {t('landing.hero.cta')}
           </Link>

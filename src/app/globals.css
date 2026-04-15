@@ -214,6 +214,16 @@ body {
   50%       { opacity: 0; }
 }
 
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes float-card {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+
 /* ─── Utility Classes ───────────────────────────────────── */
 .animate-reveal-up  { animation: reveal-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .animate-reveal-in  { animation: reveal-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
@@ -314,6 +324,15 @@ body {
 .ui-field:focus {
   border-color: var(--ui-primary);
   outline: none;
+}
+
+/* Respect prefers-reduced-motion for marquee and float animations */
+@media (prefers-reduced-motion: reduce) {
+  [style*="marquee-x"],
+  [style*="float-card"],
+  [style*="wall-scroll"] {
+    animation: none !important;
+  }
 }
 
 /* Remove number input spinners */

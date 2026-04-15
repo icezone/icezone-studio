@@ -74,7 +74,12 @@ export function LandingNav() {
             className="text-white font-bold text-base tracking-tight"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            IceZone<span className="text-amber"> Studio</span>
+            IceZone<span style={{
+              background: 'linear-gradient(135deg, var(--color-electric), var(--color-violet))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}> Studio</span>
           </span>
         </Link>
 
@@ -102,7 +107,8 @@ export function LandingNav() {
           </Link>
           <Link
             href="/signup"
-            className="text-sm font-medium bg-amber text-ink px-4 py-2 rounded-lg hover:bg-amber/90 transition-colors animate-pulse-glow"
+            className="text-sm font-medium text-white px-4 py-2 rounded-lg transition-all duration-200 hover:brightness-110 hover:scale-105"
+            style={{ background: 'linear-gradient(135deg, var(--color-electric), var(--color-violet))', boxShadow: '0 4px 16px rgba(91,118,254,0.35)' }}
           >
             {t('landing.nav.startFree')}
           </Link>

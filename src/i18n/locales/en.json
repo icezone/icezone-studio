@@ -435,7 +435,7 @@
       "features": "Features",
       "canvas": "Canvas",
       "signIn": "Sign in",
-      "startFree": "Start free →"
+      "startFree": "Start free"
     },
     "hero": {
       "headline": "AI-Native Creative Canvas",
@@ -496,6 +496,79 @@
       "company": "Company",
       "legal": "Legal",
       "copyright": "© {{year}} IceZone Studio. All rights reserved."
+    },
+    "models": {
+      "title": "Powered by Leading AI Models",
+      "nano": "Nano Banana",
+      "sora": "Sora",
+      "kling": "Kling",
+      "grok": "Grok",
+      "veo": "Veo",
+      "elevenlabs": "ElevenLabs",
+      "seed": "Seed"
+    },
+    "why": {
+      "title": "Why IceZone Studio",
+      "subtitle": "The node-based workflow platform built for AI creators",
+      "features": [
+        {
+          "title": "Unified Multi-Model Access",
+          "description": "Connect to Flux, Kling, Sora, and dozens of top AI models in one platform — no tool switching, just creating."
+        },
+        {
+          "title": "Visual Node-Based Workflow",
+          "description": "Drag and connect nodes to chain text, images, and video into a complete AI creative pipeline — clear and intuitive."
+        },
+        {
+          "title": "Story to Screen in One Click",
+          "description": "Input a novel or script, auto-split scenes, generate storyboards, and output a complete board — multiplied creative efficiency."
+        }
+      ]
+    },
+    "scenes": {
+      "title": "Explore Infinite Creative Scenes",
+      "subtitle": "From ads to anime to film — IceZone Studio generates stunning visuals for every style",
+      "tabs": [
+        { "id": "ads", "label": "Ad Creative" },
+        { "id": "anime", "label": "Anime Style" },
+        { "id": "film", "label": "Cinematic" },
+        { "id": "content", "label": "Content" },
+        { "id": "photo", "label": "Photography" }
+      ]
+    },
+    "templates": {
+      "title": "Start Creating from a Template",
+      "subtitle": "Curated official templates to launch your AI creative workflow in one click",
+      "browseAll": "Browse All Templates",
+      "items": [
+        { "title": "Novel to Storyboard", "category": "Narrative" },
+        { "title": "Ad Creative Generator", "category": "Marketing" },
+        { "title": "Video Rebuild Workflow", "category": "Video" },
+        { "title": "Batch Image Generation", "category": "Image" },
+        { "title": "Character Design Kit", "category": "Design" },
+        { "title": "Anime Scene Generator", "category": "Anime" }
+      ],
+      "modal": {
+        "title": "Template Library",
+        "close": "Close",
+        "allCategories": "All",
+        "useTemplate": "Use Template",
+        "noTemplates": "No templates yet",
+        "categories": {
+          "narrative": "Narrative",
+          "marketing": "Marketing",
+          "video": "Video",
+          "image": "Image",
+          "design": "Design",
+          "anime": "Anime"
+        }
+      }
+    },
+    "startCreating": {
+      "headline": "Start Your AI Creative Journey",
+      "description": "Join thousands of creators exploring the limitless possibilities of AI-driven creation on IceZone Studio.",
+      "primaryButton": "Start Creating Free",
+      "secondaryButton": "Already have an account? Log in"
     }
   }
 }

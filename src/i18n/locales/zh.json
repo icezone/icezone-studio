@@ -435,7 +435,7 @@
       "features": "功能",
       "canvas": "画布演示",
       "signIn": "登录",
-      "startFree": "免费开始 →"
+      "startFree": "免费开始"
     },
     "hero": {
       "headline": "AI 原生创作画布",
@@ -496,6 +496,79 @@
       "company": "关于",
       "legal": "法律",
       "copyright": "© {{year}} IceZone Studio. 保留所有权利。"
+    },
+    "models": {
+      "title": "支持主流 AI 模型",
+      "nano": "Nano Banana",
+      "sora": "Sora",
+      "kling": "Kling",
+      "grok": "Grok",
+      "veo": "Veo",
+      "elevenlabs": "ElevenLabs",
+      "seed": "Seed"
+    },
+    "why": {
+      "title": "为什么选择 IceZone Studio",
+      "subtitle": "专为 AI 创作者打造的节点式工作流平台",
+      "features": [
+        {
+          "title": "多模型统一接入",
+          "description": "一个平台接入 Flux、Kling、Sora 等数十款顶尖 AI 模型，无需切换工具，专注创作。"
+        },
+        {
+          "title": "节点式可视化工作流",
+          "description": "拖拽连接节点，将文字、图片、视频串联成完整的 AI 创作管线，清晰直观。"
+        },
+        {
+          "title": "从故事到画面，一键生成",
+          "description": "输入小说或剧本，自动拆解场景、生成分镜、输出完整故事板，创作效率倍增。"
+        }
+      ]
+    },
+    "scenes": {
+      "title": "探索无限创意场景",
+      "subtitle": "无论是广告、动漫还是电影，IceZone Studio 都能为你生成震撼视觉",
+      "tabs": [
+        { "id": "ads", "label": "广告创意" },
+        { "id": "anime", "label": "动漫风格" },
+        { "id": "film", "label": "电影级镜头" },
+        { "id": "content", "label": "内容创作" },
+        { "id": "photo", "label": "摄影写真" }
+      ]
+    },
+    "templates": {
+      "title": "从模板开始创作",
+      "subtitle": "精选官方模板，一键启动你的 AI 创作工作流",
+      "browseAll": "浏览全部模板",
+      "items": [
+        { "title": "小说转分镜", "category": "叙事" },
+        { "title": "广告创意生成", "category": "营销" },
+        { "title": "视频重制工作流", "category": "视频" },
+        { "title": "批量图片生成", "category": "图片" },
+        { "title": "角色设计套件", "category": "设计" },
+        { "title": "动漫场景生成", "category": "动漫" }
+      ],
+      "modal": {
+        "title": "模板库",
+        "close": "关闭",
+        "allCategories": "全部",
+        "useTemplate": "使用此模板",
+        "noTemplates": "暂无模板",
+        "categories": {
+          "narrative": "叙事",
+          "marketing": "营销",
+          "video": "视频",
+          "image": "图片",
+          "design": "设计",
+          "anime": "动漫"
+        }
+      }
+    },
+    "startCreating": {
+      "headline": "开始你的 AI 创作之旅",
+      "description": "加入数万创作者，在 IceZone Studio 探索 AI 驱动的无限可能。",
+      "primaryButton": "免费开始创作",
+      "secondaryButton": "已有账号？登录"
     }
   }
 }
