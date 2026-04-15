@@ -13,6 +13,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### [Unreleased]
 
+### [0.6.0] - 2026-04-15
+
+#### Added
+- **Vercel CI/CD pipeline** — GitHub Actions now auto-deploys on every push to `main` (production) and on every PR (preview URL commented on PR)
+- **Preview deployment job** (`deploy-preview`) — builds and deploys a Vercel preview on PRs, posts the URL as a PR comment
+- **Production deployment job** (`deploy-production`) — builds and deploys to Vercel production after all checks pass on `main`
+
+#### Changed
+- `vercel.json` — reduced to single region (`sin1`) for free-tier compatibility (removed `sfo1`)
+
 ### [0.5.0] - 2026-04-15
 
 #### Added
