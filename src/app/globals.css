@@ -326,11 +326,10 @@ body {
   outline: none;
 }
 
-/* Respect prefers-reduced-motion for marquee and float animations */
+/* Respect prefers-reduced-motion — target only landing animation classes */
 @media (prefers-reduced-motion: reduce) {
-  [style*="marquee-x"],
-  [style*="float-card"],
-  [style*="wall-scroll"] {
+  .animate-marquee,
+  .animate-float-card {
     animation: none !important;
   }
 }

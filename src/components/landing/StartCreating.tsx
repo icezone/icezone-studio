@@ -110,8 +110,10 @@ export function StartCreating() {
               <div
                 className="w-full h-full rounded-2xl overflow-hidden"
                 style={{
+                  position: 'relative',
                   animation: `float-card 3s ease-in-out infinite`,
                   animationDelay: cfg.delay,
+                  willChange: 'transform',
                   border: '1px solid rgba(255,255,255,0.15)',
                   boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
                   opacity: 0.85,

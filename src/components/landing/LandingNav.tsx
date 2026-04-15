@@ -69,6 +69,7 @@ export function LandingNav() {
             width={32}
             height={32}
             className="rounded-lg object-cover shrink-0"
+            style={{ width: 32, height: 'auto' }}
           />
           <span
             className="text-white font-bold text-base tracking-tight"

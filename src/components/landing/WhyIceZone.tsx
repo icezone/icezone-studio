@@ -232,11 +232,6 @@ export function WhyIceZone() {
         </div>
       </div>
 
-      <style jsx>{`
-        @media (prefers-reduced-motion: reduce) {
-          * { animation: none !important; }
-        }
-      `}</style>
     </section>
   );
 }

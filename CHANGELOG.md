@@ -13,6 +13,29 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### [Unreleased]
 
+### [0.5.0] - 2026-04-15
+
+#### Added
+- **ModelMarquee** — frosted-glass ticker strip with AI model logos (Nano Banana, Sora, Kling, Grok, Veo, ElevenLabs, Seed); infinite-scroll marquee with white-filtered SVG logos and model names; positioned between VideoHero and LiveCanvasShowcase
+- **WhyIceZone** — 3-column feature cards section with SVG icons (gradient blue→violet), glassmorphism cards with hover effects; 4-column image wall background with `rotateX` lean-back effect and scroll-driven parallax
+- **SceneShowcase** — vidu-style frameless video carousel (ads/anime/film/content/photo); autoplay, muted, no controls; 5s auto-advance with tab labels; video reflection effect; left/right edge shade gradients
+- **TemplateShowcase** — scattered absolute-positioned template cards on desktop (grid on mobile); full-screen template browser modal with category filtering; navigates to `/login?template=<id>` on template selection
+- **StartCreating** — immersive CTA section with animated gradient background, 6 floating gallery images with per-card tilt angles and staggered `float-card` animation, gradient CTA buttons
+- New CSS keyframes: `@keyframes marquee-x` and `@keyframes float-card` in `globals.css`
+- New i18n keys: `landing.models.*`, `landing.why.*`, `landing.scenes.*`, `landing.templates.*` (including modal), `landing.startCreating.*` in both `zh.json` and `en.json`
+
+#### Changed
+- **Landing page order**: `VideoHero → ModelMarquee → LiveCanvasShowcase → WhyIceZone → SceneShowcase → TemplateShowcase → StartCreating → LandingFooter`
+- **Nav "Start Free" button** — replaced amber with blue→violet gradient, matching CTA buttons below
+- **Hero "Start Creating Free" button** — replaced amber with blue→violet gradient
+- **"Studio" in logo** — replaced amber text with blue→violet gradient text
+- Archived `FeatureShowcase.tsx` and `CallToAction.tsx` to `src/components/landing/_archive/`
+
+#### Fixed
+- `WhyIceZone` had `* { animation: none !important }` in a `<style jsx>` block that intermittently killed all animations on the page — removed
+- `StartCreating` floating images missing `will-change: transform` and `position: relative` on animated container — fixed
+- Next.js Image warnings: `fill` images in `StartCreating` now have a `position: relative` parent; `LOGO.png` now includes `style={{ height: 'auto' }}`
+
 ### [0.4.0] - 2026-04-12
 
 #### Added
