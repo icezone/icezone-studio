@@ -17,7 +17,7 @@ export default function AuthLayout({
             <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="IceZone Studio" width={44} className="block rounded-md" style={{ height: 'auto' }} />
+          <img src="/logo.svg" alt="IceZone Studio" width={16} className="block rounded-md" style={{ height: 'auto' }} />
           <span className="font-medium">IceZone Studio</span>
         </Link>
       </div>

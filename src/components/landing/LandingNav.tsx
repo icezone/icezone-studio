@@ -63,7 +63,7 @@ export function LandingNav() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="IceZone Studio" width={60} className="block rounded-lg shrink-0" style={{ height: 'auto' }} />
+          <img src="/logo.svg" alt="IceZone Studio" width={20} className="block rounded-lg shrink-0" style={{ height: 'auto' }} />
           <span
             className="text-white font-bold text-base tracking-tight"
             style={{ fontFamily: 'var(--font-display)' }}

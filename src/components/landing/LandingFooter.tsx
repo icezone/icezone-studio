@@ -39,11 +39,11 @@ export function LandingFooter() {
       <div className="max-w-6xl mx-auto">
         {/* Top row */}
         <div className="flex flex-col md:flex-row gap-10 mb-10">
-          {/* Brand */}
+          {/* Brand */
           <div className="flex-1 max-w-xs">
             <Link href="/" className="flex items-center gap-2.5 mb-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.svg" alt="IceZone Studio" width={44} className="block rounded-lg" style={{ height: 'auto' }} />
+              <img src="/logo.svg" alt="IceZone Studio" width={16} className="block rounded-lg" style={{ height: 'auto' }} />
               <span className="text-white font-bold text-sm" style={{ fontFamily: 'var(--font-display)' }}>
                 IceZone Studio
               </span>
