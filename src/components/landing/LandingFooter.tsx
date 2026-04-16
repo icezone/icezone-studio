@@ -43,7 +43,7 @@ export function LandingFooter() {
           {/* Brand */}
           <div className="flex-1 max-w-xs">
             <Link href="/" className="flex items-center gap-2.5 mb-3">
-              <Image src="/LOGO.png" alt="IceZone Studio" width={28} height={28} className="rounded-lg object-cover" />
+              <Image src="/logo.svg" alt="IceZone Studio" width={28} height={28} className="rounded-lg" unoptimized />
               <span className="text-white font-bold text-sm" style={{ fontFamily: 'var(--font-display)' }}>
                 IceZone Studio
               </span>

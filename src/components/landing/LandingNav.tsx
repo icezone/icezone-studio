@@ -64,12 +64,12 @@ export function LandingNav() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
           <Image
-            src="/LOGO.png"
+            src="/logo.svg"
             alt="IceZone Studio"
             width={32}
             height={32}
-            className="rounded-lg object-cover shrink-0"
-            style={{ width: 32, height: 'auto' }}
+            className="rounded-lg shrink-0"
+            unoptimized
           />
           <span
             className="text-white font-bold text-base tracking-tight"

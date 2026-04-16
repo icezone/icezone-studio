@@ -17,7 +17,7 @@ export default function AuthLayout({
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <Image src="/LOGO.png" alt="IceZone Studio" width={22} height={22} className="rounded-md object-cover" />
+          <Image src="/logo.svg" alt="IceZone Studio" width={22} height={22} className="rounded-md" unoptimized />
           <span className="font-medium">IceZone Studio</span>
         </Link>
       </div>
