@@ -527,7 +527,7 @@
     },
     "scenes": {
       "title": "Explore Infinite Creative Scenes",
-      "subtitle": "From ads to anime to film — IceZone Studio generates stunning visuals for every style",
+      "subtitle": "From anime to film — IceZone Studio generates stunning visuals for every style",
       "tabs": [
         { "id": "ads", "label": "Ad Creative" },
         { "id": "anime", "label": "Anime Style" },
