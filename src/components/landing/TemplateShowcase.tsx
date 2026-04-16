@@ -176,7 +176,7 @@ export function TemplateShowcase() {
                 >
                   <p className="text-sm font-medium text-white truncate">{item.title}</p>
                   <span
-                    className="inline-block mt-1.5 text-xs px-2.5 py-0.5 rounded-full"
+                    className="inline-block mt-1.5 text-xs px-2.5 py-0.5 rounded-lg"
                     style={{ background: 'rgba(59,130,246,0.2)', color: 'var(--color-electric)' }}
                   >
                     {item.category}
@@ -221,7 +221,7 @@ export function TemplateShowcase() {
         <div className="text-center mt-12">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-8 py-3 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105"
+            className="px-8 py-3 rounded-lg text-sm font-semibold transition-all duration-200 hover:scale-105"
             style={{
               background: 'rgba(255,255,255,0.08)',
               border: '1px solid rgba(255,255,255,0.16)',
@@ -274,7 +274,7 @@ export function TemplateShowcase() {
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className="px-4 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 hover:brightness-110"
+                  className="px-4 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200 hover:brightness-110"
                   style={
                     activeCategory === cat
                       ? { background: 'linear-gradient(135deg, var(--color-electric), var(--color-violet))', color: '#fff', boxShadow: '0 2px 12px rgba(91,118,254,0.35)' }
@@ -297,7 +297,7 @@ export function TemplateShowcase() {
                   {filteredTemplates.map((tpl) => (
                     <div
                       key={tpl.id}
-                      className="group cursor-pointer rounded-xl overflow-hidden transition-transform duration-200 hover:scale-105"
+                      className="group cursor-pointer rounded-lg overflow-hidden transition-transform duration-200 hover:scale-105"
                       style={{ border: '1px solid rgba(255,255,255,0.08)' }}
                       onClick={() => handleTemplateClick(tpl.id)}
                     >
@@ -316,7 +316,7 @@ export function TemplateShowcase() {
                           style={{ background: 'rgba(0,0,0,0.5)' }}
                         >
                           <span
-                            className="text-xs font-semibold px-3 py-1.5 rounded-full"
+                            className="text-xs font-semibold px-3 py-1.5 rounded-lg"
                             style={{ background: 'var(--color-electric)', color: '#fff' }}
                           >
                             {t('landing.templates.modal.useTemplate')}
@@ -328,7 +328,7 @@ export function TemplateShowcase() {
                         style={{ background: 'rgba(13,21,37,0.92)' }}
                       >
                         <span
-                          className="text-[10px] px-1.5 py-0.5 rounded-full"
+                          className="text-[10px] px-1.5 py-0.5 rounded-lg"
                           style={{ background: 'rgba(59,130,246,0.2)', color: 'var(--color-electric)' }}
                         >
                           {isZh ? tpl.zhCategory : tpl.category}
