@@ -19,10 +19,10 @@ export function VideoHero() {
   }, []);
 
   return (
-    <section className="relative w-full aspect-video sm:aspect-auto sm:h-screen flex items-center justify-center overflow-hidden bg-[#070a10]">
+    <section className="relative w-full h-screen min-h-[600px] flex items-center justify-center overflow-hidden bg-[#070a10]">
       {/* Video background */}
       <video
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-contain sm:object-cover"
         src="/banner.mp4"
         poster="/banner-poster.jpg"
         autoPlay
