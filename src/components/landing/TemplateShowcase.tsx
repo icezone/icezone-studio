@@ -92,6 +92,12 @@ export function TemplateShowcase() {
 
   const modalCategories = ['All', 'Narrative', 'Marketing', 'Video', 'Image', 'Design', 'Anime'];
 
+  const categoryLabel = (cat: string) => {
+    if (cat === 'All') return t('landing.templates.modal.allCategories');
+    const key = cat.toLowerCase() as 'narrative' | 'marketing' | 'video' | 'image' | 'design' | 'anime';
+    return t(`landing.templates.modal.categories.${key}`, { defaultValue: cat });
+  };
+
   const filteredTemplates =
     activeCategory === 'All'
       ? MODAL_TEMPLATES
@@ -268,14 +274,14 @@ export function TemplateShowcase() {
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className="px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-150"
+                  className="px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 hover:brightness-110"
                   style={
                     activeCategory === cat
-                      ? { background: 'var(--color-electric)', color: '#fff' }
+                      ? { background: 'linear-gradient(135deg, var(--color-electric), var(--color-violet))', color: '#fff', boxShadow: '0 2px 12px rgba(91,118,254,0.35)' }
                       : { background: 'rgba(255,255,255,0.06)', color: 'var(--color-muted)', border: '1px solid rgba(255,255,255,0.08)' }
                   }
                 >
-                  {cat === 'All' ? t('landing.templates.modal.allCategories') : cat}
+                  {categoryLabel(cat)}
                 </button>
               ))}
             </div>
