@@ -550,7 +550,7 @@ export function LiveCanvasShowcase() {
                   textDecoration: 'none', display: 'flex', alignItems: 'center',
                 }}
               >
-                {t('landing.canvas.tryFree')} →
+                {t('landing.canvas.tryFree')}
               </Link>
             </div>
           </div>
@@ -660,7 +660,7 @@ export function LiveCanvasShowcase() {
               background: 'rgba(255,255,255,0.04)',
             }}
           >
-            {t('landing.canvas.fullApp')} →
+            {t('landing.canvas.fullApp')}
           </Link>
         </div>
       </div>
