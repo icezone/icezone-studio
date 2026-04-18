@@ -430,6 +430,24 @@
     "batchImageGen": "Batch Image Generation",
     "batchImageGenDesc": "Generate multiple AI images in batch"
   },
+  "presetPrompts": {
+    "sectionTitle": "Preset Prompts",
+    "sectionDesc": "Save reusable prompts and insert them into any node",
+    "addButton": "Add Preset",
+    "editButton": "Edit",
+    "deleteButton": "Delete",
+    "saveButton": "Save",
+    "uncategorized": "Uncategorized",
+    "namePlaceholder": "Preset name (e.g. Cinematic style)",
+    "contentPlaceholder": "Enter prompt text...",
+    "tagsPlaceholder": "Add tag and press Enter",
+    "searchPlaceholder": "Search presets...",
+    "noPresets": "No presets yet. Add one in Settings.",
+    "insertPreset": "Insert preset",
+    "nameRequired": "Name is required",
+    "contentRequired": "Content is required",
+    "confirmDelete": "Delete preset \"{{name}}\"?"
+  },
   "landing": {
     "nav": {
       "features": "Features",

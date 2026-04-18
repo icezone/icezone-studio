@@ -430,6 +430,24 @@
     "batchImageGen": "批量图片生成",
     "batchImageGenDesc": "批量生成多张 AI 图片"
   },
+  "presetPrompts": {
+    "sectionTitle": "预设提示词",
+    "sectionDesc": "保存可复用的提示词，在任意节点中一键插入",
+    "addButton": "新增预设",
+    "editButton": "编辑",
+    "deleteButton": "删除",
+    "saveButton": "保存",
+    "uncategorized": "未分类",
+    "namePlaceholder": "预设名称（如：电影感风格）",
+    "contentPlaceholder": "输入提示词内容...",
+    "tagsPlaceholder": "添加标签后回车",
+    "searchPlaceholder": "搜索预设...",
+    "noPresets": "暂无预设，请前往设置添加。",
+    "insertPreset": "插入预设",
+    "nameRequired": "名称不能为空",
+    "contentRequired": "内容不能为空",
+    "confirmDelete": "删除预设「{{name}}」？"
+  },
   "landing": {
     "nav": {
       "features": "功能",
