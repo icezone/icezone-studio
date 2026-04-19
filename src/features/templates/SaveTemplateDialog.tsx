@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, ImageIcon, Upload } from 'lucide-react';
+import { UiSelect } from '@/components/ui';
 
 interface SaveTemplateDialogProps {
   isOpen: boolean;
@@ -188,17 +189,17 @@ export function SaveTemplateDialog({ isOpen, onClose, canvasImages, onSave }: Sa
         {overwrite && (
           <div className="mb-4">
             <label className="mb-1 block text-xs font-medium text-foreground/60">{t('template.selectExistingTemplate')}</label>
-            <select
+            <UiSelect
               value={selectedTemplateId}
               onChange={(e) => setSelectedTemplateId(e.target.value)}
-              className="w-full rounded-lg border border-foreground/15 bg-foreground/[0.04] px-3 py-2 text-sm text-foreground outline-none focus:border-foreground/30 dark:[color-scheme:dark]"
+              className="w-full"
               disabled={loadingTemplates}
             >
               <option value="">{loadingTemplates ? t('common.loading') : t('template.selectExistingTemplate')}</option>
               {userTemplates.map((tpl) => (
                 <option key={tpl.id} value={tpl.id}>{tpl.name}</option>
               ))}
-            </select>
+            </UiSelect>
           </div>
         )}
 
