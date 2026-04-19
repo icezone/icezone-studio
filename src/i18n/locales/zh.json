@@ -435,6 +435,7 @@
     "coverUpload": "上传封面",
     "coverUploading": "上传中...",
     "coverUploadFailed": "封面上传失败",
+    "coverImageRequired": "请上传封面图片后再保存",
     "overwriteExisting": "覆盖现有模板",
     "selectExistingTemplate": "选择要覆盖的模板",
     "saveAsNew": "保存为新模板",

@@ -3,12 +3,21 @@
 import { useState, useCallback, useRef, useEffect, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, ImageIcon, Upload } from 'lucide-react';
-import { UiSelect } from '@/components/ui';
+
+interface EditingTemplate {
+  id: string;
+  name: string;
+  description: string;
+  tags: string[];
+  thumbnailUrl?: string;
+  isPublic: boolean;
+}
 
 interface SaveTemplateDialogProps {
   isOpen: boolean;
   onClose: () => void;
   canvasImages: string[];
+  editingTemplate?: EditingTemplate;
   onSave: (data: {
     name: string;
     description: string;
@@ -19,12 +28,7 @@ interface SaveTemplateDialogProps {
   }) => Promise<void>;
 }
 
-interface UserTemplate {
-  id: string;
-  name: string;
-}
-
-export function SaveTemplateDialog({ isOpen, onClose, canvasImages, onSave }: SaveTemplateDialogProps) {
+export function SaveTemplateDialog({ isOpen, onClose, canvasImages, editingTemplate, onSave }: SaveTemplateDialogProps) {
   const { t } = useTranslation();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -34,43 +38,30 @@ export function SaveTemplateDialog({ isOpen, onClose, canvasImages, onSave }: Sa
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Cover image
   const [coverUrl, setCoverUrl] = useState<string | undefined>(undefined);
   const [coverUploading, setCoverUploading] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
-
-  // Overwrite mode
-  const [overwrite, setOverwrite] = useState(false);
-  const [userTemplates, setUserTemplates] = useState<UserTemplate[]>([]);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
-  const [loadingTemplates, setLoadingTemplates] = useState(false);
-
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-select first canvas image as default cover
+  // Pre-fill or reset fields every time the dialog opens
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) return;
+    if (editingTemplate) {
+      setName(editingTemplate.name);
+      setDescription(editingTemplate.description);
+      setTags(editingTemplate.tags);
+      setIsPublic(editingTemplate.isPublic);
+      setCoverUrl(editingTemplate.thumbnailUrl);
+    } else {
+      setName('');
+      setDescription('');
+      setTags([]);
+      setIsPublic(false);
       setCoverUrl(canvasImages[0] ?? undefined);
     }
-  }, [isOpen, canvasImages]);
-
-  // Load user templates when overwrite toggled on
-  useEffect(() => {
-    if (!overwrite) return;
-    setLoadingTemplates(true);
-    fetch('/api/templates?category=custom')
-      .then((r) => r.json())
-      .then((d) => setUserTemplates((d.templates ?? []) as UserTemplate[]))
-      .catch(() => setUserTemplates([]))
-      .finally(() => setLoadingTemplates(false));
-  }, [overwrite]);
-
-  // When a template is selected in overwrite mode, pre-fill fields
-  useEffect(() => {
-    if (!selectedTemplateId) return;
-    const tpl = userTemplates.find((t) => t.id === selectedTemplateId);
-    if (tpl) setName(tpl.name);
-  }, [selectedTemplateId, userTemplates]);
+    setTagInput('');
+    setError(null);
+  }, [isOpen, editingTemplate, canvasImages]);
 
   const handleTagKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && tagInput.trim()) {
@@ -92,9 +83,13 @@ export function SaveTemplateDialog({ isOpen, onClose, canvasImages, onSave }: Sa
       if (res.ok) {
         const { url } = await res.json() as { url: string };
         setCoverUrl(url);
+        setError(null);
       } else {
-        setError(t('template.coverUploadFailed'));
+        const body = await res.json().catch(() => ({})) as { error?: string };
+        setError(body.error ?? t('template.coverUploadFailed'));
       }
+    } catch {
+      setError(t('template.coverUploadFailed'));
     } finally {
       setCoverUploading(false);
     }
@@ -102,6 +97,7 @@ export function SaveTemplateDialog({ isOpen, onClose, canvasImages, onSave }: Sa
 
   const handleSave = useCallback(async () => {
     if (!name.trim()) { setError(t('template.templateNamePlaceholder')); return; }
+    if (!coverUrl) { setError(t('template.coverImageRequired')); return; }
     setSaving(true);
     try {
       await onSave({
@@ -110,27 +106,28 @@ export function SaveTemplateDialog({ isOpen, onClose, canvasImages, onSave }: Sa
         tags,
         isPublic,
         thumbnailUrl: coverUrl,
-        existingTemplateId: overwrite && selectedTemplateId ? selectedTemplateId : undefined,
+        existingTemplateId: editingTemplate?.id,
       });
-      setName(''); setDescription(''); setTags([]); setIsPublic(false);
-      setCoverUrl(undefined); setOverwrite(false); setSelectedTemplateId('');
-      setError(null);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('template.saveFailed'));
     } finally {
       setSaving(false);
     }
-  }, [name, description, tags, isPublic, coverUrl, overwrite, selectedTemplateId, onSave, onClose, t]);
+  }, [name, description, tags, isPublic, coverUrl, editingTemplate, onSave, onClose, t]);
 
   if (!isOpen) return null;
+
+  const isEditing = !!editingTemplate;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="w-full max-w-md rounded-2xl border border-[rgba(15,23,42,0.15)] dark:border-[rgba(255,255,255,0.1)] bg-background p-6 shadow-2xl">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-foreground">{t('template.saveAsTemplate')}</h2>
+          <h2 className="text-base font-semibold text-foreground">
+            {isEditing ? t('template.updateTemplate') : t('template.saveAsTemplate')}
+          </h2>
           <button type="button" onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/40 hover:bg-foreground/10 hover:text-foreground">
             <X className="h-4 w-4" />
           </button>
@@ -141,7 +138,7 @@ export function SaveTemplateDialog({ isOpen, onClose, canvasImages, onSave }: Sa
           <label className="mb-1 block text-xs font-medium text-foreground/60">{t('template.coverImage')}</label>
           <div
             onClick={() => !coverUploading && coverInputRef.current?.click()}
-            className="relative flex h-28 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-foreground/15 bg-foreground/[0.04] hover:border-foreground/30"
+            className="relative flex h-48 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-foreground/15 bg-foreground/[0.04] hover:border-foreground/30"
           >
             {coverUrl ? (
               <img src={coverUrl} alt="cover" className="h-full w-full object-cover" />
@@ -173,35 +170,6 @@ export function SaveTemplateDialog({ isOpen, onClose, canvasImages, onSave }: Sa
             }}
           />
         </div>
-
-        {/* Overwrite toggle */}
-        <div className="mb-4 flex items-center gap-2">
-          <input
-            id="overwrite-toggle"
-            type="checkbox"
-            checked={overwrite}
-            onChange={(e) => { setOverwrite(e.target.checked); setSelectedTemplateId(''); }}
-            className="h-3.5 w-3.5 accent-blue-500"
-          />
-          <label htmlFor="overwrite-toggle" className="text-xs text-foreground/60">{t('template.overwriteExisting')}</label>
-        </div>
-
-        {overwrite && (
-          <div className="mb-4">
-            <label className="mb-1 block text-xs font-medium text-foreground/60">{t('template.selectExistingTemplate')}</label>
-            <UiSelect
-              value={selectedTemplateId}
-              onChange={(e) => setSelectedTemplateId(e.target.value)}
-              className="w-full"
-              disabled={loadingTemplates}
-            >
-              <option value="">{loadingTemplates ? t('common.loading') : t('template.selectExistingTemplate')}</option>
-              {userTemplates.map((tpl) => (
-                <option key={tpl.id} value={tpl.id}>{tpl.name}</option>
-              ))}
-            </UiSelect>
-          </div>
-        )}
 
         {/* Name */}
         <label className="mb-1 block text-xs font-medium text-foreground/60">{t('template.templateName')}</label>
@@ -246,6 +214,18 @@ export function SaveTemplateDialog({ isOpen, onClose, canvasImages, onSave }: Sa
           className="mb-4 w-full rounded-lg border border-foreground/15 bg-foreground/[0.04] px-3 py-2 text-sm text-foreground outline-none focus:border-foreground/30"
         />
 
+        {/* Public toggle */}
+        <div className="mb-4 flex items-center gap-2">
+          <input
+            id="public-toggle"
+            type="checkbox"
+            checked={isPublic}
+            onChange={(e) => setIsPublic(e.target.checked)}
+            className="h-3.5 w-3.5 accent-blue-500"
+          />
+          <label htmlFor="public-toggle" className="text-xs text-foreground/60">{t('template.publish')}</label>
+        </div>
+
         {error && <p className="mb-3 text-xs text-red-400">{error}</p>}
 
         {/* Actions */}
@@ -259,7 +239,7 @@ export function SaveTemplateDialog({ isOpen, onClose, canvasImages, onSave }: Sa
             disabled={saving || coverUploading}
             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {saving ? t('common.saving') : overwrite && selectedTemplateId ? t('template.updateTemplate') : t('template.saveAsTemplate')}
+            {saving ? t('common.saving') : isEditing ? t('template.updateTemplate') : t('template.saveAsTemplate')}
           </button>
         </div>
       </div>

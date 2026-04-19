@@ -435,6 +435,7 @@
     "coverUpload": "Upload Cover",
     "coverUploading": "Uploading...",
     "coverUploadFailed": "Cover upload failed",
+    "coverImageRequired": "Please upload a cover image before saving",
     "overwriteExisting": "Overwrite existing template",
     "selectExistingTemplate": "Select template to overwrite",
     "saveAsNew": "Save as new template",

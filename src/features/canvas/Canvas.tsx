@@ -1759,7 +1759,7 @@ function CanvasInner() {
   const canvasImages = useMemo(
     () =>
       nodes
-        .filter((n) => n.type === 'imageNode')
+        .filter((n) => n.type === 'imageNode' || n.type === 'uploadNode')
         .map((n) => (n.data as { imageUrl?: string }).imageUrl)
         .filter((url): url is string => typeof url === 'string' && url.length > 0),
     [nodes]

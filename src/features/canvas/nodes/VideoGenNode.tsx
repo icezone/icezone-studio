@@ -691,14 +691,14 @@ function VideoGenNodeComponent({
   return (
     <div
       className={`
-        flex flex-col rounded-xl border-2 bg-[var(--canvas-node-bg)] shadow-xl transition-all p-3 overflow-hidden
+        flex flex-col rounded-xl border-2 bg-[var(--canvas-node-bg)] shadow-xl transition-all p-3
         ${
           selected
             ? 'border-accent shadow-accent/30'
             : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'
         }
       `}
-      style={{ width: `${resolvedWidth}px`, height: `${resolvedHeight}px` }}
+      style={{ width: `${resolvedWidth}px`, minHeight: `${resolvedHeight}px` }}
       onClick={() => setSelectedNode(id)}
     >
       <NodeHeader
@@ -710,7 +710,7 @@ function VideoGenNodeComponent({
       />
 
       {/* Content Wrapper */}
-      <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         {/* Prompt Input */}
         <div className="rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] shrink-0">
           <button
@@ -965,7 +965,7 @@ function VideoGenNodeComponent({
 
         {/* Video Preview */}
         {data.videoUrl && !data.isGenerating && (
-          <div className="rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-2 flex items-center justify-center flex-1 min-h-0">
+          <div className="rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-2 flex items-center justify-center min-h-[200px]">
             <video
               src={data.videoUrl}
               controls

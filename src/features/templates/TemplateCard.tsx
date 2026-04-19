@@ -2,12 +2,13 @@
 
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Layout, Trash2, Globe, GlobeLock } from 'lucide-react';
+import { Layout, Trash2, Globe, GlobeLock, Pencil } from 'lucide-react';
 import type { WorkflowTemplate } from './types';
 
 interface TemplateCardProps {
   template: WorkflowTemplate;
   onUse: (template: WorkflowTemplate) => void;
+  onUpdate?: (template: WorkflowTemplate) => void;
   onDelete?: (template: WorkflowTemplate) => void;
   onPublish?: (template: WorkflowTemplate) => void;
   onUnpublish?: (template: WorkflowTemplate) => void;
@@ -17,6 +18,7 @@ interface TemplateCardProps {
 export const TemplateCard = memo(({
   template,
   onUse,
+  onUpdate,
   onDelete,
   onPublish,
   onUnpublish,
@@ -96,6 +98,18 @@ export const TemplateCard = memo(({
             className="flex h-7 w-7 items-center justify-center rounded-lg text-green-500/60 transition-colors hover:bg-green-500/10 hover:text-green-500"
           >
             <GlobeLock className="h-3.5 w-3.5" />
+          </button>
+        )}
+
+        {/* Update */}
+        {onUpdate && (
+          <button
+            type="button"
+            onClick={() => onUpdate(template)}
+            title={t('template.updateTemplate')}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground/40 opacity-0 transition-all group-hover:opacity-100 hover:bg-foreground/10 hover:text-foreground"
+          >
+            <Pencil className="h-3.5 w-3.5" />
           </button>
         )}
 
