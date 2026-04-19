@@ -13,6 +13,29 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### [Unreleased]
 
+### [0.7.0] - 2026-04-19
+
+#### Added
+- **Preset Prompts** — New settings section to create, tag, and manage reusable prompt snippets; BookmarkIcon picker button integrated into VideoGen, ImageEdit, NovelInput, StoryboardNode frame cards, and StoryboardGenNode; inserts at cursor position
+- **Template Cover Image** — Auto-selects first canvas image (imageNode + uploadNode) as default cover; click to upload a custom cover via `POST /api/templates/upload-cover` backed by Supabase Storage (bucket auto-created with service role key)
+- **Template Update Flow** — Per-card "Update" (pencil) button in My Templates tab opens SaveTemplateDialog pre-filled with existing template data; `PATCH /api/templates/[id]` endpoint for sparse updates
+- **Publish to Community Toggle** — SaveTemplateDialog now has a "Publish to Community" checkbox; sets `is_public` and `category=shared` on save
+- **Custom Delete Confirmation** — Replaces browser `window.confirm()` with an in-app modal dialog (red trash icon, Cancel / Delete buttons)
+- **Cover Image Required Validation** — Save is blocked and an error message shown if no cover image is selected
+
+#### Changed
+- **My Templates tab** — Now returns all templates owned by the user regardless of `is_public` / category, so published templates remain visible and deletable in the tab
+- **TemplateCard button order** — Publish/Unpublish → Update → Delete (left to right)
+- **SaveTemplateDialog cover preview** — Height increased from `h-28` to `h-48` for better image visibility
+- **Overwrite mode removed from new-template flow** — Overwrite dropdown replaced by the Update button on existing cards
+
+#### Fixed
+- **VideoGenNode preset picker** — Clicking a preset collapsed the description panel; fixed by adding `stopPropagation` on both `mousedown` and `click` on the picker popover
+- **Template loading crash** — `Cannot read properties of undefined (reading 'nodes')` caused by accessing camelCase `templateData` instead of snake_case `template_data` returned by Supabase
+- **Template overwrite dropdown dark mode** — Native `<select>` options unstyled in dark mode; replaced with custom `UiSelect` component
+- **Cover upload "Bucket not found"** — Upload route now uses Supabase service role admin client to auto-create the `template-covers` bucket; real error messages surfaced to the UI instead of a generic string
+- **VideoGenNode content clipping** — Start frame, end frame, and dropdown menus clipped by `overflow-hidden`; root div changed to `overflow: visible` with `minHeight` so all sections render fully
+
 ### [0.6.0] - 2026-04-15
 
 #### Added
@@ -143,6 +166,62 @@ IceZone Studio 的所有重要变更都记录在此文件中。
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
 ### [未发布]
+
+### [0.7.0] - 2026-04-19
+
+#### 新增
+- **预设提示词** — 设置页面新增预设提示词管理区，可创建、添加标签和管理可复用的提示词片段；VideoGen、ImageEdit、NovelInput、分镜节点帧卡片及分镜生成节点均集成书签图标选取按钮，插入至光标位置
+- **模板封面图片** — 自动选取画布中第一张图片（imageNode + uploadNode）作为默认封面；点击可上传自定义封面，通过 `POST /api/templates/upload-cover` 存储至 Supabase Storage（使用 service role 密钥自动创建 bucket）
+- **模板更新流程** — "我的模板" tab 中每个模板卡片新增"更新"（铅笔）按钮，点击打开预填充现有数据的保存对话框；新增 `PATCH /api/templates/[id]` 端点支持稀疏更新
+- **发布到社区开关** — 保存模板对话框新增"发布到社区"勾选框，保存时设置 `is_public` 并将 `category` 标记为 `shared`
+- **自定义删除确认弹窗** — 替换浏览器原生 `window.confirm()`，改为应用内自定义弹窗（红色垃圾桶图标，取消 / 删除按钮）
+- **封面图片必填校验** — 未选择封面时阻止保存并显示错误提示
+
+#### 变更
+- **我的模板 tab** — 现返回用户所有模板，不再按 `is_public` / category 过滤，已发布模板在该 tab 中仍可见且可删除
+- **模板卡片按钮顺序** — 发布/取消发布 → 更新 → 删除（从左至右）
+- **保存模板封面预览** — 高度从 `h-28` 增至 `h-48`，图片显示更完整
+- **新建模板移除覆盖模式** — 覆盖下拉选择改为在现有卡片上点击"更新"按钮操作
+
+#### 修复
+- **AI 视频节点预设选取器** — 选取预设提示词后描述面板自动收起；在弹出层容器上同时添加 `mousedown` 和 `click` 的 `stopPropagation` 修复
+- **使用模板时 runtime 崩溃** — `Cannot read properties of undefined (reading 'nodes')`，原因是访问 camelCase `templateData` 而 Supabase 返回 snake_case `template_data`
+- **覆盖模板下拉暗色模式样式** — 原生 `<select>` 在暗色模式下 option 颜色异常，替换为自定义 `UiSelect` 组件
+- **封面上传 "Bucket not found"** — 上传路由改用 Supabase service role admin client 自动创建 `template-covers` bucket；实际错误信息透传至前端
+- **AI 视频节点内容被裁剪** — 起始帧、结束帧及下拉菜单被 `overflow-hidden` 遮挡；根 div 改为 `overflow: visible` + `minHeight`，所有组件完整显示
+
+### [0.6.0] - 2026-04-15
+
+#### 新增
+- **Vercel CI/CD 流水线** — GitHub Actions 在每次推送到 `main`（生产环境）和每个 PR 时自动部署
+- **预览部署任务**（`deploy-preview`）— 在 PR 上构建并部署 Vercel 预览，将 URL 作为 PR 评论发布
+- **生产部署任务**（`deploy-production`）— 在 `main` 上所有检查通过后构建并部署到 Vercel 生产环境
+
+#### 变更
+- `vercel.json` — 简化为单区域（`sin1`）以兼容免费套餐（移除 `sfo1`）
+
+### [0.5.0] - 2026-04-15
+
+#### 新增
+- **ModelMarquee** — 磨砂玻璃风格 AI 模型 logo 滚动条（Nano Banana、Sora、Kling、Grok、Veo、ElevenLabs、Seed）；无限循环 marquee，白色滤镜 SVG logo；位于 VideoHero 和 LiveCanvasShowcase 之间
+- **WhyIceZone** — 3 列功能卡片区（蓝→紫渐变 SVG 图标，玻璃拟态卡片悬停效果）；4 列图片墙背景，`rotateX` 后仰效果和滚动视差
+- **SceneShowcase** — vidu 风格无边框视频轮播（广告/动漫/电影/内容/摄影）；自动播放，静音，无控件；5 秒自动切换，Tab 标签；视频倒影效果；左右边缘渐变遮罩
+- **TemplateShowcase** — 桌面端散乱绝对定位模板卡片（移动端网格）；全屏模板浏览弹窗，分类筛选；选中模板跳转 `/login?template=<id>`
+- **StartCreating** — 沉浸式 CTA 区，动态渐变背景，6 张浮动画廊图片（独立倾斜角度和交错 `float-card` 动画），渐变 CTA 按钮
+- `globals.css` 新增 `@keyframes marquee-x` 和 `@keyframes float-card`
+- zh.json 和 en.json 新增 `landing.models.*`、`landing.why.*`、`landing.scenes.*`、`landing.templates.*`（含弹窗）、`landing.startCreating.*` 国际化键
+
+#### 变更
+- **落地页顺序**：`VideoHero → ModelMarquee → LiveCanvasShowcase → WhyIceZone → SceneShowcase → TemplateShowcase → StartCreating → LandingFooter`
+- **导航"免费开始"按钮** — 琥珀色改为蓝→紫渐变，与下方 CTA 按钮一致
+- **Hero "立即免费创作"按钮** — 琥珀色改为蓝→紫渐变
+- **Logo 中的"Studio"** — 琥珀色文字改为蓝→紫渐变文字
+- `FeatureShowcase.tsx` 和 `CallToAction.tsx` 归档至 `src/components/landing/_archive/`
+
+#### 修复
+- `WhyIceZone` 中 `<style jsx>` 块包含 `* { animation: none !important }` 偶发性禁用全站动画 — 已移除
+- `StartCreating` 浮动图片缺少 `will-change: transform` 和动画容器的 `position: relative` — 已修复
+- Next.js Image 警告：`StartCreating` 中 `fill` 图片补充 `position: relative` 父容器；`LOGO.png` 添加 `style={{ height: 'auto' }}`
 
 ### [0.4.0] - 2026-04-12
 
