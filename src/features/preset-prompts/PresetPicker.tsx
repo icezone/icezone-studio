@@ -59,6 +59,7 @@ export function PresetPickerButton({ onInsert }: PresetPickerButtonProps) {
         <div
           className="absolute right-0 top-7 z-50 w-72 rounded-xl border border-[rgba(255,255,255,0.1)] bg-[var(--canvas-node-bg)] shadow-xl"
           onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         >
           {/* Search */}
           <div className="flex items-center gap-2 border-b border-[rgba(255,255,255,0.08)] px-3 py-2">
