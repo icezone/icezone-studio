@@ -191,7 +191,7 @@ export function SaveTemplateDialog({ isOpen, onClose, canvasImages, onSave }: Sa
             <select
               value={selectedTemplateId}
               onChange={(e) => setSelectedTemplateId(e.target.value)}
-              className="w-full rounded-lg border border-foreground/15 bg-foreground/[0.04] px-3 py-2 text-sm text-foreground outline-none focus:border-foreground/30"
+              className="w-full rounded-lg border border-foreground/15 bg-foreground/[0.04] px-3 py-2 text-sm text-foreground outline-none focus:border-foreground/30 dark:[color-scheme:dark]"
               disabled={loadingTemplates}
             >
               <option value="">{loadingTemplates ? t('common.loading') : t('template.selectExistingTemplate')}</option>
