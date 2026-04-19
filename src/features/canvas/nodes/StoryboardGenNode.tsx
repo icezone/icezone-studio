@@ -79,6 +79,7 @@ import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canv
 import { NodeResizeHandle } from '@/features/canvas/ui/NodeResizeHandle';
 import { FrameReferenceEditor } from '@/features/canvas/ui/FrameReferenceEditor';
 import { FrameControlEditor } from '@/features/canvas/ui/FrameControlEditor';
+import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker';
 import type { StoryboardFrameMode } from '@/features/canvas/domain/canvasNodes';
 import {
   NODE_CONTROL_CHIP_CLASS,
@@ -1566,6 +1567,18 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
         >
           {nodeData.frames.map((frame, index) => {
             const frameDescription = frameDescriptionDrafts[frame.id] ?? frame.description;
+            const handlePresetInsert = (content: string) => {
+              const el = frameTextareaRefs.current[frame.id];
+              if (!el) return;
+              const start = el.selectionStart ?? el.value.length;
+              const end = el.selectionEnd ?? el.value.length;
+              const next = el.value.slice(0, start) + content + el.value.slice(end);
+              handleFrameDescriptionChange(index, next);
+              requestAnimationFrame(() => {
+                el.focus();
+                el.setSelectionRange(start + content.length, start + content.length);
+              });
+            };
             return (
               <div
                 key={frame.id}
@@ -1611,6 +1624,11 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
                   className="ui-scrollbar nodrag nowheel relative z-10 h-full w-full resize-none overflow-y-auto overflow-x-hidden bg-transparent px-1.5 py-1 text-left text-[10px] leading-4 text-transparent caret-text-dark placeholder:text-[var(--canvas-node-fg-muted)]/40 focus:border-accent/50 focus:outline-none whitespace-pre-wrap break-words"
                   style={{ scrollbarGutter: 'stable' }}
                 />
+
+                {/* Preset prompt picker (top-right) */}
+                <div className="absolute right-0.5 top-0.5 z-20">
+                  <PresetPickerButton onInsert={handlePresetInsert} />
+                </div>
 
                 {/* Frame control icon (bottom-left) */}
                 {incomingImages.length > 0 && (

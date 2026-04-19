@@ -342,8 +342,32 @@ export default function DashboardPage() {
     void handleCreate();
   }, []);
 
-  const handleSaveTemplate = useCallback(async () => {
-    // No-op from dashboard — save is only meaningful in canvas
+  const handleSaveTemplate = useCallback(async (data: {
+    name: string;
+    description: string;
+    tags: string[];
+    isPublic: boolean;
+    thumbnailUrl?: string;
+    existingTemplateId?: string;
+  }) => {
+    const isUpdate = Boolean(data.existingTemplateId);
+    const url = isUpdate ? `/api/templates/${data.existingTemplateId}` : '/api/templates';
+    const method = isUpdate ? 'PATCH' : 'POST';
+
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: data.name,
+        description: data.description,
+        tags: data.tags,
+        isPublic: data.isPublic,
+        thumbnailUrl: data.thumbnailUrl,
+        // no templateData from dashboard
+      }),
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
   }, []);
 
   const handleImportJson = useCallback(() => {}, []);
@@ -567,6 +591,7 @@ export default function DashboardPage() {
         onImportJson={handleImportJson}
         onExportJson={handleExportJson}
         defaultTab={templateLibraryTab}
+        canvasImages={[]}
       />
     </div>
   );

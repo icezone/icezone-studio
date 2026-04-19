@@ -58,6 +58,7 @@ import {
 import { useCanvasStore } from '@/stores/canvasStore';
 import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker';
 
 type StoryboardNodeProps = NodeProps & {
   id: string;
@@ -309,6 +310,20 @@ const FrameCard = memo(
   }: FrameCardProps) => {
     const updateStoryboardFrame = useCanvasStore((state) => state.updateStoryboardFrame);
     const { zoom } = useViewport();
+    const noteRef = useRef<HTMLTextAreaElement>(null);
+
+    const handlePresetInsert = (content: string) => {
+      const el = noteRef.current;
+      if (!el) return;
+      const start = el.selectionStart ?? el.value.length;
+      const end = el.selectionEnd ?? el.value.length;
+      const next = (frame.note ?? '').slice(0, start) + content + (frame.note ?? '').slice(end);
+      updateStoryboardFrame(nodeId, frame.id, { note: next });
+      requestAnimationFrame(() => {
+        el.focus();
+        el.setSelectionRange(start + content.length, start + content.length);
+      });
+    };
 
     const imageSource = useMemo(() => {
       const preferOriginal = shouldUseOriginalImageByZoom(zoom);
@@ -397,7 +412,11 @@ const FrameCard = memo(
           </button>
         </div>
 
+        <div className="flex justify-end px-1 pt-1">
+          <PresetPickerButton onInsert={handlePresetInsert} />
+        </div>
         <textarea
+          ref={noteRef}
           value={frame.note}
           onChange={(event) => {
             const nextValue = event.target.value;

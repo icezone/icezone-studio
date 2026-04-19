@@ -50,6 +50,7 @@ import { VideoParamsControls } from '@/features/canvas/ui/VideoParamsControls';
 import { UiButton } from '@/components/ui';
 import { useCanvasStore } from '@/stores/canvasStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker';
 
 type VideoGenNodeProps = NodeProps & {
   id: string;
@@ -146,6 +147,19 @@ function VideoGenNodeComponent({
   const [endFramePickerOpen, setEndFramePickerOpen] = useState(false);
   const apiKeys = useSettingsStore((state) => state.apiKeys);
   const videoDownloadPresetPaths = useSettingsStore((state) => state.videoDownloadPresetPaths);
+
+  const handlePresetInsert = (content: string) => {
+    const el = promptRef.current
+    if (!el) return
+    const start = el.selectionStart ?? el.value.length
+    const end = el.selectionEnd ?? el.value.length
+    const next = el.value.slice(0, start) + content + el.value.slice(end)
+    setPromptDraft(next)
+    requestAnimationFrame(() => {
+      el.focus()
+      el.setSelectionRange(start + content.length, start + content.length)
+    })
+  }
 
   const videoModels = useMemo(() => listVideoModels(), []);
   const selectedModel = useMemo(
@@ -677,14 +691,14 @@ function VideoGenNodeComponent({
   return (
     <div
       className={`
-        flex flex-col rounded-xl border-2 bg-[var(--canvas-node-bg)] shadow-xl transition-all p-3 overflow-hidden
+        flex flex-col rounded-xl border-2 bg-[var(--canvas-node-bg)] shadow-xl transition-all p-3
         ${
           selected
             ? 'border-accent shadow-accent/30'
             : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'
         }
       `}
-      style={{ width: `${resolvedWidth}px`, height: `${resolvedHeight}px` }}
+      style={{ width: `${resolvedWidth}px`, minHeight: `${resolvedHeight}px` }}
       onClick={() => setSelectedNode(id)}
     >
       <NodeHeader
@@ -696,7 +710,7 @@ function VideoGenNodeComponent({
       />
 
       {/* Content Wrapper */}
-      <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         {/* Prompt Input */}
         <div className="rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] shrink-0">
           <button
@@ -707,7 +721,10 @@ function VideoGenNodeComponent({
             className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)] transition-colors"
           >
             <span>{t('node.videoGen.promptPlaceholder')}</span>
-            {promptCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+            <div className="flex items-center gap-1">
+              <PresetPickerButton onInsert={handlePresetInsert} />
+              {promptCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+            </div>
           </button>
           {!promptCollapsed && (
             <div className="relative p-2 border-t border-[var(--canvas-node-border)]" style={{ height: '150px' }}>
@@ -948,7 +965,7 @@ function VideoGenNodeComponent({
 
         {/* Video Preview */}
         {data.videoUrl && !data.isGenerating && (
-          <div className="rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-2 flex items-center justify-center flex-1 min-h-0">
+          <div className="rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-2 flex items-center justify-center min-h-[200px]">
             <video
               src={data.videoUrl}
               controls

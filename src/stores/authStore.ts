@@ -55,7 +55,13 @@ export const useAuthStore = create<AuthState>((set) => {
     },
 
     async signUp(email: string, password: string) {
-      const { error } = await getSupabase().auth.signUp({ email, password });
+      const { error } = await getSupabase().auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/callback`,
+        },
+      });
       return { error };
     },
 

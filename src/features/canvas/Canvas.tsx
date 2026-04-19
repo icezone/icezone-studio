@@ -1720,31 +1720,50 @@ function CanvasInner() {
     setShowTemplateLibrary(true);
   }, []);
 
-  const handleSaveTemplate = useCallback(async (data: { name: string; description: string; tags: string[]; isPublic: boolean }) => {
+  const handleSaveTemplate = useCallback(async (data: {
+    name: string;
+    description: string;
+    tags: string[];
+    isPublic: boolean;
+    thumbnailUrl?: string;
+    existingTemplateId?: string;
+  }) => {
     const templateData = serializeCanvasToTemplate(nodes, edges, {
       name: data.name,
       description: data.description,
     });
 
-    const res = await fetch('/api/templates', {
-      method: 'POST',
+    const isUpdate = Boolean(data.existingTemplateId);
+    const url = isUpdate ? `/api/templates/${data.existingTemplateId}` : '/api/templates';
+    const method = isUpdate ? 'PATCH' : 'POST';
+
+    const res = await fetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: data.name,
         description: data.description,
         tags: data.tags,
         isPublic: data.isPublic,
+        thumbnailUrl: data.thumbnailUrl,
         templateData,
       }),
     });
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
-      const errorMessage = errorData.error || `HTTP ${res.status}`;
-      console.error('Failed to save template:', errorMessage, errorData);
-      throw new Error(`Failed to save template: ${errorMessage}`);
+      throw new Error((errorData as { error?: string }).error ?? `HTTP ${res.status}`);
     }
   }, [nodes, edges]);
+
+  const canvasImages = useMemo(
+    () =>
+      nodes
+        .filter((n) => n.type === 'imageNode' || n.type === 'uploadNode')
+        .map((n) => (n.data as { imageUrl?: string }).imageUrl)
+        .filter((url): url is string => typeof url === 'string' && url.length > 0),
+    [nodes]
+  );
 
   const handleUseTemplate = useCallback(async (template: WorkflowTemplate) => {
     const res = await fetch(`/api/templates/${template.id}`);
@@ -1752,7 +1771,7 @@ function CanvasInner() {
 
     const data = await res.json();
     const { nodes: templateNodes, edges: templateEdges } = deserializeTemplateToCanvas(
-      data.templateData,
+      data.template_data,
       { x: 100, y: 100 }
     );
 
@@ -1957,6 +1976,7 @@ function CanvasInner() {
         onSaveTemplate={handleSaveTemplate}
         onImportJson={handleImportJson}
         onExportJson={handleExportJson}
+        canvasImages={canvasImages}
       />
       </div>
     </div>

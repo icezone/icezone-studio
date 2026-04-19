@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { BookOpen, Search, Loader2, CheckSquare, Square } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +17,7 @@ import { NODE_CONTROL_PRIMARY_BUTTON_CLASS } from '@/features/canvas/ui/nodeCont
 import { batchGenerateStoryboards } from '@/features/canvas/application/novelToStoryboard';
 import { UiButton } from '@/components/ui';
 import { useCanvasStore } from '@/stores/canvasStore';
+import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker';
 
 type NovelInputNodeProps = NodeProps & {
   id: string;
@@ -50,6 +51,22 @@ function NovelInputNodeComponent({
   const addEdge = useCanvasStore((s) => s.addEdge);
 
   const [error, setError] = useState<string | null>(null);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const handlePresetInsert = (content: string) => {
+    const el = textareaRef.current
+    if (!el) return
+    const start = el.selectionStart ?? el.value.length
+    const end = el.selectionEnd ?? el.value.length
+    const currentText = data.text ?? ''
+    const next = currentText.slice(0, start) + content + currentText.slice(end)
+    updateNodeData(id, { text: next })
+    requestAnimationFrame(() => {
+      el.focus()
+      el.setSelectionRange(start + content.length, start + content.length)
+    })
+  }
 
   const resolvedTitle = useMemo(
     () => resolveNodeDisplayName(CANVAS_NODE_TYPES.novelInput, data, t),
@@ -229,7 +246,11 @@ function NovelInputNodeComponent({
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-2">
         {/* Textarea */}
         <div className="relative flex-1 min-h-0">
+          <div className="flex justify-end px-1 pb-1">
+            <PresetPickerButton onInsert={handlePresetInsert} />
+          </div>
           <textarea
+            ref={textareaRef}
             value={data.text ?? ''}
             onChange={(e) => handleTextChange(e.target.value)}
             onMouseDown={(e) => e.stopPropagation()}

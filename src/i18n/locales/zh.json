@@ -428,7 +428,36 @@
     "videoRebuild": "视频拆解重制",
     "videoRebuildDesc": "分析视频关键帧，重新生成分镜",
     "batchImageGen": "批量图片生成",
-    "batchImageGenDesc": "批量生成多张 AI 图片"
+    "batchImageGenDesc": "批量生成多张 AI 图片",
+    "coverImage": "封面图片",
+    "coverImageDesc": "自动选取画布第一张图片，点击可上传自定义封面",
+    "noCoverImage": "画布暂无图片，可上传封面。",
+    "coverUpload": "上传封面",
+    "coverUploading": "上传中...",
+    "coverUploadFailed": "封面上传失败",
+    "coverImageRequired": "请上传封面图片后再保存",
+    "overwriteExisting": "覆盖现有模板",
+    "selectExistingTemplate": "选择要覆盖的模板",
+    "saveAsNew": "保存为新模板",
+    "updateTemplate": "更新模板"
+  },
+  "presetPrompts": {
+    "sectionTitle": "预设提示词",
+    "sectionDesc": "保存可复用的提示词，在任意节点中一键插入",
+    "addButton": "新增预设",
+    "editButton": "编辑",
+    "deleteButton": "删除",
+    "saveButton": "保存",
+    "uncategorized": "未分类",
+    "namePlaceholder": "预设名称（如：电影感风格）",
+    "contentPlaceholder": "输入提示词内容...",
+    "tagsPlaceholder": "添加标签后回车",
+    "searchPlaceholder": "搜索预设...",
+    "noPresets": "暂无预设，请前往设置添加。",
+    "insertPreset": "插入预设",
+    "nameRequired": "名称不能为空",
+    "contentRequired": "内容不能为空",
+    "confirmDelete": "删除预设「{{name}}」？"
   },
   "landing": {
     "nav": {

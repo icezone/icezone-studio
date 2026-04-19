@@ -68,6 +68,7 @@ import { CanvasNodeImage } from '@/features/canvas/ui/CanvasNodeImage';
 import { UiButton } from '@/components/ui';
 import { useCanvasStore } from '@/stores/canvasStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker';
 
 type ImageEditNodeProps = NodeProps & {
   id: string;
@@ -236,6 +237,19 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
   const [pickerCursor, setPickerCursor] = useState<number | null>(null);
   const [pickerActiveIndex, setPickerActiveIndex] = useState(0);
   const [pickerAnchor, setPickerAnchor] = useState<PickerAnchor>(PICKER_FALLBACK_ANCHOR);
+
+  const handlePresetInsert = (content: string) => {
+    const el = promptRef.current
+    if (!el) return
+    const start = el.selectionStart ?? el.value.length
+    const end = el.selectionEnd ?? el.value.length
+    const next = el.value.slice(0, start) + content + el.value.slice(end)
+    setPromptDraft(next)
+    requestAnimationFrame(() => {
+      el.focus()
+      el.setSelectionRange(start + content.length, start + content.length)
+    })
+  }
 
   const nodes = useCanvasStore((state) => state.nodes);
   const edges = useCanvasStore((state) => state.edges);
@@ -669,6 +683,12 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
       />
 
       <div className="relative min-h-0 flex-1 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-2">
+        <div className="w-full flex items-center justify-between mb-1">
+          <span className="text-xs text-[var(--canvas-node-fg-muted)]">{t('node.imageEdit.promptPlaceholder')}</span>
+          <div className="flex items-center gap-1">
+            <PresetPickerButton onInsert={handlePresetInsert} />
+          </div>
+        </div>
         <div className="relative h-full min-h-0">
           <div
             ref={promptHighlightRef}

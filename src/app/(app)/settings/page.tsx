@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
 import i18n from '@/i18n';
+import { PresetPromptsSection } from '@/features/settings/PresetPromptsSection';
 
 export const dynamic = 'force-dynamic';
 
@@ -114,6 +115,14 @@ export default function SettingsPage() {
         {/* API Keys */}
         <SectionCard title={t('settings.apiKeys')} desc={t('settings.apiKeysDesc')}>
           <ApiKeyManager />
+        </SectionCard>
+
+        {/* Preset Prompts */}
+        <SectionCard
+          title={t('presetPrompts.sectionTitle')}
+          desc={t('presetPrompts.sectionDesc')}
+        >
+          <PresetPromptsSection />
         </SectionCard>
       </div>
     </div>

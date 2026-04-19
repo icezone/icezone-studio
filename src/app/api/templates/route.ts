@@ -23,7 +23,7 @@ export async function GET(request: Request) {
   } else if (category === 'shared') {
     query = query.eq('is_public', true).eq('category', 'shared')
   } else if (category === 'custom') {
-    query = query.eq('user_id', user.id).eq('category', 'custom')
+    query = query.eq('user_id', user.id)
   } else {
     // Default: own templates + official
     query = query.or(`user_id.eq.${user.id},user_id.is.null,is_public.eq.true`)
