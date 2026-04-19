@@ -428,7 +428,17 @@
     "videoRebuild": "Video Rebuild",
     "videoRebuildDesc": "Analyze video keyframes and regenerate storyboard",
     "batchImageGen": "Batch Image Generation",
-    "batchImageGenDesc": "Generate multiple AI images in batch"
+    "batchImageGenDesc": "Generate multiple AI images in batch",
+    "coverImage": "Cover Image",
+    "coverImageDesc": "Auto-selected from canvas — click to upload a custom image",
+    "noCoverImage": "No canvas images. Upload a cover below.",
+    "coverUpload": "Upload Cover",
+    "coverUploading": "Uploading...",
+    "coverUploadFailed": "Cover upload failed",
+    "overwriteExisting": "Overwrite existing template",
+    "selectExistingTemplate": "Select template to overwrite",
+    "saveAsNew": "Save as new template",
+    "updateTemplate": "Update Template"
   },
   "presetPrompts": {
     "sectionTitle": "Preset Prompts",
