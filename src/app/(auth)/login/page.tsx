@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
+import { WeChatLoginButton } from '@/components/auth/WeChatLoginButton';
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -101,6 +102,8 @@ export default function LoginPage() {
       >
         {t('auth.continueWithGoogle')}
       </button>
+
+      <WeChatLoginButton />
 
       <p className="text-center text-sm text-foreground/60">
         {t('auth.noAccount')}{' '}
