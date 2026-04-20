@@ -37,7 +37,15 @@
     "checkEmailMessage": "我们已发送确认链接到 <strong>{{email}}</strong>。",
     "backToLogin": "返回登录",
     "passwordMismatch": "两次密码不一致",
-    "passwordTooShort": "密码至少需要 6 个字符"
+    "passwordTooShort": "密码至少需要 6 个字符",
+    "wechatLogin": "微信扫码登录",
+    "wechatScanTitle": "微信扫码登录",
+    "wechatScanInstruction": "打开微信，扫描二维码",
+    "wechatExpired": "二维码已过期",
+    "wechatRefresh": "点击刷新",
+    "wechatFailed": "登录失败",
+    "wechatSuccess": "登录成功，正在跳转...",
+    "wechatTimeRemaining": "剩余 {{seconds}} 秒"
   },
   "dashboard": {
     "title": "我的项目",

@@ -37,7 +37,15 @@
     "checkEmailMessage": "We've sent a confirmation link to <strong>{{email}}</strong>.",
     "backToLogin": "Back to login",
     "passwordMismatch": "Passwords do not match",
-    "passwordTooShort": "Password must be at least 6 characters"
+    "passwordTooShort": "Password must be at least 6 characters",
+    "wechatLogin": "WeChat Scan Login",
+    "wechatScanTitle": "WeChat Scan Login",
+    "wechatScanInstruction": "Open WeChat and scan the QR code",
+    "wechatExpired": "QR code expired",
+    "wechatRefresh": "Click to refresh",
+    "wechatFailed": "Login failed",
+    "wechatSuccess": "Login successful, redirecting...",
+    "wechatTimeRemaining": "{{seconds}}s remaining"
   },
   "dashboard": {
     "title": "My Projects",
