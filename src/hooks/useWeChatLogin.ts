@@ -4,13 +4,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 type WeChatLoginStatus = 'idle' | 'pending' | 'confirmed' | 'failed' | 'expired';
 
-const WECHAT_SCAN_BASE_URL = process.env.NEXT_PUBLIC_WECHAT_SCAN_URL || '';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
 
 export function useWeChatLogin() {
   const [status, setStatus] = useState<WeChatLoginStatus>('idle');
   const [uuid, setUuid] = useState<string | null>(null);
-  const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [qrImageSrc, setQrImageSrc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
 
@@ -51,11 +51,31 @@ export function useWeChatLogin() {
       return;
     }
 
+    // Fetch Mini Program QR code from Edge Function
     setUuid(newUuid);
-    setQrUrl(`${WECHAT_SCAN_BASE_URL}?uuid=${newUuid}`);
     setStatus('pending');
     setError(null);
     setRemainingSeconds(Math.floor(SESSION_TIMEOUT_MS / 1000));
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/wechat-qrcode`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uuid: newUuid }),
+      });
+      const data = await res.json();
+      if (data.success && data.image) {
+        setQrImageSrc(data.image);
+      } else {
+        setError(data.error || 'Failed to generate QR code');
+        setStatus('failed');
+        return;
+      }
+    } catch {
+      setError('Failed to connect to QR code service');
+      setStatus('failed');
+      return;
+    }
 
     // Start countdown
     timerRef.current = setInterval(() => {
@@ -118,7 +138,7 @@ export function useWeChatLogin() {
     cleanup();
     setStatus('idle');
     setUuid(null);
-    setQrUrl(null);
+    setQrImageSrc(null);
     setError(null);
     setRemainingSeconds(0);
   }, [cleanup]);
@@ -130,7 +150,7 @@ export function useWeChatLogin() {
   return {
     status,
     uuid,
-    qrUrl,
+    qrImageSrc,
     error,
     remainingSeconds,
     startLogin,

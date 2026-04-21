@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { QRCodeSVG } from 'qrcode.react';
 import { useWeChatLogin } from '@/hooks/useWeChatLogin';
 
 interface WeChatQRModalProps {
@@ -14,7 +13,7 @@ interface WeChatQRModalProps {
 export function WeChatQRModal({ open, onClose }: WeChatQRModalProps) {
   const { t } = useTranslation();
   const router = useRouter();
-  const { status, qrUrl, error, remainingSeconds, startLogin, reset } = useWeChatLogin();
+  const { status, qrImageSrc, error, remainingSeconds, startLogin, reset } = useWeChatLogin();
 
   useEffect(() => {
     if (open && status === 'idle') {
@@ -56,10 +55,10 @@ export function WeChatQRModal({ open, onClose }: WeChatQRModalProps) {
           {t('auth.wechatScanTitle')}
         </h2>
 
-        {status === 'pending' && qrUrl && (
+        {status === 'pending' && qrImageSrc && (
           <div className="flex flex-col items-center space-y-4">
             <div className="rounded-lg border border-foreground/10 p-4">
-              <QRCodeSVG value={qrUrl} size={200} />
+              <img src={qrImageSrc} alt="WeChat QR Code" width={200} height={200} />
             </div>
             <p className="text-sm text-foreground/60">{t('auth.wechatScanInstruction')}</p>
             <div className="w-full">
@@ -77,7 +76,7 @@ export function WeChatQRModal({ open, onClose }: WeChatQRModalProps) {
         {status === 'expired' && (
           <div className="flex flex-col items-center space-y-4">
             <div className="rounded-lg border border-foreground/10 p-4 opacity-30">
-              <QRCodeSVG value="expired" size={200} />
+              <div className="h-[200px] w-[200px] bg-foreground/5" />
             </div>
             <p className="text-sm text-foreground/60">{t('auth.wechatExpired')}</p>
             <button

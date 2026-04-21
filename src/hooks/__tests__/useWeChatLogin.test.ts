@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useWeChatLogin } from '../useWeChatLogin';
 
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
+
 vi.mock('@/lib/supabase/client', () => ({
   createClient: () => ({
     from: vi.fn().mockReturnValue({
@@ -21,17 +24,21 @@ vi.mock('@/lib/supabase/client', () => ({
 describe('useWeChatLogin', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    mockFetch.mockResolvedValue({
+      json: () => Promise.resolve({ success: true, image: 'data:image/png;base64,abc' }),
+    });
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    mockFetch.mockReset();
   });
 
   it('starts in idle state', () => {
     const { result } = renderHook(() => useWeChatLogin());
     expect(result.current.status).toBe('idle');
     expect(result.current.uuid).toBeNull();
-    expect(result.current.qrUrl).toBeNull();
+    expect(result.current.qrImageSrc).toBeNull();
   });
 
   it('transitions to pending when startLogin is called', async () => {
@@ -41,7 +48,7 @@ describe('useWeChatLogin', () => {
     });
     expect(result.current.status).toBe('pending');
     expect(result.current.uuid).toBeTruthy();
-    expect(result.current.qrUrl).toContain(result.current.uuid);
+    expect(result.current.qrImageSrc).toBe('data:image/png;base64,abc');
   });
 
   it('transitions to expired after timeout', async () => {

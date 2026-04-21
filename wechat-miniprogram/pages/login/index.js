@@ -8,7 +8,12 @@ Page({
   },
 
   onLoad(options) {
-    const uuid = options.uuid || '';
+    // getwxacodeunlimit passes UUID (without dashes) in the scene parameter
+    const scene = options.scene ? decodeURIComponent(options.scene) : '';
+    // Re-insert dashes to form a standard UUID
+    const uuid = scene.length === 32
+      ? `${scene.slice(0,8)}-${scene.slice(8,12)}-${scene.slice(12,16)}-${scene.slice(16,20)}-${scene.slice(20)}`
+      : options.uuid || '';
     if (!uuid) {
       this.setData({ status: 'error', errorMsg: 'Missing login session' });
       return;
