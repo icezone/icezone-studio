@@ -71,6 +71,7 @@ Deno.serve(async (req: Request) => {
         width: 430,
         auto_color: false,
         line_color: { r: 0, g: 0, b: 0 },
+        env_version: "trial",
       }),
     });
   } catch {
