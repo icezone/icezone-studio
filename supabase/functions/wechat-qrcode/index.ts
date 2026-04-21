@@ -54,8 +54,9 @@ Deno.serve(async (req: Request) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         scene,
+        page: "pages/login/index",
         width: 430,
-        env_version: "develop",
+        env_version: "release",
       }),
     });
 

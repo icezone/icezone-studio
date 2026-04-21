@@ -8,14 +8,18 @@ Page({
   },
 
   onLoad(options) {
-    // getwxacodeunlimit passes UUID (without dashes) in the scene parameter
-    const scene = options.scene ? decodeURIComponent(options.scene) : '';
-    // Re-insert dashes to form a standard UUID
+    // scene comes from getwxacodeunlimit: page options (published) or app globalData
+    const app = getApp();
+    const scene = options.scene
+      ? decodeURIComponent(options.scene)
+      : (app.globalData.scene || '');
+
+    // Re-insert dashes to form a standard UUID (scene is UUID without dashes, 32 chars)
     const uuid = scene.length === 32
       ? `${scene.slice(0,8)}-${scene.slice(8,12)}-${scene.slice(12,16)}-${scene.slice(16,20)}-${scene.slice(20)}`
       : options.uuid || '';
     if (!uuid) {
-      this.setData({ status: 'error', errorMsg: 'Missing login session' });
+      this.setData({ status: 'error', errorMsg: 'Please scan the QR code from IceZone Studio login page' });
       return;
     }
     this.setData({ uuid });
