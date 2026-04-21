@@ -34,7 +34,7 @@
 
 | 术语 | 定义 |
 |------|------|
-| **Provider** | API 的实际提供方(如 kie、fal、grsai、OpenAI 官方、用户自定义 OpenRouter 实例) |
+| **Provider** | API 的实际提供方(如 kie、s.lconai.com、ai.comfly.chat、api.n1n.ai、OpenAI Google Claude Grok官方、用户自定义 OpenRouter 实例) |
 | **Aggregator(推荐聚合器)** | 我们维护的"推荐清单"中的 provider 候选,首次引导时展示给用户 |
 | **Logical Model** | 面向用户的逻辑模型名,如 `nano-banana-pro`、`veo-3`、`gemini-2.5-flash` |
 | **Model Binding** | `logical_model × provider → 实际调用参数`(沿用现有 `src/features/canvas/models/image/<provider>/<model>.ts` 结构) |
@@ -262,7 +262,7 @@ candidates = keys that can serve `logical_model`
    score = w_success · success_rate
          + w_latency · latency_norm_inv
          + w_cost    · cost_norm_inv
-   w_success=0.6, w_latency=0.2, w_cost=0.2(MVP 默认;未来可配置)
+   w_success=0.3, w_latency=0.2, w_cost=0.5(MVP 默认;未来可配置)
 ```
 
 ### 7.2 Score 取样
@@ -346,7 +346,7 @@ Toast:"已切换至 fal 完成请求 · 查看详情"
 ### 10.1 ModelPicker
 
 - **仅显示 `displayName`**(`Nano Banana Pro`),不显示 `provider/model`
-- **已解锁态**:正常颜色,悬停显示"当前首选:kie · 可选 fal、grsai"
+- **已解锁态**:正常颜色,悬停显示"当前首选:kie · 可选 comfly、官方"
 - **未解锁态(🔒)**:灰化 + 锁图标 + "配置 <场景> key 解锁"
   - 点击直达 `KeyManager`,并预筛选能解锁此模型的 provider 类型
 
