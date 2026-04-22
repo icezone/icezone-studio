@@ -40,13 +40,13 @@ describe('POST /api/ai/reverse-prompt', () => {
   })
 
   it('400 when imageUrl missing', async () => {
-    mockGetAuthUser.mockResolvedValue({ id: 'u1' } as any)
+    mockGetAuthUser.mockResolvedValue({ id: 'u1' } as unknown as never)
     const r = await POST(req({ style: 'generic' }))
     expect(r.status).toBe(400)
   })
 
   it('defaults to generic style when style invalid', async () => {
-    mockGetAuthUser.mockResolvedValue({ id: 'u1' } as any)
+    mockGetAuthUser.mockResolvedValue({ id: 'u1' } as unknown as never)
     mockGenerate.mockResolvedValue({
       prompt: 'test',
       confidence: 0.8,
@@ -59,14 +59,14 @@ describe('POST /api/ai/reverse-prompt', () => {
   })
 
   it('503 when GEMINI_API_KEY missing', async () => {
-    mockGetAuthUser.mockResolvedValue({ id: 'u1' } as any)
+    mockGetAuthUser.mockResolvedValue({ id: 'u1' } as unknown as never)
     mockGenerate.mockRejectedValue(new GeminiKeyMissingError())
     const r = await POST(req({ imageUrl: 'https://x', style: 'generic' }))
     expect(r.status).toBe(503)
   })
 
   it('returns 200 with result on success', async () => {
-    mockGetAuthUser.mockResolvedValue({ id: 'u1' } as any)
+    mockGetAuthUser.mockResolvedValue({ id: 'u1' } as unknown as never)
     mockGenerate.mockResolvedValue({
       prompt: 'a beautiful shot',
       negativePrompt: 'blurry',
