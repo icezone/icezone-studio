@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, getAuthUser } from '@/lib/supabase/server'
 import { generateReversePrompt } from '@/server/ai/analysis/reversePromptService'
+import { GeminiKeyMissingError } from '@/server/ai/analysis/providers/geminiAnalysis'
 import type { ReversePromptStyle } from '@/server/ai/analysis/types'
 
 const VALID_STYLES: ReversePromptStyle[] = ['generic', 'chinese']
@@ -47,12 +48,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result)
   } catch (error: unknown) {
+    if (error instanceof GeminiKeyMissingError) {
+      return NextResponse.json({ error: error.message }, { status: 503 })
+    }
     const message = error instanceof Error ? error.message : 'Reverse prompt generation failed'
     const isValidationError = message.includes('required')
-    const isConfigError = message.includes('GEMINI_API_KEY')
     return NextResponse.json(
       { error: message },
-      { status: isConfigError ? 503 : isValidationError ? 400 : 500 }
+      { status: isValidationError ? 400 : 500 }
     )
   }
 }
