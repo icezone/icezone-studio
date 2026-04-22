@@ -20,6 +20,10 @@ import { useCanvasStore } from '@/stores/canvasStore';
 import { useProjectStore } from '@/stores/projectStore';
 import { webAssetGateway } from '@/features/canvas/infrastructure/webAssetGateway';
 import { webVideoAnalysisGateway } from '@/features/canvas/infrastructure/webVideoAnalysisGateway';
+import {
+  expandSelectedFramesToUploadNodes,
+  createStoryboardFromSelection,
+} from './videoAnalysisActions';
 
 type VideoAnalysisNodeProps = NodeProps & {
   id: string;
@@ -298,36 +302,33 @@ function VideoAnalysisNodeComponent({
     [id, data.scenes, updateNodeData],
   );
 
+  const buildExpandContext = useCallback(() => {
+    const currentNode = nodes.find((n) => n.id === id);
+    if (!currentNode) return null;
+    return {
+      sourceNodeId: id,
+      sourcePosition: currentNode.position ?? { x: 0, y: 0 },
+      sourceWidth: resolvedWidth,
+      addNode,
+      addEdge,
+      getNodes: () => useCanvasStore.getState().nodes,
+      t,
+    };
+  }, [addEdge, addNode, id, nodes, resolvedWidth, t]);
+
   const handleExportKeyframes = useCallback(() => {
     if (selectedCount === 0) return;
-    const selectedScenes = data.scenes.filter((s) => s.selected);
-    const currentNode = nodes.find((n) => n.id === id);
-    if (!currentNode) return;
+    const ctx = buildExpandContext();
+    if (!ctx) return;
+    expandSelectedFramesToUploadNodes(data.scenes.filter((s) => s.selected), ctx);
+  }, [selectedCount, data.scenes, buildExpandContext]);
 
-    const baseX = (currentNode.position?.x ?? 0) + resolvedWidth + 80;
-    const baseY = currentNode.position?.y ?? 0;
-
-    selectedScenes.forEach((scene, index) => {
-      if (!scene.keyframeUrl) return;
-      const position = { x: baseX, y: baseY + index * 220 };
-      addNode(
-        CANVAS_NODE_TYPES.upload,
-        position,
-        {
-          displayName: `${t('node.videoAnalysis.keyframe')} ${formatTime(scene.startTimeMs)}`,
-          imageUrl: scene.keyframeUrl,
-          previewImageUrl: scene.previewUrl ?? scene.keyframeUrl,
-          aspectRatio: '16:9',
-          sourceFileName: `keyframe-${formatTime(scene.startTimeMs)}.jpg`,
-        },
-      );
-      const latestNodes = useCanvasStore.getState().nodes;
-      const newNode = latestNodes[latestNodes.length - 1];
-      if (newNode) {
-        addEdge(id, newNode.id);
-      }
-    });
-  }, [selectedCount, data.scenes, nodes, id, resolvedWidth, addNode, addEdge, t]);
+  const handleCreateStoryboard = useCallback(() => {
+    if (selectedCount === 0) return;
+    const ctx = buildExpandContext();
+    if (!ctx) return;
+    createStoryboardFromSelection(data.scenes.filter((s) => s.selected), ctx);
+  }, [selectedCount, data.scenes, buildExpandContext]);
 
   return (
     <div
@@ -509,13 +510,18 @@ function VideoAnalysisNodeComponent({
               </div>
             </div>
 
-            <div className="px-1 shrink-0">
+            <div className="px-1 shrink-0 flex gap-1.5">
               <UiButton onClick={(e) => { e.stopPropagation(); handleExportKeyframes(); }}
                 disabled={selectedCount === 0} variant="primary" size="sm"
-                className={`w-full ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}>
+                className={`flex-1 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}>
                 {selectedCount > 0
                   ? t('node.videoAnalysis.exportKeyframesCount', { count: selectedCount })
                   : t('node.videoAnalysis.exportKeyframes')}
+              </UiButton>
+              <UiButton onClick={(e) => { e.stopPropagation(); handleCreateStoryboard(); }}
+                disabled={selectedCount === 0} variant="muted" size="sm"
+                className="flex-1">
+                {t('node.videoAnalysis.createStoryboard')}
               </UiButton>
             </div>
           </>
