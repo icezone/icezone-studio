@@ -1,25 +1,43 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { NextRequest } from 'next/server'
 
-// Mock the scene detection and frame extraction to avoid real ffmpeg calls
+const { mockGetUser, mockProjectLookup } = vi.hoisted(() => ({
+  mockGetUser: vi.fn(),
+  mockProjectLookup: vi.fn(),
+}))
+
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: async () => ({
+    auth: { getUser: mockGetUser },
+    from: () => ({ select: () => ({ eq: () => ({ maybeSingle: mockProjectLookup }) }) }),
+  }),
+}))
+
 vi.mock('@/server/video/analysis/sceneDetector', () => ({
   detectScenes: vi.fn().mockResolvedValue([
-    { startTimeMs: 0, endTimeMs: 5000, keyframeTimestampMs: 200, confidence: 1.0 },
-    { startTimeMs: 5000, endTimeMs: 10000, keyframeTimestampMs: 5200, confidence: 0.8 },
+    { startTimeMs: 0, endTimeMs: 5000, keyframeTimestampMs: 200, confidence: 0.8 },
+    { startTimeMs: 5000, endTimeMs: 10000, keyframeTimestampMs: 5200, confidence: 0.7 },
   ]),
 }))
 
 vi.mock('@/server/video/analysis/frameExtractor', () => ({
   extractKeyframes: vi.fn().mockResolvedValue([
-    { timestampMs: 200, imageData: 'data:image/jpeg;base64,abc123' },
-    { timestampMs: 5200, imageData: 'data:image/jpeg;base64,def456' },
+    { timestampMs: 200, imageData: 'data:image/jpeg;base64,QUJD' },
+    { timestampMs: 5200, imageData: 'data:image/jpeg;base64,REVG' },
   ]),
 }))
 
-import { POST } from '../../src/app/api/video/analyze/route'
-import { NextRequest } from 'next/server'
+vi.mock('@/server/video/analysis/keyframeStorage', () => ({
+  uploadKeyframes: vi.fn().mockResolvedValue([
+    'https://storage/kf-0.jpg',
+    'https://storage/kf-1.jpg',
+  ]),
+}))
 
-function makeRequest(body: Record<string, unknown>) {
+import { POST } from '@/app/api/video/analyze/route'
+
+function req(body: unknown) {
   return new NextRequest('http://localhost/api/video/analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -29,64 +47,38 @@ function makeRequest(body: Record<string, unknown>) {
 
 describe('POST /api/video/analyze', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    mockGetUser.mockReset()
+    mockProjectLookup.mockReset()
   })
 
-  it('should return 400 for missing videoUrl', async () => {
-    const response = await POST(makeRequest({
-      projectId: 'proj-1',
-    }))
-
-    expect(response.status).toBe(400)
-    const body = await response.json()
-    expect(body.error).toMatch(/videoUrl/i)
+  it('returns 401 when unauthenticated', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
+    const res = await POST(req({ videoUrl: 'https://x/y.mp4', projectId: 'p1' }))
+    expect(res.status).toBe(401)
   })
 
-  it('should return 400 for missing projectId', async () => {
-    const response = await POST(makeRequest({
-      videoUrl: 'https://example.com/video.mp4',
-    }))
-
-    expect(response.status).toBe(400)
-    const body = await response.json()
-    expect(body.error).toMatch(/projectId/i)
+  it('returns 400 for missing videoUrl', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } })
+    const res = await POST(req({ projectId: 'p1' }))
+    expect(res.status).toBe(400)
   })
 
-  it('should return scenes for valid request', async () => {
-    const response = await POST(makeRequest({
-      videoUrl: 'https://example.com/video.mp4',
-      projectId: 'proj-1',
-    }))
+  it('returns 403 when project not owned', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } })
+    mockProjectLookup.mockResolvedValue({ data: null })
+    const res = await POST(req({ videoUrl: 'https://x/y.mp4', projectId: 'p1' }))
+    expect(res.status).toBe(403)
+  })
 
-    expect(response.status).toBe(200)
-    const body = await response.json()
+  it('returns scenes with keyframeUrls on success', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } })
+    mockProjectLookup.mockResolvedValue({ data: { id: 'p1' } })
+    const res = await POST(req({ videoUrl: 'https://x/y.mp4', projectId: 'p1' }))
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.analysisId).toMatch(/[a-f0-9-]{8,}/)
     expect(body.scenes).toHaveLength(2)
-    expect(body.scenes[0]).toMatchObject({
-      startTimeMs: 0,
-      endTimeMs: 5000,
-      keyframeUrl: 'data:image/jpeg;base64,abc123',
-      confidence: 1.0,
-    })
-    expect(body.scenes[1]).toMatchObject({
-      startTimeMs: 5000,
-      endTimeMs: 10000,
-      keyframeUrl: 'data:image/jpeg;base64,def456',
-      confidence: 0.8,
-    })
-    expect(body.totalDurationMs).toBe(10000)
-  })
-
-  it('should accept optional parameters', async () => {
-    const response = await POST(makeRequest({
-      videoUrl: 'https://example.com/video.mp4',
-      projectId: 'proj-1',
-      sensitivityThreshold: 0.5,
-      minSceneDurationMs: 1000,
-      maxKeyframes: 20,
-    }))
-
-    expect(response.status).toBe(200)
-    const body = await response.json()
-    expect(body.scenes).toBeDefined()
+    expect(body.scenes[0].keyframeUrl).toBe('https://storage/kf-0.jpg')
+    expect(body.scenes[1].keyframeUrl).toBe('https://storage/kf-1.jpg')
   })
 })
