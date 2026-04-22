@@ -1,8 +1,8 @@
 'use client';
 
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { Film, Search, Loader2, CheckSquare, Square, Upload } from 'lucide-react';
+import { Film, Search, Loader2, CheckSquare, Square, Upload, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -10,6 +10,7 @@ import {
   type VideoAnalysisNodeData,
   type VideoScene,
 } from '@/features/canvas/domain/canvasNodes';
+import type { ReversePromptStyle } from '@/features/canvas/domain/videoAnalysisTypes';
 import { resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
 import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canvas/ui/NodeHeader';
 import { NodeResizeHandle } from '@/features/canvas/ui/NodeResizeHandle';
@@ -32,6 +33,24 @@ const MAX_WIDTH = 900;
 const MAX_HEIGHT = 1200;
 const DEFAULT_WIDTH = 560;
 const DEFAULT_HEIGHT = 420;
+const SHOT_ANALYSIS_FRAME_LIMIT = 10;
+const REVERSE_PROMPT_CONCURRENCY = 3;
+
+async function runWithConcurrency<T>(
+  tasks: Array<() => Promise<T>>,
+  limit: number,
+): Promise<T[]> {
+  const results: T[] = new Array(tasks.length);
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(limit, tasks.length) }, async () => {
+    while (cursor < tasks.length) {
+      const i = cursor++;
+      results[i] = await tasks[i]();
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
 
 function formatTime(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
@@ -56,6 +75,93 @@ function VideoAnalysisNodeComponent({
   const projectId = useProjectStore((s) => s.currentProjectId);
 
   const [error, setError] = useState<string | null>(null);
+  const [shotAnalysisLoading, setShotAnalysisLoading] = useState(false);
+  const autoRanForAnalysisId = useRef<string | null>(null);
+
+  const reversePromptStyle: ReversePromptStyle = data.reversePromptStyle ?? 'generic';
+
+  const handleReversePromptStyleChange = useCallback(
+    (next: ReversePromptStyle) => {
+      updateNodeData(id, { reversePromptStyle: next });
+      autoRanForAnalysisId.current = null;
+    },
+    [id, updateNodeData],
+  );
+
+  const runShotAnalysisAndReverse = useCallback(
+    async (scenes: VideoScene[], language: 'zh' | 'en', style: ReversePromptStyle) => {
+      if (scenes.length === 0) return;
+      const framesForShot = scenes.slice(0, SHOT_ANALYSIS_FRAME_LIMIT).map((s) => s.keyframeUrl).filter(Boolean);
+      if (framesForShot.length === 0) return;
+
+      setShotAnalysisLoading(true);
+      try {
+        const shotRes = await fetch('/api/ai/shot-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageUrl: framesForShot[0],
+            additionalFrameUrls: framesForShot.slice(1),
+            language,
+          }),
+        });
+        if (shotRes.ok) {
+          const shotAnalysis = await shotRes.json();
+          updateNodeData(id, { shotAnalysis });
+        } else if (shotRes.status !== 503) {
+          const body = await shotRes.json().catch(() => ({}));
+          setError(body.error || `shot-analysis ${shotRes.status}`);
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'shot-analysis failed';
+        setError(msg);
+      } finally {
+        setShotAnalysisLoading(false);
+      }
+
+      const tasks = scenes.map((scene) => async (): Promise<VideoScene> => {
+        if (!scene.keyframeUrl) return { ...scene, reversePromptError: 'no keyframe' };
+        try {
+          const res = await fetch('/api/ai/reverse-prompt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageUrl: scene.keyframeUrl, style }),
+          });
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            return { ...scene, reversePrompt: null, reversePromptError: body.error || `HTTP ${res.status}` };
+          }
+          const reversePrompt = await res.json();
+          return { ...scene, reversePrompt, reversePromptError: null };
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'reverse-prompt failed';
+          return { ...scene, reversePrompt: null, reversePromptError: msg };
+        }
+      });
+
+      const enrichedScenes = await runWithConcurrency(tasks, REVERSE_PROMPT_CONCURRENCY);
+
+      const latestScenes = useCanvasStore.getState().nodes.find((n) => n.id === id)?.data?.scenes as VideoScene[] | undefined;
+      if (latestScenes) {
+        const byId = new Map(enrichedScenes.map((s) => [s.id, s]));
+        const merged = latestScenes.map((s) => byId.get(s.id) ?? s);
+        updateNodeData(id, { scenes: merged });
+      } else {
+        updateNodeData(id, { scenes: enrichedScenes });
+      }
+    },
+    [id, updateNodeData],
+  );
+
+  useEffect(() => {
+    if (!data.analysisId || !data.scenes || data.scenes.length === 0) return;
+    if (autoRanForAnalysisId.current === data.analysisId) return;
+    const needsEnrichment = !data.shotAnalysis || data.scenes.some((s) => !s.reversePrompt && !s.reversePromptError);
+    if (!needsEnrichment) return;
+    autoRanForAnalysisId.current = data.analysisId;
+    const language: 'zh' | 'en' = reversePromptStyle === 'chinese' ? 'zh' : 'en';
+    void runShotAnalysisAndReverse(data.scenes, language, reversePromptStyle);
+  }, [data.analysisId, data.scenes, data.shotAnalysis, reversePromptStyle, runShotAnalysisAndReverse]);
 
   const resolvedTitle = useMemo(
     () => resolveNodeDisplayName(CANVAS_NODE_TYPES.videoAnalysis, data, t),
@@ -324,17 +430,55 @@ function VideoAnalysisNodeComponent({
 
         {data.scenes?.length > 0 && (
           <>
-            <div className="px-1 flex items-center justify-between">
+            <div className="px-1 flex items-center justify-between gap-2">
               <span className="text-xs font-medium text-[var(--canvas-node-fg-muted)]">
                 {t('node.videoAnalysis.scenesDetected', { count: data.scenes.length })}
               </span>
-              <button onClick={(e) => { e.stopPropagation(); toggleAllScenes(selectedCount < data.scenes.length); }}
-                className="text-[10px] text-accent hover:text-accent/80 transition-colors">
-                {selectedCount === data.scenes.length
-                  ? t('node.videoAnalysis.deselectAll')
-                  : t('node.videoAnalysis.selectAll')}
-              </button>
+              <div className="flex items-center gap-2">
+                <div
+                  className="flex items-center gap-1 rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/40 px-1 py-0.5 dark:border-[rgba(255,255,255,0.1)]"
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  <Languages className="h-3 w-3 text-[var(--canvas-node-fg-muted)]" />
+                  <button
+                    onClick={() => handleReversePromptStyleChange('generic')}
+                    className={`nodrag text-[10px] px-1 rounded ${reversePromptStyle === 'generic' ? 'bg-accent text-white' : 'text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)]'}`}
+                  >EN</button>
+                  <button
+                    onClick={() => handleReversePromptStyleChange('chinese')}
+                    className={`nodrag text-[10px] px-1 rounded ${reversePromptStyle === 'chinese' ? 'bg-accent text-white' : 'text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)]'}`}
+                  >中文</button>
+                </div>
+                <button onClick={(e) => { e.stopPropagation(); toggleAllScenes(selectedCount < data.scenes.length); }}
+                  className="text-[10px] text-accent hover:text-accent/80 transition-colors">
+                  {selectedCount === data.scenes.length
+                    ? t('node.videoAnalysis.deselectAll')
+                    : t('node.videoAnalysis.selectAll')}
+                </button>
+              </div>
             </div>
+
+            {(shotAnalysisLoading || data.shotAnalysis) && (
+              <div className="px-1">
+                <div className="rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/30 px-2 py-1 text-[10px] text-[var(--canvas-node-fg-muted)] dark:border-[rgba(255,255,255,0.1)]">
+                  {shotAnalysisLoading ? (
+                    <span className="inline-flex items-center gap-1">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      {t('node.videoAnalysis.shotAnalysisRunning')}
+                    </span>
+                  ) : data.shotAnalysis ? (
+                    <span className="block truncate">
+                      <span className="text-accent font-medium">{data.shotAnalysis.shotType}</span>
+                      <span className="mx-1">·</span>
+                      <span>{data.shotAnalysis.cameraMovement}</span>
+                      <span className="mx-1">·</span>
+                      <span>{data.shotAnalysis.mood}</span>
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            )}
 
             <div className="flex-1 min-h-0 overflow-y-auto ui-scrollbar rounded-lg border border-[rgba(15,23,42,0.15)] bg-bg-dark/30 p-2 dark:border-[rgba(255,255,255,0.1)]">
               <div className="grid grid-cols-3 gap-1.5">
