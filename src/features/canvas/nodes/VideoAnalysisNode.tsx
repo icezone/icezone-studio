@@ -16,6 +16,9 @@ import { NodeResizeHandle } from '@/features/canvas/ui/NodeResizeHandle';
 import { NODE_CONTROL_PRIMARY_BUTTON_CLASS } from '@/features/canvas/ui/nodeControlStyles';
 import { UiButton } from '@/components/ui';
 import { useCanvasStore } from '@/stores/canvasStore';
+import { useProjectStore } from '@/stores/projectStore';
+import { webAssetGateway } from '@/features/canvas/infrastructure/webAssetGateway';
+import { webVideoAnalysisGateway } from '@/features/canvas/infrastructure/webVideoAnalysisGateway';
 
 type VideoAnalysisNodeProps = NodeProps & {
   id: string;
@@ -50,6 +53,7 @@ function VideoAnalysisNodeComponent({
   const addNode = useCanvasStore((s) => s.addNode);
   const addEdge = useCanvasStore((s) => s.addEdge);
   const nodes = useCanvasStore((s) => s.nodes);
+  const projectId = useProjectStore((s) => s.currentProjectId);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -69,15 +73,40 @@ function VideoAnalysisNodeComponent({
     [data.scenes],
   );
 
+  const uploadVideoFile = useCallback(
+    async (file: File) => {
+      if (!projectId) {
+        setError(t('node.videoAnalysis.noProjectSelected'));
+        return;
+      }
+      setError(null);
+      updateNodeData(id, { videoFileName: file.name, scenes: [], errorMessage: null, isAnalyzing: true, analysisProgress: 0 });
+      try {
+        const { videoUrl, videoFileName } = await webAssetGateway.uploadVideo({
+          file,
+          projectId,
+          onProgress: (pct) => {
+            updateNodeData(id, { analysisProgress: Math.round(pct * 0.5) });
+          },
+        });
+        updateNodeData(id, { videoUrl, videoFileName, isAnalyzing: false, analysisProgress: 0, errorMessage: null });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : t('node.videoAnalysis.uploadFailed');
+        setError(message);
+        updateNodeData(id, { isAnalyzing: false, analysisProgress: 0, errorMessage: message });
+      }
+    },
+    [id, projectId, t, updateNodeData],
+  );
+
   const handleVideoUpload = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
       if (!file.type.startsWith('video/')) return;
-      const url = URL.createObjectURL(file);
-      updateNodeData(id, { videoUrl: url, videoFileName: file.name, scenes: [], errorMessage: null });
+      void uploadVideoFile(file);
     },
-    [id, updateNodeData],
+    [uploadVideoFile],
   );
 
   const handleDrop = useCallback(
@@ -86,10 +115,9 @@ function VideoAnalysisNodeComponent({
       e.stopPropagation();
       const file = e.dataTransfer.files[0];
       if (!file || !file.type.startsWith('video/')) return;
-      const url = URL.createObjectURL(file);
-      updateNodeData(id, { videoUrl: url, videoFileName: file.name, scenes: [], errorMessage: null });
+      void uploadVideoFile(file);
     },
-    [id, updateNodeData],
+    [uploadVideoFile],
   );
 
   const handleSensitivityChange = useCallback(
@@ -109,46 +137,44 @@ function VideoAnalysisNodeComponent({
 
   const handleAnalyze = useCallback(async () => {
     if (!canAnalyze || !data.videoUrl) return;
+    if (!projectId) {
+      setError(t('node.videoAnalysis.noProjectSelected'));
+      return;
+    }
     setError(null);
     updateNodeData(id, { isAnalyzing: true, analysisProgress: 0, errorMessage: null, scenes: [] });
 
     try {
-      const response = await fetch('/api/video/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          videoUrl: data.videoUrl,
-          sensitivityThreshold: data.sensitivityThreshold,
-          minSceneDurationMs: data.minSceneDurationMs,
-          maxKeyframes: data.maxKeyframes,
-          projectId: 'local',
-        }),
+      const result = await webVideoAnalysisGateway.analyze({
+        videoUrl: data.videoUrl,
+        projectId,
+        sensitivityThreshold: data.sensitivityThreshold,
+        minSceneDurationMs: data.minSceneDurationMs,
+        maxKeyframes: data.maxKeyframes,
       });
 
-      if (!response.ok) {
-        const errorBody = await response.json().catch(() => ({}));
-        throw new Error(errorBody.error || `HTTP ${response.status}`);
-      }
+      const scenes: VideoScene[] = (result.scenes ?? []).map((s, i) => ({
+        id: `scene-${i}-${Date.now()}`,
+        startTimeMs: s.startTimeMs,
+        endTimeMs: s.endTimeMs,
+        keyframeUrl: s.keyframeUrl,
+        confidence: s.confidence,
+        selected: true,
+      }));
 
-      const result = await response.json();
-      const scenes: VideoScene[] = (result.scenes ?? []).map(
-        (s: Record<string, unknown>, i: number) => ({
-          id: `scene-${i}-${Date.now()}`,
-          startTimeMs: typeof s.startTimeMs === 'number' ? s.startTimeMs : 0,
-          endTimeMs: typeof s.endTimeMs === 'number' ? s.endTimeMs : 0,
-          keyframeUrl: typeof s.keyframeUrl === 'string' ? s.keyframeUrl : '',
-          confidence: typeof s.confidence === 'number' ? s.confidence : 0,
-          selected: true,
-        }),
-      );
-
-      updateNodeData(id, { isAnalyzing: false, analysisProgress: 100, scenes, errorMessage: null });
+      updateNodeData(id, {
+        isAnalyzing: false,
+        analysisProgress: 100,
+        scenes,
+        analysisId: result.analysisId,
+        errorMessage: null,
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : t('node.videoAnalysis.analysisFailed');
       setError(message);
       updateNodeData(id, { isAnalyzing: false, analysisProgress: 0, errorMessage: message });
     }
-  }, [canAnalyze, data.videoUrl, data.sensitivityThreshold, data.minSceneDurationMs, data.maxKeyframes, id, updateNodeData, t]);
+  }, [canAnalyze, data.videoUrl, data.sensitivityThreshold, data.minSceneDurationMs, data.maxKeyframes, id, projectId, updateNodeData, t]);
 
   const toggleSceneSelection = useCallback(
     (sceneId: string) => {
