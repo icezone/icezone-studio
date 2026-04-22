@@ -250,21 +250,34 @@ connectivity: {
 ### videoAnalysisNode（视频分析）
 
 **功能**：
-- 视频场景检测
-- 关键帧提取
+- 拖拽或点击上传视频，自动通过 `/api/assets/video-upload` 走签名上传
+- 基于像素差值的场景检测 + 关键帧抽取（ffmpeg scene filter）
+- 首批前 10 帧自动调用 Gemini 做整段镜头语言分析（运镜 / 主体 / 光影）
+- 每个关键帧自动反推 prompt（默认并发 3），支持 EN / 中文 切换
+- 选中场景后一键展开为多个 `uploadNode`，或打包为一个 `storyboardSplitNode`
 
 **输入**：
-- 必需：视频 URL
+- 必需：本地视频文件（拖拽或文件选择）
+- 可选：调整灵敏度（0.1-1.0）、最短场景时长（200ms-2s）、最大关键帧数（1-200）
 
 **输出**：
-- 场景边界时间戳
-- 关键帧图片 URL
+- `analysisId` + 场景数组（`startTimeMs` / `endTimeMs` / `keyframeUrl` / `confidence`）
+- 每个场景附带 `reversePrompt`（成功）或 `reversePromptError`（失败）
+- 节点级 `shotAnalysis`（`shotType` / `cameraMovement` / `mood` / `composition` 等）
 
 **连线**：
-- 输出端口：✅
 - 输入端口：✅
+- 输出端口：✅（选中场景一键 fan-out 到 upload 或 storyboard 节点）
 
-**关联 API**: `/api/video/analyze`
+**关联 API**：
+- `/api/assets/video-upload`（签名上传 URL）
+- `/api/video/analyze`（场景检测 + 关键帧上传）
+- `/api/ai/shot-analysis`（整段镜头语言分析）
+- `/api/ai/reverse-prompt`（逐帧提示词反推）
+
+**已知限制**（MVP）：
+- 同步模式硬超时 280s，长视频请拆分后再传
+- Gemini 未配置 key 时 shot-analysis / reverse-prompt 返回 503，但场景检测仍可用
 
 ---
 
