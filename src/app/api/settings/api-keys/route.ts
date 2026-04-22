@@ -42,7 +42,13 @@ const addKeySchema = z
     provider: z.string().min(1),
     key: z.string().min(8),
     key_index: z.number().int().min(0).optional(),
-    base_url: z.string().url().optional(),
+    base_url: z
+      .string()
+      .url()
+      .refine((v) => /^https?:\/\//i.test(v), {
+        message: 'base_url must use http or https scheme',
+      })
+      .optional(),
     protocol: z.enum(['native', 'openai-compat']).optional(),
     display_name: z.string().max(80).optional(),
   })
@@ -55,6 +61,10 @@ const addKeySchema = z
   .refine(
     (v) => !v.provider.startsWith(CUSTOM_PREFIX) || Boolean(v.base_url),
     { message: 'custom provider requires base_url', path: ['base_url'] }
+  )
+  .refine(
+    (v) => !v.provider.startsWith(CUSTOM_PREFIX) || v.provider.length > CUSTOM_PREFIX.length,
+    { message: 'custom provider id must include a suffix (custom:<id>)', path: ['provider'] }
   )
 
 const deleteKeySchema = z.object({

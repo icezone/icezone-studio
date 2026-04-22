@@ -75,4 +75,46 @@ describe('POST /api/settings/api-keys', () => {
     const res = await POST(req)
     expect(res.status).toBe(400)
   })
+
+  it('bare custom: 前缀无后缀被拒', async () => {
+    const req = new Request('http://x', {
+      method: 'POST',
+      body: JSON.stringify({
+        provider: 'custom:',
+        key: 'sk-12345678',
+        base_url: 'https://api.example.com/v1',
+      }),
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+  })
+
+  it('base_url 非 http/https scheme 被拒', async () => {
+    const req = new Request('http://x', {
+      method: 'POST',
+      body: JSON.stringify({
+        provider: 'custom:a1',
+        key: 'sk-12345678',
+        base_url: 'javascript:alert(1)',
+      }),
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+  })
+
+  it('显式 protocol 优先于自动推导,不被 base_url 覆写', async () => {
+    const req = new Request('http://x', {
+      method: 'POST',
+      body: JSON.stringify({
+        provider: 'custom:b2',
+        key: 'sk-12345678',
+        base_url: 'https://api.example.com/v1',
+        protocol: 'native',
+      }),
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+    const row = mock.upsert.mock.calls[0][0]
+    expect(row.protocol).toBe('native')
+  })
 })
