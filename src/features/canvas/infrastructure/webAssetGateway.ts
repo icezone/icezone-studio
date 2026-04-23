@@ -16,14 +16,14 @@ export class WebAssetGateway implements AssetGateway {
       const err = await signRes.json().catch(() => ({ error: 'sign failed' }));
       throw new Error(err.error || `sign failed (${signRes.status})`);
     }
-    const { uploadUrl, videoUrl } = (await signRes.json()) as {
+    const { uploadUrl, objectPath } = (await signRes.json()) as {
       uploadUrl: string;
-      videoUrl: string;
+      objectPath: string;
     };
 
     await this.putWithProgress(uploadUrl, file, onProgress, signal);
 
-    return { videoUrl, videoFileName: file.name };
+    return { videoUrl: objectPath, videoFileName: file.name };
   }
 
   private putWithProgress(

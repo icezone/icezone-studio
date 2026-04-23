@@ -4,18 +4,12 @@ import { NextRequest } from 'next/server'
 
 const mockGetUser = vi.fn()
 const mockCreateSignedUploadUrl = vi.fn()
-const mockCreateSignedUrl = vi.fn()
 const mockSelectProject = vi.fn()
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     auth: { getUser: mockGetUser },
-    storage: {
-      from: () => ({
-        createSignedUploadUrl: mockCreateSignedUploadUrl,
-        createSignedUrl: mockCreateSignedUrl,
-      }),
-    },
+    storage: { from: () => ({ createSignedUploadUrl: mockCreateSignedUploadUrl }) },
     from: () => ({ select: () => ({ eq: () => ({ maybeSingle: mockSelectProject }) }) }),
   }),
 }))
@@ -34,7 +28,6 @@ describe('POST /api/assets/video-upload', () => {
   beforeEach(() => {
     mockGetUser.mockReset()
     mockCreateSignedUploadUrl.mockReset()
-    mockCreateSignedUrl.mockReset()
     mockSelectProject.mockReset()
   })
 
@@ -64,15 +57,11 @@ describe('POST /api/assets/video-upload', () => {
       data: { signedUrl: 'https://supabase/upload', path: 'p1/abc.mp4', token: 't' },
       error: null,
     })
-    mockCreateSignedUrl.mockResolvedValue({
-      data: { signedUrl: 'https://supabase/read?token=xyz' },
-      error: null,
-    })
     const res = await POST(makeReq({ projectId: 'p1', fileName: 'v.mp4', mimeType: 'video/mp4' }))
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.uploadUrl).toBe('https://supabase/upload')
-    expect(body.videoUrl).toBe('https://supabase/read?token=xyz')
+    expect(body.objectPath).toMatch(/^p1\/.+\.mp4$/)
   })
 
   it('rejects invalid mime type', async () => {

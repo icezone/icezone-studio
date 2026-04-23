@@ -44,17 +44,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'project not found or not owned' }, { status: 403 })
   }
 
+  // If videoUrl is a bucket-relative object path (no scheme), generate a
+  // fresh signed read URL. Otherwise trust the caller (e.g. E2E tests).
+  let resolvedVideoUrl = videoUrl
+  if (!/^https?:\/\//i.test(videoUrl)) {
+    const { data: readSigned, error: readErr } = await supabase.storage
+      .from('project-videos')
+      .createSignedUrl(videoUrl, 60 * 60)
+    if (readErr || !readSigned) {
+      return NextResponse.json(
+        { error: readErr?.message ?? 'failed to sign video URL' },
+        { status: 500 },
+      )
+    }
+    resolvedVideoUrl = readSigned.signedUrl
+  }
+
   const analysisId = randomUUID()
 
   const work = (async () => {
-    const scenes = await detectScenes(videoUrl, {
+    const scenes = await detectScenes(resolvedVideoUrl, {
       sensitivityThreshold: body.sensitivityThreshold,
       minSceneDurationMs: body.minSceneDurationMs,
       maxKeyframes: body.maxKeyframes,
     })
 
     const timestamps = scenes.map((s) => s.keyframeTimestampMs)
-    const frames = await extractKeyframes(videoUrl, timestamps)
+    const frames = await extractKeyframes(resolvedVideoUrl, timestamps)
 
     const keyframes = frames.map((f) => ({
       timestampMs: f.timestampMs,
