@@ -53,13 +53,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error?.message ?? 'failed to sign' }, { status: 500 })
   }
 
-  const publicBase = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-  const videoUrl = `${publicBase}/storage/v1/object/sign/project-videos/${signed.path}`
+  const { data: readSigned, error: readErr } = await supabase.storage
+    .from('project-videos')
+    .createSignedUrl(objectPath, 60 * 60)
+
+  if (readErr || !readSigned) {
+    return NextResponse.json(
+      { error: readErr?.message ?? 'failed to create read signed url' },
+      { status: 500 }
+    )
+  }
+
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString()
 
   return NextResponse.json({
     uploadUrl: signed.signedUrl,
-    videoUrl,
+    videoUrl: readSigned.signedUrl,
     expiresAt,
   })
 }
