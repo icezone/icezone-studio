@@ -1,4 +1,4 @@
--- 016_video_intelligence_buckets.sql
+-- 018_video_intelligence_buckets.sql
 -- Create storage buckets for video intelligence feature.
 
 -- 1. project-videos bucket (7-day TTL; videos can be discarded once keyframes extracted)
