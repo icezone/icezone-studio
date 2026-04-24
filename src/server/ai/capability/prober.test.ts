@@ -113,6 +113,8 @@ describe('probeKey', () => {
     const result = await probeKey(makeSupabase(supaMock.keyRow) as never, 'u1', 'k1')
     expect(result.status).toBe('invalid')
     expect(result.error).toContain('401')
+    // 失败路径:能力数组必须为空,不残留任何条目
+    expect(result.capabilities).toEqual([])
     expect(supaMock.keyUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'invalid' })
     )
@@ -122,5 +124,9 @@ describe('probeKey', () => {
     const result = await probeKey(makeSupabase(null) as never, 'u1', 'missing')
     expect(result.status).toBe('invalid')
     expect(result.error).toMatch(/not found/i)
+    // key 不存在时不应写任何表,capabilities 必须为空
+    expect(result.capabilities).toEqual([])
+    expect(supaMock.capabilitiesDelete).not.toHaveBeenCalled()
+    expect(supaMock.keyUpdate).not.toHaveBeenCalled()
   })
 })
