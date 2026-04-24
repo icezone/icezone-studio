@@ -1,4 +1,9 @@
 import type { Edge, Node, XYPosition } from '@xyflow/react';
+import type {
+  ReversePromptResult,
+  ShotAnalysisResult,
+  ReversePromptStyle,
+} from './videoAnalysisTypes';
 
 export const CANVAS_NODE_TYPES = {
   upload: 'uploadNode',
@@ -227,6 +232,8 @@ export interface VideoScene {
   previewUrl?: string;
   confidence: number;
   selected: boolean;
+  reversePrompt?: ReversePromptResult | null;
+  reversePromptError?: string | null;
 }
 
 export interface VideoAnalysisNodeData extends NodeDisplayData {
@@ -246,6 +253,11 @@ export interface VideoAnalysisNodeData extends NodeDisplayData {
 
   // Analysis results
   scenes: VideoScene[];
+
+  // Whole-video analysis
+  analysisId?: string | null;
+  shotAnalysis?: ShotAnalysisResult | null;
+  reversePromptStyle?: ReversePromptStyle;
 }
 
 export interface VideoResultNodeData extends NodeDisplayData {

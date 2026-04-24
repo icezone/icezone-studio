@@ -1,71 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, getAuthUser } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { analyzeShot } from '@/server/ai/analysis/shotAnalysisService'
+import { GeminiKeyMissingError } from '@/server/ai/analysis/providers/geminiAnalysis'
 
-export async function POST(request: NextRequest) {
-  // Auth check
+const VALID_LANG = new Set(['zh', 'en'])
+
+export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const user = await getAuthUser(supabase)
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data: userRes } = await supabase.auth.getUser()
+  if (!userRes?.user) {
+    return NextResponse.json({ error: 'unauthenticated' }, { status: 401 })
   }
 
-  // Parse body
-  let body: Record<string, unknown>
+  let body: { imageUrl?: string; additionalFrameUrls?: string[]; language?: string }
   try {
-    body = await request.json()
+    body = await req.json()
   } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    return NextResponse.json({ error: 'invalid JSON' }, { status: 400 })
   }
 
-  const { imageUrl, additionalFrameUrls, language } = body
-
-  if (!imageUrl || typeof imageUrl !== 'string') {
-    return NextResponse.json(
-      { error: 'imageUrl is required and must be a string' },
-      { status: 400 }
-    )
+  if (!body.imageUrl) {
+    return NextResponse.json({ error: 'imageUrl required' }, { status: 400 })
   }
-
-  // Validate additionalFrameUrls if provided
-  if (additionalFrameUrls !== undefined) {
-    if (!Array.isArray(additionalFrameUrls)) {
-      return NextResponse.json(
-        { error: 'additionalFrameUrls must be an array of strings' },
-        { status: 400 }
-      )
-    }
-    if (additionalFrameUrls.some((url: unknown) => typeof url !== 'string')) {
-      return NextResponse.json(
-        { error: 'All additionalFrameUrls must be strings' },
-        { status: 400 }
-      )
-    }
-    if (additionalFrameUrls.length > 8) {
-      return NextResponse.json(
-        { error: 'Maximum 8 additional frames allowed' },
-        { status: 400 }
-      )
-    }
+  if (!body.language || !VALID_LANG.has(body.language)) {
+    return NextResponse.json({ error: 'language must be zh or en' }, { status: 400 })
   }
-
-  // Validate language
-  const resolvedLanguage = language === 'zh' || language === 'en' ? language : 'en'
 
   try {
     const result = await analyzeShot({
-      imageUrl: imageUrl as string,
-      additionalFrameUrls: (additionalFrameUrls as string[] | undefined) || undefined,
-      language: resolvedLanguage,
+      imageUrl: body.imageUrl,
+      additionalFrameUrls: body.additionalFrameUrls,
+      language: body.language as 'zh' | 'en',
     })
-
     return NextResponse.json(result)
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Shot analysis failed'
-    const isValidationError = message.includes('required')
-    return NextResponse.json(
-      { error: message },
-      { status: isValidationError ? 400 : 500 }
-    )
+  } catch (err) {
+    if (err instanceof GeminiKeyMissingError) {
+      return NextResponse.json({ error: err.message }, { status: 503 })
+    }
+    const msg = err instanceof Error ? err.message : String(err)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

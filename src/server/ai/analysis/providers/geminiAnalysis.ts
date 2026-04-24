@@ -1,9 +1,16 @@
 import type { LlmAnalysisRequest, LlmMultimodalRequest, LlmVisionAnalysisRequest } from '../types'
 
+export class GeminiKeyMissingError extends Error {
+  constructor() {
+    super('GEMINI_API_KEY is not configured')
+    this.name = 'GeminiKeyMissingError'
+  }
+}
+
 function getGeminiConfig() {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not configured')
+    throw new GeminiKeyMissingError()
   }
   const model = process.env.GEMINI_ANALYSIS_MODEL || 'gemini-2.0-flash'
   return { apiKey, model }

@@ -273,12 +273,17 @@
       "analyzeButton": "Start Analysis",
       "analyzing": "Analyzing...",
       "analysisFailed": "Analysis failed",
+      "uploadFailed": "Upload failed",
+      "noProjectSelected": "Please select a project first",
       "scenesDetected": "{{count}} scenes detected",
       "selectAll": "Select All",
       "deselectAll": "Deselect All",
       "exportKeyframes": "Export Keyframes",
       "exportKeyframesCount": "Export Selected Keyframes ({{count}})",
-      "keyframe": "Keyframe"
+      "createStoryboard": "Create Storyboard",
+      "storyboardFromVideo": "Storyboard from Video",
+      "keyframe": "Keyframe",
+      "shotAnalysisRunning": "Analyzing shot composition..."
     }
   },
   "modelParams": {

@@ -1,8 +1,8 @@
 'use client';
 
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { Film, Search, Loader2, CheckSquare, Square, Upload } from 'lucide-react';
+import { Film, Search, Loader2, CheckSquare, Square, Upload, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -10,12 +10,20 @@ import {
   type VideoAnalysisNodeData,
   type VideoScene,
 } from '@/features/canvas/domain/canvasNodes';
+import type { ReversePromptStyle } from '@/features/canvas/domain/videoAnalysisTypes';
 import { resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
 import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canvas/ui/NodeHeader';
 import { NodeResizeHandle } from '@/features/canvas/ui/NodeResizeHandle';
 import { NODE_CONTROL_PRIMARY_BUTTON_CLASS } from '@/features/canvas/ui/nodeControlStyles';
 import { UiButton } from '@/components/ui';
 import { useCanvasStore } from '@/stores/canvasStore';
+import { useProjectStore } from '@/stores/projectStore';
+import { webAssetGateway } from '@/features/canvas/infrastructure/webAssetGateway';
+import { webVideoAnalysisGateway } from '@/features/canvas/infrastructure/webVideoAnalysisGateway';
+import {
+  expandSelectedFramesToUploadNodes,
+  createStoryboardFromSelection,
+} from './videoAnalysisActions';
 
 type VideoAnalysisNodeProps = NodeProps & {
   id: string;
@@ -29,6 +37,24 @@ const MAX_WIDTH = 900;
 const MAX_HEIGHT = 1200;
 const DEFAULT_WIDTH = 560;
 const DEFAULT_HEIGHT = 420;
+const SHOT_ANALYSIS_FRAME_LIMIT = 10;
+const REVERSE_PROMPT_CONCURRENCY = 3;
+
+async function runWithConcurrency<T>(
+  tasks: Array<() => Promise<T>>,
+  limit: number,
+): Promise<T[]> {
+  const results: T[] = new Array(tasks.length);
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(limit, tasks.length) }, async () => {
+    while (cursor < tasks.length) {
+      const i = cursor++;
+      results[i] = await tasks[i]();
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
 
 function formatTime(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
@@ -50,8 +76,96 @@ function VideoAnalysisNodeComponent({
   const addNode = useCanvasStore((s) => s.addNode);
   const addEdge = useCanvasStore((s) => s.addEdge);
   const nodes = useCanvasStore((s) => s.nodes);
+  const projectId = useProjectStore((s) => s.currentProjectId);
 
   const [error, setError] = useState<string | null>(null);
+  const [shotAnalysisLoading, setShotAnalysisLoading] = useState(false);
+  const autoRanForAnalysisId = useRef<string | null>(null);
+
+  const reversePromptStyle: ReversePromptStyle = data.reversePromptStyle ?? 'generic';
+
+  const handleReversePromptStyleChange = useCallback(
+    (next: ReversePromptStyle) => {
+      updateNodeData(id, { reversePromptStyle: next });
+      autoRanForAnalysisId.current = null;
+    },
+    [id, updateNodeData],
+  );
+
+  const runShotAnalysisAndReverse = useCallback(
+    async (scenes: VideoScene[], language: 'zh' | 'en', style: ReversePromptStyle) => {
+      if (scenes.length === 0) return;
+      const framesForShot = scenes.slice(0, SHOT_ANALYSIS_FRAME_LIMIT).map((s) => s.keyframeUrl).filter(Boolean);
+      if (framesForShot.length === 0) return;
+
+      setShotAnalysisLoading(true);
+      try {
+        const shotRes = await fetch('/api/ai/shot-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageUrl: framesForShot[0],
+            additionalFrameUrls: framesForShot.slice(1),
+            language,
+          }),
+        });
+        if (shotRes.ok) {
+          const shotAnalysis = await shotRes.json();
+          updateNodeData(id, { shotAnalysis });
+        } else if (shotRes.status !== 503) {
+          const body = await shotRes.json().catch(() => ({}));
+          setError(body.error || `shot-analysis ${shotRes.status}`);
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'shot-analysis failed';
+        setError(msg);
+      } finally {
+        setShotAnalysisLoading(false);
+      }
+
+      const tasks = scenes.map((scene) => async (): Promise<VideoScene> => {
+        if (!scene.keyframeUrl) return { ...scene, reversePromptError: 'no keyframe' };
+        try {
+          const res = await fetch('/api/ai/reverse-prompt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageUrl: scene.keyframeUrl, style }),
+          });
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            return { ...scene, reversePrompt: null, reversePromptError: body.error || `HTTP ${res.status}` };
+          }
+          const reversePrompt = await res.json();
+          return { ...scene, reversePrompt, reversePromptError: null };
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'reverse-prompt failed';
+          return { ...scene, reversePrompt: null, reversePromptError: msg };
+        }
+      });
+
+      const enrichedScenes = await runWithConcurrency(tasks, REVERSE_PROMPT_CONCURRENCY);
+
+      const latestScenes = useCanvasStore.getState().nodes.find((n) => n.id === id)?.data?.scenes as VideoScene[] | undefined;
+      if (latestScenes) {
+        const byId = new Map(enrichedScenes.map((s) => [s.id, s]));
+        const merged = latestScenes.map((s) => byId.get(s.id) ?? s);
+        updateNodeData(id, { scenes: merged });
+      } else {
+        updateNodeData(id, { scenes: enrichedScenes });
+      }
+    },
+    [id, updateNodeData],
+  );
+
+  useEffect(() => {
+    if (!data.analysisId || !data.scenes || data.scenes.length === 0) return;
+    if (autoRanForAnalysisId.current === data.analysisId) return;
+    const needsEnrichment = !data.shotAnalysis || data.scenes.some((s) => !s.reversePrompt && !s.reversePromptError);
+    if (!needsEnrichment) return;
+    autoRanForAnalysisId.current = data.analysisId;
+    const language: 'zh' | 'en' = reversePromptStyle === 'chinese' ? 'zh' : 'en';
+    void runShotAnalysisAndReverse(data.scenes, language, reversePromptStyle);
+  }, [data.analysisId, data.scenes, data.shotAnalysis, reversePromptStyle, runShotAnalysisAndReverse]);
 
   const resolvedTitle = useMemo(
     () => resolveNodeDisplayName(CANVAS_NODE_TYPES.videoAnalysis, data, t),
@@ -69,15 +183,40 @@ function VideoAnalysisNodeComponent({
     [data.scenes],
   );
 
+  const uploadVideoFile = useCallback(
+    async (file: File) => {
+      if (!projectId) {
+        setError(t('node.videoAnalysis.noProjectSelected'));
+        return;
+      }
+      setError(null);
+      updateNodeData(id, { videoFileName: file.name, scenes: [], errorMessage: null, isAnalyzing: true, analysisProgress: 0 });
+      try {
+        const { videoUrl, videoFileName } = await webAssetGateway.uploadVideo({
+          file,
+          projectId,
+          onProgress: (pct) => {
+            updateNodeData(id, { analysisProgress: Math.round(pct * 0.5) });
+          },
+        });
+        updateNodeData(id, { videoUrl, videoFileName, isAnalyzing: false, analysisProgress: 0, errorMessage: null });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : t('node.videoAnalysis.uploadFailed');
+        setError(message);
+        updateNodeData(id, { isAnalyzing: false, analysisProgress: 0, errorMessage: message });
+      }
+    },
+    [id, projectId, t, updateNodeData],
+  );
+
   const handleVideoUpload = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
       if (!file.type.startsWith('video/')) return;
-      const url = URL.createObjectURL(file);
-      updateNodeData(id, { videoUrl: url, videoFileName: file.name, scenes: [], errorMessage: null });
+      void uploadVideoFile(file);
     },
-    [id, updateNodeData],
+    [uploadVideoFile],
   );
 
   const handleDrop = useCallback(
@@ -86,10 +225,9 @@ function VideoAnalysisNodeComponent({
       e.stopPropagation();
       const file = e.dataTransfer.files[0];
       if (!file || !file.type.startsWith('video/')) return;
-      const url = URL.createObjectURL(file);
-      updateNodeData(id, { videoUrl: url, videoFileName: file.name, scenes: [], errorMessage: null });
+      void uploadVideoFile(file);
     },
-    [id, updateNodeData],
+    [uploadVideoFile],
   );
 
   const handleSensitivityChange = useCallback(
@@ -109,46 +247,44 @@ function VideoAnalysisNodeComponent({
 
   const handleAnalyze = useCallback(async () => {
     if (!canAnalyze || !data.videoUrl) return;
+    if (!projectId) {
+      setError(t('node.videoAnalysis.noProjectSelected'));
+      return;
+    }
     setError(null);
     updateNodeData(id, { isAnalyzing: true, analysisProgress: 0, errorMessage: null, scenes: [] });
 
     try {
-      const response = await fetch('/api/video/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          videoUrl: data.videoUrl,
-          sensitivityThreshold: data.sensitivityThreshold,
-          minSceneDurationMs: data.minSceneDurationMs,
-          maxKeyframes: data.maxKeyframes,
-          projectId: 'local',
-        }),
+      const result = await webVideoAnalysisGateway.analyze({
+        videoUrl: data.videoUrl,
+        projectId,
+        sensitivityThreshold: data.sensitivityThreshold,
+        minSceneDurationMs: data.minSceneDurationMs,
+        maxKeyframes: data.maxKeyframes,
       });
 
-      if (!response.ok) {
-        const errorBody = await response.json().catch(() => ({}));
-        throw new Error(errorBody.error || `HTTP ${response.status}`);
-      }
+      const scenes: VideoScene[] = (result.scenes ?? []).map((s, i) => ({
+        id: `scene-${i}-${Date.now()}`,
+        startTimeMs: s.startTimeMs,
+        endTimeMs: s.endTimeMs,
+        keyframeUrl: s.keyframeUrl,
+        confidence: s.confidence,
+        selected: true,
+      }));
 
-      const result = await response.json();
-      const scenes: VideoScene[] = (result.scenes ?? []).map(
-        (s: Record<string, unknown>, i: number) => ({
-          id: `scene-${i}-${Date.now()}`,
-          startTimeMs: typeof s.startTimeMs === 'number' ? s.startTimeMs : 0,
-          endTimeMs: typeof s.endTimeMs === 'number' ? s.endTimeMs : 0,
-          keyframeUrl: typeof s.keyframeUrl === 'string' ? s.keyframeUrl : '',
-          confidence: typeof s.confidence === 'number' ? s.confidence : 0,
-          selected: true,
-        }),
-      );
-
-      updateNodeData(id, { isAnalyzing: false, analysisProgress: 100, scenes, errorMessage: null });
+      updateNodeData(id, {
+        isAnalyzing: false,
+        analysisProgress: 100,
+        scenes,
+        analysisId: result.analysisId,
+        errorMessage: null,
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : t('node.videoAnalysis.analysisFailed');
       setError(message);
       updateNodeData(id, { isAnalyzing: false, analysisProgress: 0, errorMessage: message });
     }
-  }, [canAnalyze, data.videoUrl, data.sensitivityThreshold, data.minSceneDurationMs, data.maxKeyframes, id, updateNodeData, t]);
+  }, [canAnalyze, data.videoUrl, data.sensitivityThreshold, data.minSceneDurationMs, data.maxKeyframes, id, projectId, updateNodeData, t]);
 
   const toggleSceneSelection = useCallback(
     (sceneId: string) => {
@@ -166,36 +302,33 @@ function VideoAnalysisNodeComponent({
     [id, data.scenes, updateNodeData],
   );
 
+  const buildExpandContext = useCallback(() => {
+    const currentNode = nodes.find((n) => n.id === id);
+    if (!currentNode) return null;
+    return {
+      sourceNodeId: id,
+      sourcePosition: currentNode.position ?? { x: 0, y: 0 },
+      sourceWidth: resolvedWidth,
+      addNode,
+      addEdge,
+      getNodes: () => useCanvasStore.getState().nodes,
+      t,
+    };
+  }, [addEdge, addNode, id, nodes, resolvedWidth, t]);
+
   const handleExportKeyframes = useCallback(() => {
     if (selectedCount === 0) return;
-    const selectedScenes = data.scenes.filter((s) => s.selected);
-    const currentNode = nodes.find((n) => n.id === id);
-    if (!currentNode) return;
+    const ctx = buildExpandContext();
+    if (!ctx) return;
+    expandSelectedFramesToUploadNodes(data.scenes.filter((s) => s.selected), ctx);
+  }, [selectedCount, data.scenes, buildExpandContext]);
 
-    const baseX = (currentNode.position?.x ?? 0) + resolvedWidth + 80;
-    const baseY = currentNode.position?.y ?? 0;
-
-    selectedScenes.forEach((scene, index) => {
-      if (!scene.keyframeUrl) return;
-      const position = { x: baseX, y: baseY + index * 220 };
-      addNode(
-        CANVAS_NODE_TYPES.upload,
-        position,
-        {
-          displayName: `${t('node.videoAnalysis.keyframe')} ${formatTime(scene.startTimeMs)}`,
-          imageUrl: scene.keyframeUrl,
-          previewImageUrl: scene.previewUrl ?? scene.keyframeUrl,
-          aspectRatio: '16:9',
-          sourceFileName: `keyframe-${formatTime(scene.startTimeMs)}.jpg`,
-        },
-      );
-      const latestNodes = useCanvasStore.getState().nodes;
-      const newNode = latestNodes[latestNodes.length - 1];
-      if (newNode) {
-        addEdge(id, newNode.id);
-      }
-    });
-  }, [selectedCount, data.scenes, nodes, id, resolvedWidth, addNode, addEdge, t]);
+  const handleCreateStoryboard = useCallback(() => {
+    if (selectedCount === 0) return;
+    const ctx = buildExpandContext();
+    if (!ctx) return;
+    createStoryboardFromSelection(data.scenes.filter((s) => s.selected), ctx);
+  }, [selectedCount, data.scenes, buildExpandContext]);
 
   return (
     <div
@@ -257,11 +390,11 @@ function VideoAnalysisNodeComponent({
           <select value={data.minSceneDurationMs}
             onChange={(e) => { e.stopPropagation(); handleMinDurationChange(parseInt(e.target.value, 10)); }}
             onMouseDown={(e) => e.stopPropagation()}
-            className="nodrag rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/45 px-2 py-0.5 text-xs text-[var(--canvas-node-fg)] outline-none dark:border-[rgba(255,255,255,0.1)]">
-            <option value={200}>200ms</option>
-            <option value={500}>500ms</option>
-            <option value={1000}>1s</option>
-            <option value={2000}>2s</option>
+            className="nodrag rounded-md border border-[rgba(15,23,42,0.15)] bg-[var(--canvas-node-bg)] px-2 py-0.5 text-xs text-[var(--canvas-node-fg)] outline-none dark:border-[rgba(255,255,255,0.1)]">
+            <option className="bg-[var(--canvas-node-bg)] text-[var(--canvas-node-fg)]" value={200}>200ms</option>
+            <option className="bg-[var(--canvas-node-bg)] text-[var(--canvas-node-fg)]" value={500}>500ms</option>
+            <option className="bg-[var(--canvas-node-bg)] text-[var(--canvas-node-fg)]" value={1000}>1s</option>
+            <option className="bg-[var(--canvas-node-bg)] text-[var(--canvas-node-fg)]" value={2000}>2s</option>
           </select>
         </div>
 
@@ -298,17 +431,55 @@ function VideoAnalysisNodeComponent({
 
         {data.scenes?.length > 0 && (
           <>
-            <div className="px-1 flex items-center justify-between">
+            <div className="px-1 flex items-center justify-between gap-2">
               <span className="text-xs font-medium text-[var(--canvas-node-fg-muted)]">
                 {t('node.videoAnalysis.scenesDetected', { count: data.scenes.length })}
               </span>
-              <button onClick={(e) => { e.stopPropagation(); toggleAllScenes(selectedCount < data.scenes.length); }}
-                className="text-[10px] text-accent hover:text-accent/80 transition-colors">
-                {selectedCount === data.scenes.length
-                  ? t('node.videoAnalysis.deselectAll')
-                  : t('node.videoAnalysis.selectAll')}
-              </button>
+              <div className="flex items-center gap-2">
+                <div
+                  className="flex items-center gap-1 rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/40 px-1 py-0.5 dark:border-[rgba(255,255,255,0.1)]"
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  <Languages className="h-3 w-3 text-[var(--canvas-node-fg-muted)]" />
+                  <button
+                    onClick={() => handleReversePromptStyleChange('generic')}
+                    className={`nodrag text-[10px] px-1 rounded ${reversePromptStyle === 'generic' ? 'bg-accent text-white' : 'text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)]'}`}
+                  >EN</button>
+                  <button
+                    onClick={() => handleReversePromptStyleChange('chinese')}
+                    className={`nodrag text-[10px] px-1 rounded ${reversePromptStyle === 'chinese' ? 'bg-accent text-white' : 'text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)]'}`}
+                  >中文</button>
+                </div>
+                <button onClick={(e) => { e.stopPropagation(); toggleAllScenes(selectedCount < data.scenes.length); }}
+                  className="text-[10px] text-accent hover:text-accent/80 transition-colors">
+                  {selectedCount === data.scenes.length
+                    ? t('node.videoAnalysis.deselectAll')
+                    : t('node.videoAnalysis.selectAll')}
+                </button>
+              </div>
             </div>
+
+            {(shotAnalysisLoading || data.shotAnalysis) && (
+              <div className="px-1">
+                <div className="rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/30 px-2 py-1 text-[10px] text-[var(--canvas-node-fg-muted)] dark:border-[rgba(255,255,255,0.1)]">
+                  {shotAnalysisLoading ? (
+                    <span className="inline-flex items-center gap-1">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      {t('node.videoAnalysis.shotAnalysisRunning')}
+                    </span>
+                  ) : data.shotAnalysis ? (
+                    <span className="block truncate">
+                      <span className="text-accent font-medium">{data.shotAnalysis.shotType}</span>
+                      <span className="mx-1">·</span>
+                      <span>{data.shotAnalysis.cameraMovement}</span>
+                      <span className="mx-1">·</span>
+                      <span>{data.shotAnalysis.mood}</span>
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            )}
 
             <div className="flex-1 min-h-0 overflow-y-auto ui-scrollbar rounded-lg border border-[rgba(15,23,42,0.15)] bg-bg-dark/30 p-2 dark:border-[rgba(255,255,255,0.1)]">
               <div className="grid grid-cols-3 gap-1.5">
@@ -339,13 +510,18 @@ function VideoAnalysisNodeComponent({
               </div>
             </div>
 
-            <div className="px-1 shrink-0">
+            <div className="px-1 shrink-0 flex gap-1.5">
               <UiButton onClick={(e) => { e.stopPropagation(); handleExportKeyframes(); }}
                 disabled={selectedCount === 0} variant="primary" size="sm"
-                className={`w-full ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}>
+                className={`flex-1 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}>
                 {selectedCount > 0
                   ? t('node.videoAnalysis.exportKeyframesCount', { count: selectedCount })
                   : t('node.videoAnalysis.exportKeyframes')}
+              </UiButton>
+              <UiButton onClick={(e) => { e.stopPropagation(); handleCreateStoryboard(); }}
+                disabled={selectedCount === 0} variant="muted" size="sm"
+                className="flex-1">
+                {t('node.videoAnalysis.createStoryboard')}
               </UiButton>
             </div>
           </>

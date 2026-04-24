@@ -196,3 +196,43 @@ export interface LlmAnalysisGateway {
   reversePrompt: (payload: ReversePromptPayload) => Promise<ReversePromptResult>;
   analyzeShot: (payload: ShotAnalysisPayload) => Promise<ShotAnalysisResult>;
 }
+
+/* ── Video Intelligence: asset upload + analyze ── */
+
+export interface UploadVideoParams {
+  file: File;
+  projectId: string;
+  onProgress?: (pct: number) => void;
+  signal?: AbortSignal;
+}
+
+export interface AssetGateway {
+  uploadVideo(params: UploadVideoParams): Promise<{ videoUrl: string; videoFileName: string }>;
+}
+
+export interface VideoAnalyzeParams {
+  videoUrl: string;
+  projectId: string;
+  sensitivityThreshold?: number;
+  minSceneDurationMs?: number;
+  maxKeyframes?: number;
+  signal?: AbortSignal;
+}
+
+export interface VideoAnalyzeScene {
+  startTimeMs: number;
+  endTimeMs: number;
+  keyframeUrl: string;
+  confidence: number;
+}
+
+export interface VideoAnalyzeResponse {
+  analysisId: string;
+  scenes: VideoAnalyzeScene[];
+  totalDurationMs: number;
+  fps: number;
+}
+
+export interface VideoAnalysisGateway {
+  analyze(params: VideoAnalyzeParams): Promise<VideoAnalyzeResponse>;
+}

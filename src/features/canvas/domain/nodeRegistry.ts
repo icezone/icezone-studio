@@ -374,6 +374,9 @@ const videoAnalysisNodeDefinition: CanvasNodeDefinition<VideoAnalysisNodeData> =
     analysisProgress: 0,
     errorMessage: null,
     scenes: [],
+    analysisId: null,
+    shotAnalysis: null,
+    reversePromptStyle: 'generic',
   }),
 };
 

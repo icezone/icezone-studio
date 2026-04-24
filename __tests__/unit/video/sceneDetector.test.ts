@@ -175,4 +175,30 @@ describe('SceneDetector', () => {
       expect(scene.endTimeMs - scene.startTimeMs).toBeGreaterThanOrEqual(500)
     }
   })
+
+  it('should use ffmpeg score as confidence (not hard-coded 1.0)', async () => {
+    mockFfmpeg.setShowInfoOutput([
+      '[Parsed_showinfo_1 @ 0x1234] n:  60 pts:  60060 pts_time:2.000    pos: 100000 fmt:yuv420p sar:1/1 s:1920x1080 i:P iskey:1 type:I cmb:0 cmb_raw:0.0 score:0.42',
+      '[Parsed_showinfo_1 @ 0x1234] n: 150 pts: 150150 pts_time:5.005    pos: 250000 fmt:yuv420p sar:1/1 s:1920x1080 i:P iskey:1 type:I cmb:0 cmb_raw:0.0 score:0.91',
+    ])
+
+    const scenes = await detectScenes('https://example.com/video.mp4')
+
+    // First scene (0 to 2000ms) should use the score from the NEXT boundary (0.42)
+    expect(scenes[0].confidence).toBeCloseTo(0.42, 2)
+    // Second scene should use 0.91
+    expect(scenes[1].confidence).toBeCloseTo(0.91, 2)
+  })
+
+  it('should throw when ffmpeg fails (no silent single-scene fallback)', async () => {
+    // Mock ffmpeg to fail
+    mockFfmpeg.ffmpegInstance.run.mockImplementationOnce(() => {
+      const errorCb = (mockFfmpeg.ffmpegInstance as unknown as Record<string, (err: Error) => void>)._errorCb
+      if (errorCb) {
+        errorCb(new Error('ffmpeg not found'))
+      }
+    })
+
+    await expect(detectScenes('/does/not/exist.mp4')).rejects.toThrow(/ffmpeg/i)
+  })
 })

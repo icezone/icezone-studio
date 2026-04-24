@@ -273,12 +273,17 @@
       "analyzeButton": "开始分析",
       "analyzing": "分析中...",
       "analysisFailed": "分析失败",
+      "uploadFailed": "上传失败",
+      "noProjectSelected": "请先选择一个项目",
       "scenesDetected": "检测到 {{count}} 个场景",
       "selectAll": "全选",
       "deselectAll": "取消全选",
       "exportKeyframes": "导出关键帧",
       "exportKeyframesCount": "导出选中关键帧 ({{count}})",
-      "keyframe": "关键帧"
+      "createStoryboard": "生成分镜",
+      "storyboardFromVideo": "视频分镜",
+      "keyframe": "关键帧",
+      "shotAnalysisRunning": "正在分析镜头语言..."
     }
   },
   "modelParams": {

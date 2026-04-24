@@ -12,6 +12,8 @@ import { webAiGateway } from '../infrastructure/webAiGateway';
 import { webImageSplitGateway } from '../infrastructure/webImageSplitGateway';
 import { webVideoGateway } from '../infrastructure/webVideoGateway';
 import { webLlmAnalysisGateway } from '../infrastructure/webLlmAnalysisGateway';
+import { webAssetGateway } from '../infrastructure/webAssetGateway';
+import { webVideoAnalysisGateway } from '../infrastructure/webVideoAnalysisGateway';
 
 export const canvasEventBus = new InMemoryCanvasEventBus();
 export const canvasNodeFactory = new CanvasNodeFactory(uuidGenerator, nodeCatalog);
@@ -20,3 +22,5 @@ export const canvasToolProcessor = new CanvasToolProcessor(webImageSplitGateway,
 export const canvasAiGateway = webAiGateway;
 export const canvasVideoAiGateway = webVideoGateway;
 export const canvasLlmAnalysisGateway = webLlmAnalysisGateway;
+export const canvasAssetGateway = webAssetGateway;
+export const canvasVideoAnalysisGateway = webVideoAnalysisGateway;

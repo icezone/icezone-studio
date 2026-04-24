@@ -27,10 +27,10 @@ export async function detectScenes(
 
   try {
     return await detectScenesWithFfmpeg(videoPath, options);
-  } catch {
-    // ffmpeg unavailable — return a single-scene fallback so the pipeline
-    // can still progress (e.g. in dev/testing without ffmpeg installed).
-    return fallbackSingleScene(options);
+  } catch (err) {
+    // Re-throw ffmpeg errors instead of silently falling back
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(`ffmpeg scene detection failed: ${message}`);
   }
 }
 
@@ -82,7 +82,8 @@ function extractSceneTimestamps(
       if (ptsTimeMatch) {
         const seconds = parseFloat(ptsTimeMatch[1]);
         const timestampMs = Math.round(seconds * 1000);
-        const scoreMatch = line.match(/scene:([\d.]+)/);
+        // The showinfo filter outputs "score:" not "scene:" in the debug line
+        const scoreMatch = line.match(/score:([\d.]+)/);
         const score = scoreMatch ? parseFloat(scoreMatch[1]) : threshold;
         results.push({ timestampMs, score });
       }
@@ -128,7 +129,7 @@ export function buildScenes(
 
   // Always include time 0 as the first scene boundary.
   const boundaries = [
-    { timestampMs: 0, score: 1 },
+    { timestampMs: 0, score: 1.0 },
     ...rawTimestamps.filter((t) => t.timestampMs > 0),
   ];
 
@@ -149,19 +150,38 @@ export function buildScenes(
     merged.push(b);
   }
 
-  // Build scene intervals.
+  // Build scene intervals, merging short scenes into the previous one.
   const scenes: DetectedScene[] = [];
   for (let i = 0; i < merged.length; i++) {
     const start = merged[i].timestampMs;
     const end = i + 1 < merged.length ? merged[i + 1].timestampMs : totalDurationMs;
+    const duration = end - start;
 
-    if (end - start < options.minSceneDurationMs && i > 0) continue;
+    // Use the score from the NEXT boundary (the change that ends this scene)
+    // as the confidence for this scene, clamped to [0, 1]
+    const nextBoundaryIndex = i + 1;
+    const sceneScore = nextBoundaryIndex < merged.length
+      ? merged[nextBoundaryIndex].score
+      : merged[i].score;
+
+    // If this scene is too short and we have a previous scene, extend the previous scene
+    if (duration < options.minSceneDurationMs && i > 0 && scenes.length > 0) {
+      // Extend the previous scene's end time to include this short segment
+      const prev = scenes[scenes.length - 1];
+      prev.endTimeMs = end;
+      // Update keyframe to be in the middle of the extended scene
+      const extendedDuration = prev.endTimeMs - prev.startTimeMs;
+      prev.keyframeTimestampMs = prev.startTimeMs + Math.min(200, Math.round(extendedDuration / 3));
+      // Keep the higher confidence
+      prev.confidence = Math.max(prev.confidence, sceneScore);
+      continue;
+    }
 
     scenes.push({
       startTimeMs: start,
       endTimeMs: end,
-      keyframeTimestampMs: start + Math.min(200, Math.round((end - start) / 2)),
-      confidence: merged[i].score,
+      keyframeTimestampMs: start + Math.min(200, Math.round(duration / 3)),
+      confidence: Math.min(1.0, Math.max(0.0, sceneScore)),
     });
   }
 
@@ -176,17 +196,3 @@ export function buildScenes(
   return scenes;
 }
 
-// ---------------------------------------------------------------------------
-// Fallback for environments without ffmpeg
-// ---------------------------------------------------------------------------
-
-function fallbackSingleScene(options: SceneDetectorOptions): DetectedScene[] {
-  return [
-    {
-      startTimeMs: 0,
-      endTimeMs: options.minSceneDurationMs,
-      keyframeTimestampMs: 0,
-      confidence: 1,
-    },
-  ];
-}

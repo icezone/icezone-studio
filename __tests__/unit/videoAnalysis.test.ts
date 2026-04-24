@@ -120,6 +120,40 @@ describe('buildScenes', () => {
       expect(result[i].startTimeMs).toBeGreaterThanOrEqual(result[i - 1].startTimeMs);
     }
   });
+
+  it('should merge adjacent scenes shorter than minSceneDurationMs threshold', () => {
+    // First cut at 300ms creates a 300ms scene (< 500ms threshold)
+    // Second cut at 3500ms creates a 3200ms scene
+    const rawTimestamps = [
+      { timestampMs: 300, score: 0.4 },
+      { timestampMs: 3500, score: 0.8 },
+    ];
+    const result = buildScenes(rawTimestamps, 10000, {
+      ...defaultOpts,
+      minSceneDurationMs: 500,
+    });
+
+    // The 300ms boundary should be merged into the previous scene
+    // Expect 2 scenes: [0-3500) and [3500-10000)
+    expect(result).toHaveLength(2);
+    expect(result[0].startTimeMs).toBe(0);
+    expect(result[0].endTimeMs).toBe(3500);
+    expect(result[1].startTimeMs).toBe(3500);
+    expect(result[1].endTimeMs).toBe(10000);
+  });
+
+  it('should use ffmpeg score as confidence (not hard-coded 1.0)', () => {
+    const rawTimestamps = [
+      { timestampMs: 2000, score: 0.42 },
+      { timestampMs: 5000, score: 0.91 },
+    ];
+    const result = buildScenes(rawTimestamps, 8000, defaultOpts);
+
+    // First scene confidence should come from the first boundary's score
+    expect(result[0].confidence).toBeCloseTo(0.42, 2);
+    // Second scene confidence from second boundary
+    expect(result[1].confidence).toBeCloseTo(0.91, 2);
+  });
 });
 
 // ---------------------------------------------------------------------------
