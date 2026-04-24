@@ -43,6 +43,16 @@ export interface AddKeyInput {
   display_name?: string
 }
 
+// 统一解析错误响应：body 非 JSON（如 502 HTML）时回退到默认消息，避免抛出 SyntaxError
+async function readError(res: Response, fallback: string): Promise<string> {
+  try {
+    const body = await res.json()
+    return body?.error ?? fallback
+  } catch {
+    return fallback
+  }
+}
+
 export function useKeyManager() {
   const [keys, setKeys] = useState<KeyRowData[]>([])
   const [loading, setLoading] = useState(true)
@@ -96,7 +106,7 @@ export function useKeyManager() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(input),
       })
-      if (!res.ok) throw new Error((await res.json()).error ?? 'add failed')
+      if (!res.ok) throw new Error(await readError(res, 'add failed'))
       await reload()
     },
     [reload]
@@ -110,7 +120,7 @@ export function useKeyManager() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ provider, key_index: keyIndex }),
       })
-      if (!res.ok) throw new Error('delete failed')
+      if (!res.ok) throw new Error(await readError(res, 'delete failed'))
       await reload()
     },
     [reload]
@@ -120,7 +130,7 @@ export function useKeyManager() {
   const probe = useCallback(
     async (keyId: string) => {
       const res = await fetch(`/api/settings/api-keys/${keyId}/probe`, { method: 'POST' })
-      if (!res.ok) throw new Error('probe failed')
+      if (!res.ok) throw new Error(await readError(res, 'probe failed'))
       await reload()
     },
     [reload]

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { useKeyManager } from '@/features/settings/KeyManager/useKeyManager'
 
@@ -7,6 +7,11 @@ const fetchMock = vi.fn()
 beforeEach(() => {
   fetchMock.mockReset()
   vi.stubGlobal('fetch', fetchMock)
+})
+
+afterEach(() => {
+  // 清理 stubbed fetch，防止泄漏到后续测试
+  vi.unstubAllGlobals()
 })
 
 describe('useKeyManager', () => {
