@@ -70,6 +70,14 @@ export async function loadUserKeysForProvider(
 }
 
 /**
+ * 暴露解密函数供 capability prober 测试使用。
+ * 不重命名原有 decrypt 函数,以免影响其它调用者。
+ */
+export function decryptKeyForTesting(encryptedBase64: string, ivBase64: string): string {
+  return decrypt(encryptedBase64, ivBase64)
+}
+
+/**
  * Persist key status changes back to the database after error reporting.
  */
 export async function persistKeyStatus(
