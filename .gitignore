@@ -46,3 +46,8 @@ next-env.d.ts
 .env.supabase
 
 .env*.local
+
+# local-only session / tool caches
+.superpowers/
+.plans/
+supabase/.temp/
