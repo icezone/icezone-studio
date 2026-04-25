@@ -1,25 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
 import i18n from '@/i18n';
 import { PresetPromptsSection } from '@/features/settings/PresetPromptsSection';
+import { KeyManager } from '@/features/settings/KeyManager/KeyManager';
 
 export const dynamic = 'force-dynamic';
 
 type Lang = 'zh' | 'en';
-
-const PROVIDERS = ['kie', 'ppio', 'grsai', 'fal', 'openai', 'anthropic'] as const;
-type Provider = (typeof PROVIDERS)[number];
-
-interface ApiKeyEntry {
-  id: string;
-  provider: Provider;
-  maskedValue: string;
-  created_at: string;
-}
 
 function SectionCard({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
   return (
@@ -112,9 +102,9 @@ export default function SettingsPage() {
           </div>
         </SectionCard>
 
-        {/* API Keys */}
+        {/* API Keys — 由 KeyManager 容器接管 */}
         <SectionCard title={t('settings.apiKeys')} desc={t('settings.apiKeysDesc')}>
-          <ApiKeyManager />
+          <KeyManager />
         </SectionCard>
 
         {/* Preset Prompts */}
@@ -125,161 +115,6 @@ export default function SettingsPage() {
           <PresetPromptsSection />
         </SectionCard>
       </div>
-    </div>
-  );
-}
-
-function ApiKeyManager() {
-  const { t } = useTranslation();
-  const [keys, setKeys] = useState<ApiKeyEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [addingProvider, setAddingProvider] = useState<Provider | null>(null);
-  const [inputValue, setInputValue] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
-
-  async function loadKeys() {
-    try {
-      const res = await fetch('/api/settings/api-keys');
-      if (res.ok) setKeys(await res.json() as ApiKeyEntry[]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => { void loadKeys(); }, []);
-
-  function showToast(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 2500);
-  }
-
-  async function handleSave(provider: Provider) {
-    if (!inputValue.trim()) return;
-    setSaving(true);
-    try {
-      const res = await fetch('/api/settings/api-keys', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider, key: inputValue.trim() }),
-      });
-      if (res.ok) {
-        await loadKeys();
-        setAddingProvider(null);
-        setInputValue('');
-        showToast(t('settings.keyAdded'));
-      }
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDelete(provider: Provider) {
-    await fetch('/api/settings/api-keys', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ provider }),
-    });
-    setKeys((prev) => prev.filter((k) => k.provider !== provider));
-    showToast(t('settings.keyDeleted'));
-  }
-
-  const existingProviders = new Set(keys.map((k) => k.provider));
-  const availableProviders = PROVIDERS.filter((p) => !existingProviders.has(p));
-
-  return (
-    <div className="space-y-3">
-      {loading && <p className="text-xs text-ui-fg-muted">{t('common.loading')}</p>}
-
-      {/* Existing keys */}
-      {keys.map((key) => (
-        <div
-          key={key.id}
-          className="flex items-center justify-between rounded-lg border border-[var(--ui-line)] px-3 py-2.5"
-        >
-          <div>
-            <span className="text-sm font-medium text-ui-fg">{key.provider}</span>
-            <span className="ml-3 font-mono text-xs text-ui-fg-muted">{key.maskedValue}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => { setAddingProvider(key.provider); setInputValue(''); }}
-              className="text-xs text-ui-fg-muted hover:text-ui-fg"
-            >
-              {t('common.edit')}
-            </button>
-            <button
-              type="button"
-              onClick={() => void handleDelete(key.provider)}
-              className="text-xs text-red-400 hover:text-red-500"
-            >
-              {t('common.delete')}
-            </button>
-          </div>
-        </div>
-      ))}
-
-      {/* Add key form */}
-      {addingProvider ? (
-        <div className="rounded-lg border border-[var(--ui-line)] p-3">
-          <div className="mb-2 text-xs font-medium text-ui-fg-muted">
-            {addingProvider}
-          </div>
-          <div className="flex gap-2">
-            <input
-              autoFocus
-              type="password"
-              placeholder="sk-..."
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') void handleSave(addingProvider);
-                if (e.key === 'Escape') { setAddingProvider(null); setInputValue(''); }
-              }}
-              className="flex-1 rounded border border-[var(--ui-line)] bg-[var(--ui-surface-field)] px-3 py-1.5 text-sm text-ui-fg outline-none placeholder:text-ui-fg-placeholder focus:border-ui-primary"
-            />
-            <button
-              type="button"
-              onClick={() => void handleSave(addingProvider)}
-              disabled={saving || !inputValue.trim()}
-              className="rounded bg-ui-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-ui-primary-pressed disabled:opacity-50"
-            >
-              {t('settings.saveKey')}
-            </button>
-            <button
-              type="button"
-              onClick={() => { setAddingProvider(null); setInputValue(''); }}
-              className="rounded border border-[var(--ui-line)] px-3 py-1.5 text-xs text-ui-fg-muted hover:text-ui-fg"
-            >
-              {t('common.cancel')}
-            </button>
-          </div>
-        </div>
-      ) : availableProviders.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          {availableProviders.map((provider) => (
-            <button
-              key={provider}
-              type="button"
-              onClick={() => { setAddingProvider(provider); setInputValue(''); }}
-              className="flex items-center gap-1.5 rounded-lg border border-[var(--ui-line)] px-3 py-1.5 text-xs text-ui-fg-muted hover:border-ui-primary/40 hover:text-ui-fg"
-            >
-              <svg viewBox="0 0 12 12" fill="currentColor" className="h-3 w-3">
-                <path d="M6 1a.5.5 0 0 1 .5.5v4h4a.5.5 0 0 1 0 1h-4v4a.5.5 0 0 1-1 0v-4h-4a.5.5 0 0 1 0-1h4v-4A.5.5 0 0 1 6 1Z" />
-              </svg>
-              {provider}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-lg bg-ui-primary px-4 py-2 text-sm text-white shadow-lg">
-          {toast}
-        </div>
-      )}
     </div>
   );
 }
