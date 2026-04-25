@@ -48,7 +48,7 @@ export function KeyRow({ row, onProbe, onDelete }: Props) {
       <div className="text-xs text-gray-600">
         已解锁模型({row.capabilities.length}):
         {row.capabilities.length === 0 ? (
-          <span className="ml-1 italic text-gray-400">无(点"重新探测")</span>
+          <span className="ml-1 italic text-gray-400">无(点&ldquo;重新探测&rdquo;)</span>
         ) : (
           <span className="ml-1">{row.capabilities.join(', ')}</span>
         )}

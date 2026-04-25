@@ -13,7 +13,7 @@ export function KeyManager() {
       <div>
         <h2 className="text-lg font-semibold">API Keys</h2>
         <p className="text-sm text-gray-500">
-          添加内置 provider key 或自定义 OpenAI-compat 端点。保存后点"重新探测"发现可用模型。
+          添加内置 provider key 或自定义 OpenAI-compat 端点。保存后点&ldquo;重新探测&rdquo;发现可用模型。
         </p>
       </div>
 
