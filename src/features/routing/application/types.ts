@@ -18,18 +18,19 @@ export interface KeyCandidate {
 }
 
 /** router 路由请求 */
-export interface RouteRequest {
+export interface RouteRequest<T = unknown> {
+  /** M3 直接依赖 SupabaseClient;M4 可提取 IKeyRepository port */
   supabase: SupabaseClient
   userId: string
   logicalModelId: string               // e.g. 'nano-banana-2'
   scenario: Scenario
   /** 调用方提供的实际 AI 调用函数;router 传入选中的候选 key */
-  callFn: (candidate: KeyCandidate, decryptedApiKey: string) => Promise<unknown>
+  callFn: (candidate: KeyCandidate, decryptedApiKey: string) => Promise<T>
 }
 
 /** router 路由成功结果 */
-export interface RouteDecision {
-  result: unknown
+export interface RouteDecision<T = unknown> {
+  result: T
   keyId: string
   provider: string
   toast?: FallbackToastPayload         // 仅在发生 fallback 时存在
@@ -39,7 +40,7 @@ export interface RouteDecision {
 export interface FallbackAttempt {
   keyId: string
   displayName: string | null
-  status: 'success' | 'failed'
+  status: Exclude<CallStatus, 'timeout'>   // fallback 不产生 timeout 状态
   latencyMs?: number
   errorCode?: string
 }
@@ -57,8 +58,8 @@ export interface RoutingError {
   suggestion: string
 }
 
-export function isRoutingError(v: RouteDecision | RoutingError): v is RoutingError {
-  return 'code' in v
+export function isRoutingError(v: unknown): v is RoutingError {
+  return typeof v === 'object' && v !== null && 'code' in v
 }
 
 /** 写入 model_call_history 的载体 */
