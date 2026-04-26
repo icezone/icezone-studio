@@ -194,10 +194,10 @@ test.describe('Wave 1: Template & Enhancement Features', () => {
     const apiKeysSection = page.locator('text=API Key')
     await expect(apiKeysSection.first()).toBeVisible({ timeout: 5000 })
 
-    // Check for provider add buttons (multi-key support: each provider has its own + button)
+    // Check for provider select (multi-key support: providers listed in dropdown)
     // Available providers: kie, ppio, grsai, fal, openai, anthropic
-    const providerButton = page.locator('button:has-text("kie"), button:has-text("ppio"), button:has-text("openai")')
-    await expect(providerButton.first()).toBeVisible({ timeout: 5000 })
+    const providerSelect = page.locator('select').filter({ hasText: 'KIE' })
+    await expect(providerSelect.first()).toBeVisible({ timeout: 5000 })
   })
 })
 

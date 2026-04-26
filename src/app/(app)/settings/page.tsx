@@ -6,6 +6,8 @@ import { useThemeStore } from '@/stores/themeStore';
 import i18n from '@/i18n';
 import { PresetPromptsSection } from '@/features/settings/PresetPromptsSection';
 import { KeyManager } from '@/features/settings/KeyManager/KeyManager';
+import { ScenarioDefaults } from '@/features/settings/ScenarioDefaults';
+import { ModelPreferences } from '@/features/settings/ModelPreferences';
 
 export const dynamic = 'force-dynamic';
 
@@ -105,6 +107,14 @@ export default function SettingsPage() {
         {/* API Keys — 由 KeyManager 容器接管 */}
         <SectionCard title={t('settings.apiKeys')} desc={t('settings.apiKeysDesc')}>
           <KeyManager />
+        </SectionCard>
+
+        {/* Smart Routing Preferences */}
+        <SectionCard title="智能路由偏好">
+          <ScenarioDefaults />
+          <div className="mt-4 border-t border-gray-100 pt-4">
+            <ModelPreferences />
+          </div>
         </SectionCard>
 
         {/* Preset Prompts */}
