@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const mock = vi.hoisted(() => ({
   authUser: { id: 'u1' } as { id: string } | null,
   upsertError: null as { message: string } | null,
+  upsertFn: vi.fn(),
   prefRows: [
     { id: 'p1', level: 'model', target: 'nano-banana-2', preferred_key_id: 'k1', fallback_enabled: true },
   ],
@@ -12,7 +13,10 @@ const mock = vi.hoisted(() => ({
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     from: (_t: string) => ({
-      upsert: () => Promise.resolve({ error: mock.upsertError }),
+      upsert: (...args: unknown[]) => {
+        mock.upsertFn(...args)
+        return Promise.resolve({ error: mock.upsertError })
+      },
       select: () => ({ eq: () => Promise.resolve({ data: mock.prefRows, error: null }) }),
     }),
   }),
@@ -23,6 +27,7 @@ describe('routing-preferences API', () => {
   beforeEach(() => {
     mock.authUser = { id: 'u1' }
     mock.upsertError = null
+    mock.upsertFn.mockClear()
   })
 
   it('GET 未登录返回 401', async () => {
@@ -60,5 +65,10 @@ describe('routing-preferences API', () => {
       body: JSON.stringify({ level: 'model', target: 'nano-banana-2', preferred_key_id: 'k1', fallback_enabled: true }),
     }))
     expect(res.status).toBe(200)
+    expect(mock.upsertFn).toHaveBeenCalledOnce()
+    expect(mock.upsertFn).toHaveBeenCalledWith(
+      expect.objectContaining({ user_id: 'u1', level: 'model', target: 'nano-banana-2' }),
+      { onConflict: 'user_id,level,target' }
+    )
   })
 })

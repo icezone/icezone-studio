@@ -32,6 +32,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'level(model|scenario) and target are required' }, { status: 400 })
   }
 
+  if (preferred_key_id !== undefined && preferred_key_id !== null && typeof preferred_key_id !== 'string') {
+    return NextResponse.json({ error: 'preferred_key_id must be a string or null' }, { status: 400 })
+  }
+
   const { error } = await supabase.from('routing_preferences').upsert(
     {
       user_id: user.id,
