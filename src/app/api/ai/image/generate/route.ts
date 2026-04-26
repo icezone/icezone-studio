@@ -5,6 +5,9 @@ import { createJob } from '@/server/jobs/jobService'
 import { InsufficientCreditsError } from '@/server/jobs/jobService'
 import { withKeyRotation } from '@/server/ai/keyRotationHelper'
 import { AllKeysUnavailableError } from '@/server/ai/keyRotation'
+import { route } from '@/server/routing/router'
+import { isRoutingError } from '@/features/routing/application/types'
+import { resolveProvider } from '@/server/ai/registry'
 
 // Ensure providers are registered
 import '@/server/ai/index'
@@ -51,6 +54,47 @@ export async function POST(request: NextRequest) {
   if (typeof projectId !== 'string' || !projectId) {
     return NextResponse.json({ error: 'projectId is required' }, { status: 400 })
   }
+
+  // --- 智能路由路径(logicalModelId) ---
+  const logicalModelId = body['logicalModelId']
+  if (typeof logicalModelId === 'string' && logicalModelId) {
+    const genReq = {
+      modelId: logicalModelId,
+      prompt: prompt as string,
+      negativePrompt: negativePrompt as string | undefined,
+      width: width as number | undefined,
+      height: height as number | undefined,
+      aspectRatio: aspectRatio as string | undefined,
+      imageUrl: imageUrl as string | undefined,
+      steps: steps as number | undefined,
+      cfgScale: cfgScale as number | undefined,
+      seed: seed as number | undefined,
+      extraParams: extraParams as Record<string, unknown> | undefined,
+    }
+
+    const decision = await route({
+      supabase,
+      userId: user.id,
+      logicalModelId,
+      scenario: 'image',
+      callFn: async (candidate, decryptedKey) => {
+        const provider = resolveProvider(candidate.provider, {
+          baseUrl: candidate.baseUrl ?? undefined,
+          apiKey: decryptedKey,
+        })
+        if (!provider) throw new Error(`provider ${candidate.provider} not found`)
+        if (provider.generate) return provider.generate(genReq)
+        if (provider.submitJob) return { jobId: await provider.submitJob(genReq), status: 'pending' }
+        throw new Error(`provider ${candidate.provider} has no generate method`)
+      },
+    })
+
+    if (isRoutingError(decision)) {
+      return NextResponse.json({ error: decision.code, suggestion: decision.suggestion }, { status: 503 })
+    }
+    return NextResponse.json({ ...(decision.result as object), toast: decision.toast ?? null })
+  }
+  // --- 智能路由路径结束 ---
 
   // Determine provider from modelId prefix (e.g. "ppio/gemini-3.1-flash" -> "ppio")
   const providerId = modelId.includes('/') ? modelId.split('/')[0] : modelId
