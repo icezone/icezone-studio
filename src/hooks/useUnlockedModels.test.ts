@@ -44,6 +44,7 @@ describe('useUnlockedModels', () => {
     const { result } = renderHook(() => useUnlockedModels())
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.unlockedIds.size).toBe(0)
+    expect(result.current.error).toBeInstanceOf(Error)
   })
 
   it('401 响应时 hasKeys=false', async () => {
@@ -55,5 +56,6 @@ describe('useUnlockedModels', () => {
     const { result } = renderHook(() => useUnlockedModels())
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.hasKeys).toBe(false)
+    expect(result.current.error).toBeInstanceOf(Error)
   })
 })
