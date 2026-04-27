@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 
 export const ONBOARDING_STORAGE_KEY = 'smart-routing-onboarded'
 
@@ -17,12 +17,12 @@ export function useOnboardingState(keyCount: number): OnboardingState {
 
   const show = !dismissed && keyCount === 0
 
-  function dismiss() {
+  const dismiss = useCallback(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true')
     }
     setDismissed(true)
-  }
+  }, [])
 
   return { show, dismiss }
 }
