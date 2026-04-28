@@ -288,13 +288,13 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
     [imageModels],
   )
 
-  function handleLogicalModelChange(logicalModelId: string) {
+  const handleLogicalModelChange = useCallback((logicalModelId: string) => {
     const canvasModelId = mapToCanvasModelId(logicalModelId, allCanvasModelIds)
     updateNodeData(id, {
       logicalModelId,
       ...(canvasModelId ? { model: canvasModelId } : {}),
     })
-  }
+  }, [allCanvasModelIds, id, updateNodeData])
 
   const selectedModel = useMemo(() => {
     const modelId = data.model ?? DEFAULT_IMAGE_MODEL_ID;
@@ -490,7 +490,7 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
         aspectRatio: resolvedRequestAspectRatio,
         referenceImages: incomingImages,
         extraParams: effectiveExtraParams,
-        ...(data.logicalModelId ? { logicalModelId: data.logicalModelId as string } : {}),
+        ...(data.logicalModelId ? { logicalModelId: data.logicalModelId } : {}),
       });
       const generationDebugContext: GenerationDebugContext = {
         sourceType: 'imageEdit',
@@ -574,6 +574,7 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
     supportedAspectRatioValues,
     t,
     updateNodeData,
+    data.logicalModelId,
   ]);
 
   const syncPromptHighlightScroll = () => {
@@ -777,7 +778,7 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
 
       <LogicalModelPicker
         scenario="image"
-        value={(data.logicalModelId as string | undefined) ?? null}
+        value={data.logicalModelId ?? null}
         onChange={handleLogicalModelChange}
         className="mb-2"
       />

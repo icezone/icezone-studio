@@ -87,6 +87,7 @@ export interface ImageEditNodeData extends NodeImageData {
   isGenerating?: boolean;
   generationStartedAt?: number | null;
   generationDurationMs?: number;
+  logicalModelId?: string;
 }
 
 export interface StoryboardFrameItem {
