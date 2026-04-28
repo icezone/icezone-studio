@@ -68,7 +68,9 @@ import { CanvasNodeImage } from '@/features/canvas/ui/CanvasNodeImage';
 import { UiButton } from '@/components/ui';
 import { useCanvasStore } from '@/stores/canvasStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker';
+import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker'
+import { LogicalModelPicker } from '@/features/canvas/ui/LogicalModelPicker'
+import { mapToCanvasModelId } from '@/config/logical-models';
 
 type ImageEditNodeProps = NodeProps & {
   id: string;
@@ -281,6 +283,19 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
 
   const imageModels = useMemo(() => listImageModels(), []);
 
+  const allCanvasModelIds = useMemo(
+    () => imageModels.map((m) => m.id),
+    [imageModels],
+  )
+
+  function handleLogicalModelChange(logicalModelId: string) {
+    const canvasModelId = mapToCanvasModelId(logicalModelId, allCanvasModelIds)
+    updateNodeData(id, {
+      logicalModelId,
+      ...(canvasModelId ? { model: canvasModelId } : {}),
+    })
+  }
+
   const selectedModel = useMemo(() => {
     const modelId = data.model ?? DEFAULT_IMAGE_MODEL_ID;
     return getImageModel(modelId);
@@ -475,6 +490,7 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
         aspectRatio: resolvedRequestAspectRatio,
         referenceImages: incomingImages,
         extraParams: effectiveExtraParams,
+        ...(data.logicalModelId ? { logicalModelId: data.logicalModelId as string } : {}),
       });
       const generationDebugContext: GenerationDebugContext = {
         sourceType: 'imageEdit',
@@ -758,6 +774,13 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
           </div>
         )}
       </div>
+
+      <LogicalModelPicker
+        scenario="image"
+        value={(data.logicalModelId as string | undefined) ?? null}
+        onChange={handleLogicalModelChange}
+        className="mb-2"
+      />
 
       <div className="mt-2 flex shrink-0 items-center gap-1">
         <ModelParamsControls
