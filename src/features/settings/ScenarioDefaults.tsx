@@ -23,12 +23,19 @@ export function ScenarioDefaults() {
   const [saving, setSaving] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/api/settings/api-keys').then(r => r.json()).then(setKeys)
-    fetch('/api/settings/routing-preferences').then(r => r.json()).then((data: Preference[]) => {
-      const map: Record<string, string> = {}
-      for (const p of data) if (p.level === 'scenario') map[p.target] = p.preferred_key_id ?? ''
-      setPrefs(map)
-    })
+    fetch('/api/settings/api-keys')
+      .then(r => r.ok ? r.json() : [])
+      .then((data: unknown) => { if (Array.isArray(data)) setKeys(data) })
+      .catch(() => {})
+    fetch('/api/settings/routing-preferences')
+      .then(r => r.ok ? r.json() : [])
+      .then((data: unknown) => {
+        if (!Array.isArray(data)) return
+        const map: Record<string, string> = {}
+        for (const p of data as Preference[]) if (p.level === 'scenario') map[p.target] = p.preferred_key_id ?? ''
+        setPrefs(map)
+      })
+      .catch(() => {})
   }, [])
 
   async function save(scenario: string, keyId: string) {

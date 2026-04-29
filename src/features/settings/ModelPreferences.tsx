@@ -16,12 +16,19 @@ export function ModelPreferences() {
   const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
-    fetch('/api/settings/api-keys').then(r => r.json()).then(setKeys)
-    fetch('/api/settings/routing-preferences').then(r => r.json()).then((data: Preference[]) => {
-      const map: Record<string, string> = {}
-      for (const p of data) if (p.level === 'model') map[p.target] = p.preferred_key_id ?? ''
-      setPrefs(map)
-    })
+    fetch('/api/settings/api-keys')
+      .then(r => r.ok ? r.json() : [])
+      .then((data: unknown) => { if (Array.isArray(data)) setKeys(data) })
+      .catch(() => {})
+    fetch('/api/settings/routing-preferences')
+      .then(r => r.ok ? r.json() : [])
+      .then((data: unknown) => {
+        if (!Array.isArray(data)) return
+        const map: Record<string, string> = {}
+        for (const p of data as Preference[]) if (p.level === 'model') map[p.target] = p.preferred_key_id ?? ''
+        setPrefs(map)
+      })
+      .catch(() => {})
   }, [])
 
   async function save(model: string, keyId: string) {
