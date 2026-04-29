@@ -58,16 +58,20 @@ export function AddKeyForm({ onSubmit }: Props) {
     }
   }
 
-  const inputCls = 'rounded border border-[var(--ui-line)] bg-[var(--ui-surface-field)] px-2 py-1 text-[var(--ui-fg)] placeholder:text-[var(--ui-fg-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--ui-primary)]'
+  // ui-field provides: bg, border-color, border-radius, color, focus styles
+  const fieldCls = 'ui-field border w-full px-2 py-1 text-sm'
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2 rounded border border-[var(--ui-line)] bg-[var(--ui-surface-field)] p-3">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-3 rounded-lg border border-[var(--ui-border-soft)] p-3"
+    >
       <div className="flex gap-4 text-sm text-[var(--ui-fg)]">
-        <label className="flex items-center gap-1">
+        <label className="flex items-center gap-1 cursor-pointer">
           <input type="radio" checked={mode === 'builtin'} onChange={() => setMode('builtin')} />
           {t('settings.addKey.builtinProvider')}
         </label>
-        <label className="flex items-center gap-1">
+        <label className="flex items-center gap-1 cursor-pointer">
           <input type="radio" checked={mode === 'custom'} onChange={() => setMode('custom')} />
           {t('settings.addKey.customEndpoint')}
         </label>
@@ -79,7 +83,7 @@ export function AddKeyForm({ onSubmit }: Props) {
           <select
             value={provider}
             onChange={(e) => setProvider(e.target.value)}
-            className={inputCls}
+            className={`${fieldCls} [color-scheme:light_dark]`}
           >
             {BUILT_IN.map((p) => (
               <option key={p.value} value={p.value}>{p.label}</option>
@@ -95,7 +99,7 @@ export function AddKeyForm({ onSubmit }: Props) {
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
               placeholder="https://api.example.com/v1"
-              className={inputCls}
+              className={fieldCls}
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-[var(--ui-fg-muted)]">
@@ -105,7 +109,7 @@ export function AddKeyForm({ onSubmit }: Props) {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder={t('settings.addKey.displayNamePlaceholder')}
-              className={inputCls}
+              className={fieldCls}
             />
           </label>
         </>
@@ -117,7 +121,7 @@ export function AddKeyForm({ onSubmit }: Props) {
           type="password"
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
-          className={`${inputCls} font-mono`}
+          className={`${fieldCls} font-mono`}
           required
           minLength={8}
         />
@@ -128,7 +132,7 @@ export function AddKeyForm({ onSubmit }: Props) {
       <button
         type="submit"
         disabled={submitting}
-        className="self-start rounded bg-[var(--ui-primary)] px-3 py-1 text-sm text-white hover:bg-[var(--ui-primary-pressed)] disabled:opacity-50"
+        className="self-start rounded-lg bg-[var(--ui-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--ui-primary-pressed)] disabled:opacity-50"
       >
         {submitting ? t('settings.addKey.adding') : t('settings.addKey.add')}
       </button>
