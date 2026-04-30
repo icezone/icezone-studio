@@ -123,6 +123,22 @@
       "adding": "Adding...",
       "add": "Add",
       "customUrlRequired": "Custom endpoint requires a Base URL"
+    },
+    "costPanel": {
+      "title": "Call History",
+      "desc": "AI model call summary for the past 30 days",
+      "loading": "Loading...",
+      "empty": "No call records yet",
+      "error": "Failed to load, please refresh",
+      "totalCalls": "Total Calls",
+      "successRate": "Success Rate",
+      "avgLatency": "Avg Latency",
+      "totalCost": "Est. Cost",
+      "model": "Model",
+      "calls": "Calls",
+      "success": "Success",
+      "latency": "Avg Latency",
+      "cost": "Cost"
     }
   },
   "canvas": {

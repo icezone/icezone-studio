@@ -123,6 +123,22 @@
       "adding": "添加中...",
       "add": "添加",
       "customUrlRequired": "自定义端点需要 Base URL"
+    },
+    "costPanel": {
+      "title": "调用记录",
+      "desc": "近 30 天 AI 模型调用汇总",
+      "loading": "加载中...",
+      "empty": "暂无调用记录",
+      "error": "加载失败，请刷新重试",
+      "totalCalls": "总调用次数",
+      "successRate": "成功率",
+      "avgLatency": "平均延迟",
+      "totalCost": "预估总费用",
+      "model": "模型",
+      "calls": "调用次数",
+      "success": "成功率",
+      "latency": "平均延迟",
+      "cost": "费用"
     }
   },
   "canvas": {
