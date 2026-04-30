@@ -10,6 +10,7 @@ import { KeyManager } from './KeyManager/KeyManager';
 import { ScenarioDefaults } from './ScenarioDefaults';
 import { ModelPreferences } from './ModelPreferences';
 import { PresetPromptsSection } from './PresetPromptsSection';
+import { CostSummaryPanel } from './CostSummaryPanel';
 import i18n from '@/i18n';
 
 type Lang = 'zh' | 'en';
@@ -171,6 +172,14 @@ export function SettingsDialog() {
             desc={t('presetPrompts.sectionDesc')}
           >
             <PresetPromptsSection />
+          </SectionBlock>
+
+          {/* 调用记录 */}
+          <SectionBlock
+            title={t('settings.costPanel.title')}
+            desc={t('settings.costPanel.desc')}
+          >
+            <CostSummaryPanel />
           </SectionBlock>
         </div>
       </div>

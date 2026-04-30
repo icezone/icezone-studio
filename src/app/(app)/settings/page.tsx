@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
 import i18n from '@/i18n';
 import { PresetPromptsSection } from '@/features/settings/PresetPromptsSection';
+import { CostSummaryPanel } from '@/features/settings/CostSummaryPanel';
 import { KeyManager } from '@/features/settings/KeyManager/KeyManager';
 import { ScenarioDefaults } from '@/features/settings/ScenarioDefaults';
 import { ModelPreferences } from '@/features/settings/ModelPreferences';
@@ -123,6 +124,14 @@ export default function SettingsPage() {
           desc={t('presetPrompts.sectionDesc')}
         >
           <PresetPromptsSection />
+        </SectionCard>
+
+        {/* 调用记录 */}
+        <SectionCard
+          title={t('settings.costPanel.title')}
+          desc={t('settings.costPanel.desc')}
+        >
+          <CostSummaryPanel />
         </SectionCard>
       </div>
     </div>
