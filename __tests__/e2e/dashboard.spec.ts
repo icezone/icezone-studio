@@ -17,7 +17,7 @@ test.describe('Dashboard (authenticated)', () => {
     await page.waitForURL('**/dashboard')
     // Dismiss OnboardingWizard if shown (triggered when user has no API keys)
     const closeBtn = page.locator('button[aria-label="跳过引导"]')
-    if (await closeBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+    if (await closeBtn.isVisible({ timeout: 8000 }).catch(() => false)) {
       await closeBtn.click()
       await expect(closeBtn).not.toBeVisible({ timeout: 3000 })
     }

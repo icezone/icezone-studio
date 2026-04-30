@@ -20,7 +20,7 @@ async function login(page: import('@playwright/test').Page) {
   await page.waitForURL('/dashboard', { timeout: 15000 })
   // Dismiss OnboardingWizard if shown (blocks pointer events for users with no API keys)
   const closeBtn = page.locator('button[aria-label="跳过引导"]')
-  if (await closeBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+  if (await closeBtn.isVisible({ timeout: 8000 }).catch(() => false)) {
     await closeBtn.click()
     await expect(closeBtn).not.toBeVisible({ timeout: 3000 })
   }
