@@ -1,33 +1,26 @@
 'use client'
 
-// KeyManager 容器：组合 AddKeyForm + KeyRow 列表 + useKeyManager hook
+import { useTranslation } from 'react-i18next'
 import { AddKeyForm } from './AddKeyForm'
 import { KeyRow } from './KeyRow'
 import { useKeyManager } from './useKeyManager'
 
 export function KeyManager() {
+  const { t } = useTranslation()
   const { keys, loading, error, addKey, deleteKey, probe } = useKeyManager()
 
   return (
-    <section className="flex flex-col gap-4">
-      <div>
-        <h2 className="text-lg font-semibold">API Keys</h2>
-        <p className="text-sm text-gray-500">
-          添加内置 provider key 或自定义 OpenAI-compat 端点。保存后点&ldquo;重新探测&rdquo;发现可用模型。
-        </p>
-      </div>
-
-      {/* 添加 key 表单 */}
+    <div className="flex flex-col gap-4">
       <AddKeyForm onSubmit={addKey} />
-
-      {/* 错误提示 */}
-      {error && <div className="rounded bg-red-50 p-2 text-sm text-red-700">加载失败:{error}</div>}
-
-      {/* key 列表 */}
+      {error && (
+        <div className="rounded bg-red-500/10 p-2 text-sm text-red-500">
+          加载失败: {error}
+        </div>
+      )}
       {loading ? (
-        <div className="text-sm text-gray-500">加载中...</div>
+        <div className="text-sm text-[var(--ui-fg-muted)]">{t('common.loading')}</div>
       ) : keys.length === 0 ? (
-        <div className="text-sm text-gray-500">还没有 key，先添加一个。</div>
+        <div className="text-sm text-[var(--ui-fg-muted)]">{t('settings.multiKeyAddKey')}</div>
       ) : (
         <div className="flex flex-col gap-2">
           {keys.map((k) => (
@@ -35,6 +28,6 @@ export function KeyManager() {
           ))}
         </div>
       )}
-    </section>
+    </div>
   )
 }

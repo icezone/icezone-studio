@@ -108,6 +108,10 @@
     "langEn": "English",
     "missingAnyApiKeyMessage": "No API keys configured. AI features are unavailable.",
     "openProvidersSettings": "Configure",
+    "routingTitle": "Routing Preferences",
+    "scenarioDefaults": "Scenario Defaults",
+    "modelPrefsAdvanced": "Model-level Preferences (Advanced)",
+    "autoSelect": "Auto (best match)",
     "addKey": {
       "builtinProvider": "Built-in Provider",
       "customEndpoint": "Custom OpenAI-compat Endpoint",

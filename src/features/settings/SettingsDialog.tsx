@@ -1,28 +1,18 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { X, RotateCcw, Trash2, Plus } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { subscribeOpenSettingsDialog } from './settingsEvents';
 import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
+import { KeyManager } from './KeyManager/KeyManager';
+import { ScenarioDefaults } from './ScenarioDefaults';
+import { ModelPreferences } from './ModelPreferences';
+import { PresetPromptsSection } from './PresetPromptsSection';
 import i18n from '@/i18n';
 
-const PROVIDERS = ['kie', 'ppio', 'grsai', 'fal', 'openai', 'anthropic'] as const;
-type Provider = (typeof PROVIDERS)[number];
 type Lang = 'zh' | 'en';
-type KeyStatus = 'active' | 'exhausted' | 'invalid' | 'rate_limited';
-
-interface ApiKeyEntry {
-  id: string;
-  provider: Provider;
-  maskedValue: string;
-  key_index: number;
-  status: KeyStatus;
-  last_error: string | null;
-  error_count: number;
-  created_at: string;
-}
 
 function SectionBlock({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
   return (
@@ -32,214 +22,6 @@ function SectionBlock({ title, desc, children }: { title: string; desc?: string;
         {desc && <p className="mt-0.5 text-xs text-white/50">{desc}</p>}
       </div>
       {children}
-    </div>
-  );
-}
-
-function StatusBadge({ status, t }: { status: KeyStatus; t: (key: string) => string }) {
-  const config: Record<KeyStatus, { label: string; className: string }> = {
-    active: {
-      label: t('settings.statusActive'),
-      className: 'bg-green-500/15 text-green-400 border-green-500/30',
-    },
-    rate_limited: {
-      label: t('settings.statusRateLimited'),
-      className: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-    },
-    exhausted: {
-      label: t('settings.statusExhausted'),
-      className: 'bg-red-500/15 text-red-400 border-red-500/30',
-    },
-    invalid: {
-      label: t('settings.statusInvalid'),
-      className: 'bg-red-500/15 text-red-400 border-red-500/30',
-    },
-  };
-
-  const { label, className } = config[status] ?? config.active;
-  return (
-    <span className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-medium ${className}`}>
-      {label}
-    </span>
-  );
-}
-
-function ApiKeyManager() {
-  const { t } = useTranslation();
-  const [keys, setKeys] = useState<ApiKeyEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [addingProvider, setAddingProvider] = useState<Provider | null>(null);
-  const [inputValue, setInputValue] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
-
-  async function loadKeys() {
-    try {
-      const res = await fetch('/api/settings/api-keys');
-      if (res.ok) setKeys(await res.json() as ApiKeyEntry[]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => { void loadKeys(); }, []);
-
-  function showToast(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 2500);
-  }
-
-  async function handleSave(provider: Provider) {
-    if (!inputValue.trim()) return;
-    setSaving(true);
-    try {
-      const res = await fetch('/api/settings/api-keys', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider, key: inputValue.trim() }),
-      });
-      if (res.ok) {
-        await loadKeys();
-        setAddingProvider(null);
-        setInputValue('');
-        showToast(t('settings.keyAdded'));
-      }
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDelete(provider: Provider, keyIndex: number) {
-    await fetch('/api/settings/api-keys', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ provider, key_index: keyIndex }),
-    });
-    await loadKeys();
-    showToast(t('settings.keyDeleted'));
-  }
-
-  async function handleRestore(provider: Provider, keyIndex: number) {
-    await fetch('/api/settings/api-keys', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ provider, key_index: keyIndex, status: 'active' }),
-    });
-    await loadKeys();
-    showToast(t('settings.multiKeyRestored'));
-  }
-
-  // Group keys by provider
-  const keysByProvider = PROVIDERS.reduce<Record<string, ApiKeyEntry[]>>((acc, p) => {
-    const providerKeys = keys.filter((k) => k.provider === p);
-    if (providerKeys.length > 0) acc[p] = providerKeys;
-    return acc;
-  }, {});
-
-  const providersWithKeys = Object.keys(keysByProvider);
-  const availableProviders = PROVIDERS.filter((p) => !keysByProvider[p]);
-
-  return (
-    <div className="space-y-3">
-      {loading && <p className="text-xs text-white/50">{t('common.loading')}</p>}
-
-      {providersWithKeys.map((provider) => (
-        <div key={provider} className="rounded-lg border border-white/8 p-3">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm font-medium text-white/80">{provider}</span>
-            <button
-              type="button"
-              onClick={() => { setAddingProvider(provider as Provider); setInputValue(''); }}
-              className="flex items-center gap-1 text-[10px] text-white/40 transition-colors hover:text-white/70"
-            >
-              <Plus className="h-3 w-3" />
-              {t('settings.multiKeyAddKey')}
-            </button>
-          </div>
-          <div className="space-y-1.5">
-            {keysByProvider[provider].map((key) => (
-              <div key={key.id} className="flex items-center justify-between rounded-md border border-white/6 px-2.5 py-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs text-white/50">{key.maskedValue}</span>
-                  <StatusBadge status={key.status} t={t} />
-                  {key.last_error && (
-                    <span className="max-w-[120px] truncate text-[10px] text-red-400/60" title={key.last_error}>
-                      {key.last_error}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {(key.status === 'exhausted' || key.status === 'rate_limited') && (
-                    <button
-                      type="button"
-                      onClick={() => void handleRestore(key.provider, key.key_index)}
-                      className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-amber-400 transition-colors hover:bg-amber-500/10 hover:text-amber-300"
-                      title={t('settings.multiKeyRestore')}
-                    >
-                      <RotateCcw className="h-3 w-3" />
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => void handleDelete(key.provider, key.key_index)}
-                    className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-300"
-                    title={t('common.delete')}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-
-      {/* Input for adding a key */}
-      {addingProvider ? (
-        <div className="rounded-lg border border-white/12 p-3">
-          <div className="mb-2 text-xs font-medium text-white/50">{addingProvider}</div>
-          <div className="flex gap-2">
-            <input
-              autoFocus
-              type="password"
-              placeholder="sk-..."
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') void handleSave(addingProvider);
-                if (e.key === 'Escape') { setAddingProvider(null); setInputValue(''); }
-              }}
-              className="flex-1 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-sm text-white outline-none placeholder:text-white/20 focus:border-white/30"
-            />
-            <button type="button" onClick={() => void handleSave(addingProvider)}
-              disabled={saving || !inputValue.trim()}
-              className="rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40 hover:bg-blue-400 transition-colors">
-              {t('settings.saveKey')}
-            </button>
-            <button type="button" onClick={() => { setAddingProvider(null); setInputValue(''); }}
-              className="rounded-lg border border-white/12 px-3 py-1.5 text-xs text-white/50 transition-colors hover:text-white/80">
-              {t('common.cancel')}
-            </button>
-          </div>
-        </div>
-      ) : availableProviders.length > 0 ? (
-        <div className="flex flex-wrap gap-2 pt-1">
-          {availableProviders.map((provider) => (
-            <button key={provider} type="button"
-              onClick={() => { setAddingProvider(provider); setInputValue(''); }}
-              className="flex items-center gap-1.5 rounded-lg border border-white/12 px-3 py-1.5 text-xs text-white/50 transition-colors hover:border-white/25 hover:text-white/80">
-              <Plus className="h-3 w-3" />
-              {provider}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
-      {toast && (
-        <div className="fixed bottom-6 left-1/2 z-[300] -translate-x-1/2 rounded-xl bg-white/10 px-4 py-2 text-sm text-white backdrop-blur shadow-lg border border-white/15">
-          {toast}
-        </div>
-      )}
     </div>
   );
 }
@@ -371,11 +153,24 @@ export function SettingsDialog() {
           </SectionBlock>
 
           {/* API Keys */}
+          <SectionBlock title={t('settings.apiKeys')} desc={t('settings.apiKeysDesc')}>
+            <KeyManager />
+          </SectionBlock>
+
+          {/* Smart Routing Preferences */}
+          <SectionBlock title={t('settings.routingTitle')}>
+            <ScenarioDefaults />
+            <div className="mt-4 border-t border-white/8 pt-4">
+              <ModelPreferences />
+            </div>
+          </SectionBlock>
+
+          {/* Preset Prompts */}
           <SectionBlock
-            title={t('settings.apiKeys')}
-            desc={t('settings.multiKeyDesc')}
+            title={t('presetPrompts.sectionTitle')}
+            desc={t('presetPrompts.sectionDesc')}
           >
-            <ApiKeyManager />
+            <PresetPromptsSection />
           </SectionBlock>
         </div>
       </div>

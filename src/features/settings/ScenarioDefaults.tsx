@@ -1,5 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { UiSelect } from '@/components/ui/primitives'
 
 interface Preference {
   id: string
@@ -18,6 +20,7 @@ interface ApiKey {
 const SCENARIOS = ['image', 'video', 'text', 'analysis'] as const
 
 export function ScenarioDefaults() {
+  const { t } = useTranslation()
   const [keys, setKeys] = useState<ApiKey[]>([])
   const [prefs, setPrefs] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState<string | null>(null)
@@ -54,23 +57,23 @@ export function ScenarioDefaults() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-sm font-medium text-gray-700">场景默认 Key</h3>
+      <h3 className="text-sm font-medium text-[var(--ui-fg)]">{t('settings.scenarioDefaults')}</h3>
       {SCENARIOS.map(sc => (
         <div key={sc} className="flex items-center gap-2">
-          <span className="w-20 text-sm capitalize text-gray-600">{sc}</span>
-          <select
-            className="flex-1 rounded border border-gray-300 px-2 py-1 text-sm"
+          <span className="w-20 text-sm capitalize text-[var(--ui-fg-muted)]">{sc}</span>
+          <UiSelect
             value={prefs[sc] ?? ''}
             onChange={e => { void save(sc, e.target.value) }}
             disabled={saving === sc}
+            className="flex-1 text-sm"
           >
-            <option value="">自动选优</option>
+            <option value="">{t('settings.autoSelect')}</option>
             {keys.map(k => (
               <option key={k.id} value={k.id}>
                 {k.display_name ?? k.provider}
               </option>
             ))}
-          </select>
+          </UiSelect>
         </div>
       ))}
     </div>

@@ -108,6 +108,10 @@
     "langEn": "English",
     "missingAnyApiKeyMessage": "尚未配置任何 API Key，AI 功能暂时不可用。",
     "openProvidersSettings": "去配置",
+    "routingTitle": "智能路由偏好",
+    "scenarioDefaults": "场景默认 Key",
+    "modelPrefsAdvanced": "模型级偏好（高级）",
+    "autoSelect": "自动选优",
     "addKey": {
       "builtinProvider": "内置 Provider",
       "customEndpoint": "自定义 OpenAI-compat 端点",

@@ -110,9 +110,9 @@ export default function SettingsPage() {
         </SectionCard>
 
         {/* Smart Routing Preferences */}
-        <SectionCard title="智能路由偏好">
+        <SectionCard title={t('settings.routingTitle')}>
           <ScenarioDefaults />
-          <div className="mt-4 border-t border-gray-100 pt-4">
+          <div className="mt-4 border-t border-[var(--ui-border-soft)] pt-4">
             <ModelPreferences />
           </div>
         </SectionCard>
