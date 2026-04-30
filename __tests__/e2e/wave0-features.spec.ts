@@ -18,6 +18,12 @@ async function login(page: import('@playwright/test').Page) {
   await page.fill('input[type="password"]', password)
   await page.click('button[type="submit"]')
   await page.waitForURL('/dashboard', { timeout: 15000 })
+  // Dismiss OnboardingWizard if shown (blocks pointer events for users with no API keys)
+  const closeBtn = page.locator('button[aria-label="跳过引导"]')
+  if (await closeBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await closeBtn.click()
+    await expect(closeBtn).not.toBeVisible({ timeout: 3000 })
+  }
 }
 
 /** Create a new project from dashboard and wait for canvas to load. Returns the project ID. */
