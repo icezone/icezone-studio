@@ -15,9 +15,11 @@ test.describe('Dashboard (authenticated)', () => {
     await page.locator('#password').fill(E2E_PASSWORD!)
     await page.locator('button[type="submit"]').click()
     await page.waitForURL('**/dashboard')
+    // Wait for network idle so API-key fetch completes before checking for wizard
+    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {})
     // Dismiss OnboardingWizard if shown (triggered when user has no API keys)
     const closeBtn = page.locator('button[aria-label="跳过引导"]')
-    if (await closeBtn.isVisible({ timeout: 8000 }).catch(() => false)) {
+    if (await closeBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
       await closeBtn.click()
       await expect(closeBtn).not.toBeVisible({ timeout: 3000 })
     }

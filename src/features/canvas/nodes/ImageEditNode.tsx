@@ -687,6 +687,7 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
           ? 'border-accent shadow-[0_0_0_1px_rgba(59,130,246,0.32)]'
           : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'}
       `}
+      data-testid="node-imageEdit"
       style={{ width: `${resolvedWidth}px`, height: `${resolvedHeight}px` }}
       onClick={() => setSelectedNode(id)}
     >

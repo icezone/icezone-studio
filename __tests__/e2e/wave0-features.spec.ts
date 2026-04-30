@@ -18,9 +18,11 @@ async function login(page: import('@playwright/test').Page) {
   await page.fill('input[type="password"]', password)
   await page.click('button[type="submit"]')
   await page.waitForURL('/dashboard', { timeout: 15000 })
+  // Wait for network idle so API-key fetch completes before checking for wizard
+  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {})
   // Dismiss OnboardingWizard if shown (blocks pointer events for users with no API keys)
   const closeBtn = page.locator('button[aria-label="跳过引导"]')
-  if (await closeBtn.isVisible({ timeout: 8000 }).catch(() => false)) {
+  if (await closeBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
     await closeBtn.click()
     await expect(closeBtn).not.toBeVisible({ timeout: 3000 })
   }
@@ -270,8 +272,8 @@ test.describe('Wave M4: Onboarding & Canvas UX', () => {
     const projectId = await createProject(page)
     try {
       await openNodeMenu(page)
-      // ImageEdit 节点（菜单中显示 "AI 图片"）
-      const imageEditOption = page.locator('text=AI 图片').first()
+      // ImageEdit 节点（菜单 menuLabelKey=node.menu.aiImageGeneration → "AI 生图"）
+      const imageEditOption = page.locator('text=AI 生图').first()
       await expect(imageEditOption).toBeVisible({ timeout: 5000 })
       await imageEditOption.click()
 
@@ -279,9 +281,9 @@ test.describe('Wave M4: Onboarding & Canvas UX', () => {
       const node = page.locator('[data-testid="node-imageEdit"], [data-testid="node-upload"]').first()
       await expect(node).toBeVisible({ timeout: 5000 })
 
-      // 验证逻辑模型名出现（不应显示 "kie/" 前缀）
+      // 验证逻辑模型名出现（不应显示 "kie/" 前缀）；等待 capabilities fetch 完成
       const modelPicker = page.locator('[data-testid^="model-option-"]').first()
-      await expect(modelPicker).toBeVisible({ timeout: 5000 })
+      await expect(modelPicker).toBeVisible({ timeout: 10000 })
     } finally {
       await deleteProject(page, projectId)
     }
