@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import { useWeChatLogin } from '@/hooks/useWeChatLogin';
 
@@ -58,7 +59,7 @@ export function WeChatQRModal({ open, onClose }: WeChatQRModalProps) {
         {status === 'pending' && qrImageSrc && (
           <div className="flex flex-col items-center space-y-4">
             <div className="rounded-lg border border-foreground/10 p-4">
-              <img src={qrImageSrc} alt="WeChat QR Code" width={200} height={200} />
+              <Image src={qrImageSrc} alt="WeChat QR Code" width={256} height={256} />
             </div>
             <p className="text-sm text-foreground/60">{t('auth.wechatScanInstruction')}</p>
             <div className="w-full">

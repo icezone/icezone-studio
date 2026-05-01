@@ -20,19 +20,34 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const { error } = await signIn(email, password);
-    if (error) {
-      setError(error.message);
+    try {
+      const { error } = await signIn(email, password);
+      if (error) {
+        console.error('[Auth] Email login failed:', error);
+        setError(error.message);
+        setLoading(false);
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('[Auth] Email login exception:', error);
+      setError(t('common.error'));
       setLoading(false);
-    } else {
-      router.push('/dashboard');
     }
   };
 
   const handleGoogleLogin = async () => {
     setError(null);
-    const { error } = await signInWithOAuth('google');
-    if (error) setError(error.message);
+    try {
+      const { error } = await signInWithOAuth('google');
+      if (error) {
+        console.error('[Auth] Google login failed:', error);
+        setError(error.message);
+      }
+    } catch (error) {
+      console.error('[Auth] Google login exception:', error);
+      setError(t('common.error'));
+    }
   };
 
   return (

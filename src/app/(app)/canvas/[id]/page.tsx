@@ -35,11 +35,6 @@ function CanvasTopBar() {
   const [nameValue, setNameValue] = useState(projectName);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync nameValue when project name changes externally
-  useEffect(() => {
-    if (!editing) setNameValue(projectName);
-  }, [projectName, editing]);
-
   useEffect(() => {
     if (editing && inputRef.current) {
       inputRef.current.focus();
@@ -50,12 +45,16 @@ function CanvasTopBar() {
   async function handleRenameSubmit() {
     const trimmed = nameValue.trim();
     if (trimmed && trimmed !== projectName && currentProjectId) {
-      patchProjectName(trimmed);
-      await fetch(`/api/projects/${currentProjectId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: trimmed }),
-      });
+      try {
+        patchProjectName(trimmed);
+        await fetch(`/api/projects/${currentProjectId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: trimmed }),
+        });
+      } catch (error) {
+        console.error('[Canvas] Rename failed:', { projectId: currentProjectId, error });
+      }
     }
     setEditing(false);
   }
@@ -89,7 +88,10 @@ function CanvasTopBar() {
         ) : (
           <button
             type="button"
-            onClick={() => setEditing(true)}
+            onClick={() => {
+              setNameValue(projectName);
+              setEditing(true);
+            }}
             title={t('dashboard.renameProject')}
             className="group flex max-w-[260px] items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-white/10"
           >

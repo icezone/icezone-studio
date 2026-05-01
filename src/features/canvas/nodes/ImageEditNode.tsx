@@ -6,6 +6,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
 } from 'react';
 import { Handle, Position, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
@@ -359,14 +360,6 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
     updateNodeInternals(id);
   }, [id, resolvedHeight, resolvedWidth, updateNodeInternals]);
 
-  useEffect(() => {
-    const externalPrompt = data.prompt ?? '';
-    if (externalPrompt !== promptDraftRef.current) {
-      promptDraftRef.current = externalPrompt;
-      setPromptDraft(externalPrompt);
-    }
-  }, [data.prompt]);
-
   const commitPromptDraft = useCallback((nextPrompt: string) => {
     promptDraftRef.current = nextPrompt;
     updateNodeData(id, { prompt: nextPrompt });
@@ -395,7 +388,7 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
     updateNodeData,
   ]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (incomingImages.length === 0) {
       setShowImagePicker(false);
       setPickerCursor(null);
@@ -567,7 +560,6 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
     incomingImages,
     requestResolution.requestModel,
     selectedAspectRatio.value,
-    selectedModel.id,
     selectedModel.expectedDurationMs,
     selectedModel.providerId,
     selectedResolution.value,

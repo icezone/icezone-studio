@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { UI_DIALOG_TRANSITION_MS } from './motion';
 
 interface DialogTransitionState {
@@ -13,7 +13,7 @@ export function useDialogTransition(
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     let frameId1 = 0;
     let frameId2 = 0;
     let timer: ReturnType<typeof setTimeout> | null = null;

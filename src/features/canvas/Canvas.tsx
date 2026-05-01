@@ -574,7 +574,7 @@ function CanvasInner() {
         }
       })();
     }
-  }, [apiKeys, nodes, updateNodeData]);
+  }, [apiKeys, nodes, updateNodeData, t]);
 
   useEffect(() => {
     const element = wrapperRef.current;
