@@ -1,5 +1,10 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { NextRequest } from 'next/server'
+
+function makeReq() {
+  return new NextRequest('http://localhost/api/settings/call-history')
+}
 
 const mock = vi.hoisted(() => ({
   authUser: { id: 'u1' } as { id: string } | null,
@@ -33,13 +38,13 @@ describe('GET /api/settings/call-history', () => {
   it('未登录返回 401', async () => {
     mock.authUser = null
     const { GET } = await import('@/app/api/settings/call-history/route')
-    const res = await GET()
+    const res = await GET(makeReq())
     expect(res.status).toBe(401)
   })
 
   it('返回 30 天汇总:total / success / avgLatency / totalCost', async () => {
     const { GET } = await import('@/app/api/settings/call-history/route')
-    const res = await GET()
+    const res = await GET(makeReq())
     const body = await res.json()
     expect(res.status).toBe(200)
     expect(body.total).toBe(3)
