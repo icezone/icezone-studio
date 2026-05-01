@@ -139,6 +139,15 @@
       "success": "成功率",
       "latency": "平均延迟",
       "cost": "费用"
+    },
+    "aliasMap": {
+      "title": "模型别名映射",
+      "desc": "手动指定此端点支持的逻辑模型（用于无法自动识别的端点）",
+      "addPlaceholder": "选择逻辑模型",
+      "addBtn": "添加",
+      "removeBtn": "移除",
+      "probeSource": "自动探测",
+      "aliasSource": "手动映射"
     }
   },
   "canvas": {

@@ -139,6 +139,15 @@
       "success": "Success",
       "latency": "Avg Latency",
       "cost": "Cost"
+    },
+    "aliasMap": {
+      "title": "Model Alias Mapping",
+      "desc": "Manually specify which logical models this endpoint supports",
+      "addPlaceholder": "Select logical model",
+      "addBtn": "Add",
+      "removeBtn": "Remove",
+      "probeSource": "Auto-detected",
+      "aliasSource": "Manual"
     }
   },
   "canvas": {
