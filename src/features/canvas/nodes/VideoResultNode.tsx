@@ -65,7 +65,9 @@ function VideoResultNodeComponent({
         // Desktop-only: Tauri download path removed in web version.
       } else {
         // Browser download using fetch + blob (works with CORS)
-        console.log('[VideoResultNode] Starting browser download:', url);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[VideoResultNode] Starting browser download:', url);
+        }
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error(`Failed to fetch video: ${response.statusText}`);
@@ -84,7 +86,9 @@ function VideoResultNodeComponent({
         // Clean up blob URL after a delay
         setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
 
-        console.log('[VideoResultNode] Browser download initiated');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[VideoResultNode] Browser download initiated');
+        }
       }
     } catch (error) {
       console.error('[VideoResultNode] Failed to download video:', error);
@@ -142,7 +146,9 @@ function VideoResultNodeComponent({
       addEdge(sourceId, newNodeId);
     });
 
-    console.log('[VideoResultNode] Created new VideoGenNode:', newNodeId);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[VideoResultNode] Created new VideoGenNode:', newNodeId);
+    }
   };
 
   return (

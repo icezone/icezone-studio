@@ -326,7 +326,7 @@ export function UiSelect({ className = '', children, ...props }: UiSelectProps) 
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen]);
+  }, [isOpen, listboxId]);
 
   const commitValue = (nextValue: string) => {
     if (!isControlled) {

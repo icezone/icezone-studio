@@ -231,13 +231,15 @@ function VideoGenNodeComponent({
           data.model
         );
 
-        console.log('[VideoGenNode] Poll status:', {
-          jobId: data.jobId,
-          state: status.state,
-          videoUrl: status.videoUrl,
-          progress: status.progress,
-          errorMessage: status.errorMessage,
-        });
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[VideoGenNode] Poll status:', {
+            jobId: data.jobId,
+            state: status.state,
+            videoUrl: status.videoUrl,
+            progress: status.progress,
+            errorMessage: status.errorMessage,
+          });
+        }
 
         if (status.state === 'completed' && status.videoUrl) {
           if (pollIntervalRef.current) {
@@ -627,7 +629,9 @@ function VideoGenNodeComponent({
         // Desktop-only: Tauri download path removed in web version.
       } else {
         // Browser download using fetch + blob (works with CORS)
-        console.log('[VideoGenNode] Starting browser download:', url);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[VideoGenNode] Starting browser download:', url);
+        }
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error(`Failed to fetch video: ${response.statusText}`);
@@ -646,7 +650,9 @@ function VideoGenNodeComponent({
         // Clean up blob URL after a delay
         setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
 
-        console.log('[VideoGenNode] Browser download initiated');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[VideoGenNode] Browser download initiated');
+        }
       }
     } catch (error) {
       console.error('[VideoGenNode] Failed to download video:', error);

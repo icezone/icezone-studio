@@ -334,13 +334,22 @@ export default function DashboardPage() {
   }
 
   async function handleDelete(project: Project) {
-    await fetch(`/api/projects/${project.id}`, { method: 'DELETE' });
-    setProjects((prev) => prev.filter((p) => p.id !== project.id));
-    setDeleteTarget(null);
+    try {
+      await fetch(`/api/projects/${project.id}`, { method: 'DELETE' });
+      setProjects((prev) => prev.filter((p) => p.id !== project.id));
+      setDeleteTarget(null);
+    } catch (error) {
+      console.error('[Dashboard] Delete failed:', { projectId: project.id, error });
+      setError(t('common.error'));
+    }
   }
 
   async function handleCreateFromTemplate(_templateKey: string) {
-    await handleCreate();
+    try {
+      await handleCreate();
+    } catch (error) {
+      console.error('[Dashboard] Create from template failed:', error);
+    }
   }
 
   function openTemplateLibrary(tab: 'official' | 'shared') {
@@ -352,7 +361,7 @@ export default function DashboardPage() {
     // Close library and create a new project (template loading handled in canvas)
     setTemplateLibraryOpen(false);
     void handleCreate();
-  }, []);
+  }, [handleCreate]);
 
   const handleSaveTemplate = useCallback(async (data: {
     name: string;
@@ -386,15 +395,20 @@ export default function DashboardPage() {
   const handleExportJson = useCallback(() => {}, []);
 
   async function handleRename(project: Project, newName: string) {
-    const res = await fetch(`/api/projects/${project.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newName }),
-    });
-    if (res.ok) {
-      setProjects((prev) =>
-        prev.map((p) => (p.id === project.id ? { ...p, name: newName } : p))
-      );
+    try {
+      const res = await fetch(`/api/projects/${project.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName }),
+      });
+      if (res.ok) {
+        setProjects((prev) =>
+          prev.map((p) => (p.id === project.id ? { ...p, name: newName } : p))
+        );
+      }
+    } catch (error) {
+      console.error('[Dashboard] Rename failed:', { projectId: project.id, error });
+      setError(t('common.error'));
     }
   }
 

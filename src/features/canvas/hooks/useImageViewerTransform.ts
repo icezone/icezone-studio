@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type MouseEvent, type RefObject, type SyntheticEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type RefObject, type SyntheticEvent } from 'react';
 
 export interface ImageViewerTransformHandlers {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -84,7 +84,7 @@ export function useImageViewerTransform(isOpen: boolean): ImageViewerTransformHa
     );
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isOpen) return;
     setViewerOpacity(0);
     requestAnimationFrame(() => {
