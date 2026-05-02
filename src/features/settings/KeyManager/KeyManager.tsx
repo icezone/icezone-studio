@@ -7,7 +7,7 @@ import { useKeyManager } from './useKeyManager'
 
 export function KeyManager() {
   const { t } = useTranslation()
-  const { keys, loading, error, addKey, deleteKey, probe } = useKeyManager()
+  const { keys, loading, error, addKey, deleteKey, probe, addAlias, removeAlias } = useKeyManager()
 
   return (
     <div className="flex flex-col gap-4">
@@ -24,7 +24,14 @@ export function KeyManager() {
       ) : (
         <div className="flex flex-col gap-2">
           {keys.map((k) => (
-            <KeyRow key={k.id} row={k} onProbe={probe} onDelete={deleteKey} />
+            <KeyRow
+                key={k.id}
+                row={k}
+                onProbe={probe}
+                onDelete={deleteKey}
+                onAddAlias={addAlias}
+                onRemoveAlias={removeAlias}
+              />
           ))}
         </div>
       )}
