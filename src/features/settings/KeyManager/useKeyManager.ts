@@ -12,6 +12,7 @@ export interface KeyRowData {
   last_verified_at: string | null
   last_error: string | null
   capabilities: string[]
+  aliasIds: string[]
 }
 
 interface ApiKeyResponse {
@@ -71,6 +72,23 @@ export function useKeyManager() {
       if (!capRes.ok) throw new Error(`capabilities ${capRes.status}`)
       const keyRows = (await keysRes.json()) as ApiKeyResponse[]
       const cap = (await capRes.json()) as CapabilitiesResponse
+
+      const customKeys = keyRows.filter((r) => r.provider.startsWith('custom:'))
+      const aliasResults = await Promise.all(
+        customKeys.map((r) =>
+          fetch(`/api/settings/api-keys/${r.id}/capabilities`)
+            .then((res) => (res.ok ? res.json() : { capabilities: [] }))
+            .then((data: { capabilities: { logicalModelId: string; source: string }[] }) => ({
+              keyId: r.id,
+              aliasIds: data.capabilities
+                .filter((c) => c.source === 'alias')
+                .map((c) => c.logicalModelId),
+            }))
+            .catch(() => ({ keyId: r.id, aliasIds: [] as string[] })),
+        ),
+      )
+      const aliasMap = Object.fromEntries(aliasResults.map(({ keyId, aliasIds }) => [keyId, aliasIds]))
+
       setKeys(
         keyRows.map((r) => ({
           id: r.id,
@@ -84,6 +102,7 @@ export function useKeyManager() {
           last_verified_at: r.last_verified_at,
           last_error: r.last_error,
           capabilities: cap.byKey[r.id] ?? [],
+          aliasIds: aliasMap[r.id] ?? [],
         }))
       )
     } catch (e) {
@@ -136,5 +155,31 @@ export function useKeyManager() {
     [reload]
   )
 
-  return { keys, loading, error, reload, addKey, deleteKey, probe }
+  const addAlias = useCallback(
+    async (keyId: string, logicalModelId: string) => {
+      const res = await fetch(`/api/settings/api-keys/${keyId}/capabilities`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ logicalModelId }),
+      })
+      if (!res.ok) throw new Error(await readError(res, 'add alias failed'))
+      await reload()
+    },
+    [reload],
+  )
+
+  const removeAlias = useCallback(
+    async (keyId: string, logicalModelId: string) => {
+      const res = await fetch(`/api/settings/api-keys/${keyId}/capabilities`, {
+        method: 'DELETE',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ logicalModelId }),
+      })
+      if (!res.ok) throw new Error(await readError(res, 'remove alias failed'))
+      await reload()
+    },
+    [reload],
+  )
+
+  return { keys, loading, error, reload, addKey, deleteKey, probe, addAlias, removeAlias }
 }
