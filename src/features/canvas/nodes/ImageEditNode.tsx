@@ -356,10 +356,6 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
 
   const resolvedWidth = Math.max(IMAGE_EDIT_NODE_MIN_WIDTH, Math.round(width ?? IMAGE_EDIT_NODE_DEFAULT_WIDTH));
 
-  useEffect(() => {
-    updateNodeInternals(id);
-  }, [id, resolvedWidth, updateNodeInternals]);
-
   const commitPromptDraft = useCallback((nextPrompt: string) => {
     promptDraftRef.current = nextPrompt;
     updateNodeData(id, { prompt: nextPrompt });
@@ -672,15 +668,15 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
 
   const { expanded, toggle, collapse } = useNodeExpanded();
 
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [id, expanded, resolvedWidth, updateNodeInternals]);
+
   const prevSelected = useRef(selected);
   useEffect(() => {
     if (prevSelected.current && !selected) collapse();
     prevSelected.current = selected;
   }, [selected, collapse]);
-
-  useEffect(() => {
-    updateNodeInternals(id);
-  }, [expanded, id, updateNodeInternals]);
 
   return (
     <div
@@ -702,10 +698,20 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
           position={Position.Right}
         />
         <div
+          role="button"
+          tabIndex={0}
           onClick={(e) => {
             e.stopPropagation();
             setSelectedNode(id);
             toggle();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.stopPropagation();
+              setSelectedNode(id);
+              toggle();
+            }
           }}
           className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
         >
