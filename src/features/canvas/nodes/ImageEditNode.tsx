@@ -22,7 +22,7 @@ import {
   type ImageSize,
 } from '@/features/canvas/domain/canvasNodes';
 import { resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
-import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canvas/ui/NodeHeader';
+import { NodeHeader } from '@/features/canvas/ui/NodeHeader';
 import { NodeResizeHandle } from '@/features/canvas/ui/NodeResizeHandle';
 import {
   canvasAiGateway,
@@ -72,6 +72,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker'
 import { LogicalModelPicker } from '@/features/canvas/ui/LogicalModelPicker'
 import { mapToCanvasModelId } from '@/config/logical-models';
+import { useNodeExpanded } from './shared/useNodeExpanded';
 
 type ImageEditNodeProps = NodeProps & {
   id: string;
@@ -96,7 +97,7 @@ const IMAGE_EDIT_NODE_MIN_HEIGHT = 180;
 const IMAGE_EDIT_NODE_MAX_WIDTH = 1400;
 const IMAGE_EDIT_NODE_MAX_HEIGHT = 1000;
 const IMAGE_EDIT_NODE_DEFAULT_WIDTH = 640;
-const IMAGE_EDIT_NODE_DEFAULT_HEIGHT = 420;
+
 
 function getTextareaCaretOffset(
   textarea: HTMLTextAreaElement,
@@ -354,11 +355,10 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
   );
 
   const resolvedWidth = Math.max(IMAGE_EDIT_NODE_MIN_WIDTH, Math.round(width ?? IMAGE_EDIT_NODE_DEFAULT_WIDTH));
-  const resolvedHeight = Math.max(IMAGE_EDIT_NODE_MIN_HEIGHT, Math.round(height ?? IMAGE_EDIT_NODE_DEFAULT_HEIGHT));
 
   useEffect(() => {
     updateNodeInternals(id);
-  }, [id, resolvedHeight, resolvedWidth, updateNodeInternals]);
+  }, [id, resolvedWidth, updateNodeInternals]);
 
   const commitPromptDraft = useCallback((nextPrompt: string) => {
     promptDraftRef.current = nextPrompt;
@@ -670,185 +670,211 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
     }
   };
 
+  const { expanded, toggle, collapse } = useNodeExpanded();
+
+  const prevSelected = useRef(selected);
+  useEffect(() => {
+    if (prevSelected.current && !selected) collapse();
+    prevSelected.current = selected;
+  }, [selected, collapse]);
+
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [expanded, id, updateNodeInternals]);
+
   return (
     <div
       ref={rootRef}
-      className={`
-        group relative flex h-full flex-col overflow-visible rounded-[var(--node-radius)] border bg-[var(--canvas-node-bg)] p-2 transition-colors duration-150
-        ${selected
-          ? 'border-accent shadow-[0_0_0_1px_rgba(59,130,246,0.32)]'
-          : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'}
-      `}
+      className="node-wrap"
+      style={{ width: `${resolvedWidth}px` }}
       data-testid="node-imageEdit"
-      style={{ width: `${resolvedWidth}px`, height: `${resolvedHeight}px` }}
-      onClick={() => setSelectedNode(id)}
     >
-      <NodeHeader
-        className={NODE_HEADER_FLOATING_POSITION_CLASS}
-        icon={<Sparkles className="h-4 w-4" />}
-        titleText={resolvedTitle}
-        rightSlot={undefined}
-        editable
-        onTitleChange={(nextTitle) => updateNodeData(id, { displayName: nextTitle })}
-      />
-
-      <div className="relative min-h-0 flex-1 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-2">
-        <div className="w-full flex items-center justify-between mb-1">
-          <span className="text-xs text-[var(--canvas-node-fg-muted)]">{t('node.imageEdit.promptPlaceholder')}</span>
-          <div className="flex items-center gap-1">
-            <PresetPickerButton onInsert={handlePresetInsert} />
-          </div>
-        </div>
-        <div className="relative h-full min-h-0">
-          <div
-            ref={promptHighlightRef}
-            aria-hidden="true"
-            className="ui-scrollbar pointer-events-none absolute inset-0 overflow-y-auto overflow-x-hidden text-sm leading-6 text-[var(--canvas-node-fg)]"
-            style={{ scrollbarGutter: 'stable' }}
-          >
-            <div className="min-h-full whitespace-pre-wrap break-words px-1 py-0.5">
-              {renderPromptWithHighlights(promptDraft, incomingImages.length)}
-            </div>
-          </div>
-
-          <textarea
-            ref={promptRef}
-            value={promptDraft}
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              setPromptDraft(nextValue);
-              commitPromptDraft(nextValue);
-            }}
-            onKeyDown={handlePromptKeyDown}
-            onScroll={syncPromptHighlightScroll}
-            onMouseDown={(event) => event.stopPropagation()}
-            placeholder={t('node.imageEdit.promptPlaceholder')}
-            className="ui-scrollbar nodrag nowheel relative z-10 h-full w-full resize-none overflow-y-auto overflow-x-hidden border-none bg-transparent px-1 py-0.5 text-sm leading-6 text-transparent caret-[var(--canvas-node-fg)] outline-none placeholder:text-[var(--canvas-node-fg-muted)]/80 focus:border-transparent whitespace-pre-wrap break-words"
-            style={{ scrollbarGutter: 'stable' }}
-          />
-        </div>
-
-        {showImagePicker && incomingImageItems.length > 0 && (
-          <div
-            className="nowheel absolute z-30 w-[120px] overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
-            style={{ left: pickerAnchor.left, top: pickerAnchor.top }}
-            onMouseDown={(event) => event.stopPropagation()}
-            onWheelCapture={(event) => event.stopPropagation()}
-          >
-            <div
-              className="ui-scrollbar nowheel max-h-[180px] overflow-y-auto"
-              onWheelCapture={(event) => event.stopPropagation()}
-            >
-              {incomingImageItems.map((item, index) => (
-                <button
-                  key={`${item.imageUrl}-${index}`}
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    insertImageReference(index);
-                  }}
-                  onMouseEnter={() => setPickerActiveIndex(index)}
-                  className={`flex w-full items-center gap-2 border border-transparent bg-[var(--canvas-node-section-bg)] px-2 py-2 text-left text-sm text-[var(--canvas-node-fg)] transition-colors hover:border-[var(--canvas-node-border)] ${pickerActiveIndex === index
-                      ? 'border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)]'
-                      : ''
-                    }`}
-                >
-                  <CanvasNodeImage
-                    src={item.displayUrl}
-                    alt={item.label}
-                    viewerSourceUrl={resolveImageDisplayUrl(item.imageUrl)}
-                    viewerImageList={incomingImageViewerList}
-                    className="h-8 w-8 rounded object-cover"
-                    draggable={false}
-                  />
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <LogicalModelPicker
-        scenario="image"
-        value={data.logicalModelId ?? null}
-        onChange={handleLogicalModelChange}
-        className="mb-2"
-      />
-
-      <div className="mt-2 flex shrink-0 items-center gap-1">
-        <ModelParamsControls
-          imageModels={imageModels}
-          selectedModel={selectedModel}
-          resolutionOptions={resolutionOptions}
-          selectedResolution={selectedResolution}
-          selectedAspectRatio={selectedAspectRatio}
-          aspectRatioOptions={aspectRatioOptions}
-          onModelChange={(modelId) => {
-            updateNodeData(id, { model: modelId });
-          }}
-          onResolutionChange={(resolution) => {
-            updateNodeData(id, { size: resolution as ImageSize });
-          }
-          }
-          onAspectRatioChange={(aspectRatio) => {
-            updateNodeData(id, { requestAspectRatio: aspectRatio });
-          }
-          }
-          extraParams={data.extraParams}
-          onExtraParamChange={(key, value) =>
-            updateNodeData(id, {
-              extraParams: {
-                ...(data.extraParams ?? {}),
-                [key]: value,
-              },
-            })
-          }
-          showWebSearchToggle={showWebSearchToggle}
-          webSearchEnabled={webSearchEnabled}
-          onWebSearchToggle={(enabled) =>
-            updateNodeData(id, {
-              extraParams: {
-                ...(data.extraParams ?? {}),
-                enable_web_search: enabled,
-              },
-            })
-          }
-          triggerSize="sm"
-          chipClassName={NODE_CONTROL_CHIP_CLASS}
-          modelChipClassName={NODE_CONTROL_MODEL_CHIP_CLASS}
-          paramsChipClassName={NODE_CONTROL_PARAMS_CHIP_CLASS}
+      {/* Preview wrap — Handles anchor here, vertically centred on preview card */}
+      <div className="node-preview-wrap" style={{ width: `${resolvedWidth}px` }}>
+        <Handle
+          type="target"
+          id="target"
+          position={Position.Left}
         />
-
-        <div className="ml-auto" />
-
-        <UiButton
-          onClick={(event) => {
-            event.stopPropagation();
-            void handleGenerate();
+        <Handle
+          type="source"
+          id="source"
+          position={Position.Right}
+        />
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedNode(id);
+            toggle();
           }}
-          variant="primary"
-          className={`shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
+          className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
         >
-          <Sparkles className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
-          {t('canvas.generate')}
-        </UiButton>
+          <div className="node-preview-header">
+            <Sparkles className="h-3.5 w-3.5 shrink-0 text-[var(--canvas-node-fg-muted)]" />
+            <span className="truncate text-[12px] font-semibold leading-none text-[var(--canvas-node-fg)]">
+              {resolvedTitle}
+            </span>
+          </div>
+          <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
+            <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
+            <div className="node-edit-hint">{t('canvas.clickToEdit')}</div>
+          </div>
+        </div>
       </div>
 
-      {error && <div className="mt-1 shrink-0 text-xs text-red-400">{error}</div>}
+      {expanded && (
+        <div className="node-gap-dots">
+          <span className="node-dot" />
+          <span className="node-dot" />
+          <span className="node-dot" />
+        </div>
+      )}
 
-      <Handle
-        type="target"
-        id="target"
-        position={Position.Left}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent"
-      />
-      <Handle
-        type="source"
-        id="source"
-        position={Position.Right}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent"
-      />
+      {expanded && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="node-settings-panel"
+        >
+          <NodeHeader
+            icon={<Sparkles className="h-4 w-4" />}
+            titleText={resolvedTitle}
+            rightSlot={undefined}
+            editable
+            onTitleChange={(nextTitle) => updateNodeData(id, { displayName: nextTitle })}
+          />
+
+          <div className="relative rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-2">
+            <div className="mb-1 flex w-full items-center justify-between">
+              <span className="text-xs text-[var(--canvas-node-fg-muted)]">
+                {t('node.imageEdit.promptPlaceholder')}
+              </span>
+              <div className="flex items-center gap-1">
+                <PresetPickerButton onInsert={handlePresetInsert} />
+              </div>
+            </div>
+            <div className="relative" style={{ minHeight: 72 }}>
+              <div
+                ref={promptHighlightRef}
+                aria-hidden="true"
+                className="ui-scrollbar pointer-events-none absolute inset-0 overflow-y-auto overflow-x-hidden text-sm leading-6 text-[var(--canvas-node-fg)]"
+                style={{ scrollbarGutter: 'stable' }}
+              >
+                <div className="min-h-full whitespace-pre-wrap break-words px-1 py-0.5">
+                  {renderPromptWithHighlights(promptDraft, incomingImages.length)}
+                </div>
+              </div>
+              <textarea
+                ref={promptRef}
+                value={promptDraft}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  setPromptDraft(nextValue);
+                  commitPromptDraft(nextValue);
+                }}
+                onKeyDown={handlePromptKeyDown}
+                onScroll={syncPromptHighlightScroll}
+                onMouseDown={(event) => event.stopPropagation()}
+                placeholder={t('node.imageEdit.promptPlaceholder')}
+                className="ui-scrollbar nodrag nowheel relative z-10 w-full resize-none overflow-y-auto overflow-x-hidden border-none bg-transparent px-1 py-0.5 text-sm leading-6 text-transparent caret-[var(--canvas-node-fg)] outline-none placeholder:text-[var(--canvas-node-fg-muted)]/80 focus:border-transparent whitespace-pre-wrap break-words"
+                style={{ scrollbarGutter: 'stable', minHeight: 72 }}
+              />
+            </div>
+
+            {showImagePicker && incomingImageItems.length > 0 && (
+              <div
+                className="nowheel absolute z-30 w-[120px] overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
+                style={{ left: pickerAnchor.left, top: pickerAnchor.top }}
+                onMouseDown={(event) => event.stopPropagation()}
+                onWheelCapture={(event) => event.stopPropagation()}
+              >
+                <div
+                  className="ui-scrollbar nowheel max-h-[180px] overflow-y-auto"
+                  onWheelCapture={(event) => event.stopPropagation()}
+                >
+                  {incomingImageItems.map((item, index) => (
+                    <button
+                      key={`${item.imageUrl}-${index}`}
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        insertImageReference(index);
+                      }}
+                      onMouseEnter={() => setPickerActiveIndex(index)}
+                      className={`flex w-full items-center gap-2 border border-transparent bg-[var(--canvas-node-section-bg)] px-2 py-2 text-left text-sm text-[var(--canvas-node-fg)] transition-colors hover:border-[var(--canvas-node-border)] ${
+                        pickerActiveIndex === index
+                          ? 'border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)]'
+                          : ''
+                      }`}
+                    >
+                      <CanvasNodeImage
+                        src={item.displayUrl}
+                        alt={item.label}
+                        viewerSourceUrl={resolveImageDisplayUrl(item.imageUrl)}
+                        viewerImageList={incomingImageViewerList}
+                        className="h-8 w-8 rounded object-cover"
+                        draggable={false}
+                      />
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <LogicalModelPicker
+            scenario="image"
+            value={data.logicalModelId ?? null}
+            onChange={handleLogicalModelChange}
+          />
+
+          <div className="node-ctrl-row">
+            <ModelParamsControls
+              imageModels={imageModels}
+              selectedModel={selectedModel}
+              resolutionOptions={resolutionOptions}
+              selectedResolution={selectedResolution}
+              selectedAspectRatio={selectedAspectRatio}
+              aspectRatioOptions={aspectRatioOptions}
+              onModelChange={(modelId) => { updateNodeData(id, { model: modelId }); }}
+              onResolutionChange={(resolution) => { updateNodeData(id, { size: resolution as ImageSize }); }}
+              onAspectRatioChange={(aspectRatio) => { updateNodeData(id, { requestAspectRatio: aspectRatio }); }}
+              extraParams={data.extraParams}
+              onExtraParamChange={(key, value) =>
+                updateNodeData(id, {
+                  extraParams: { ...(data.extraParams ?? {}), [key]: value },
+                })
+              }
+              showWebSearchToggle={showWebSearchToggle}
+              webSearchEnabled={webSearchEnabled}
+              onWebSearchToggle={(enabled) =>
+                updateNodeData(id, {
+                  extraParams: { ...(data.extraParams ?? {}), enable_web_search: enabled },
+                })
+              }
+              triggerSize="sm"
+              chipClassName={NODE_CONTROL_CHIP_CLASS}
+              modelChipClassName={NODE_CONTROL_MODEL_CHIP_CLASS}
+              paramsChipClassName={NODE_CONTROL_PARAMS_CHIP_CLASS}
+            />
+            <div className="ml-auto" />
+            <UiButton
+              onClick={(event) => {
+                event.stopPropagation();
+                void handleGenerate();
+              }}
+              variant="primary"
+              className={`shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
+            >
+              <Sparkles className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
+              {t('canvas.generate')}
+            </UiButton>
+          </div>
+
+          {error && <div className="text-xs text-red-400">{error}</div>}
+        </div>
+      )}
+
       <NodeResizeHandle
         minWidth={IMAGE_EDIT_NODE_MIN_WIDTH}
         minHeight={IMAGE_EDIT_NODE_MIN_HEIGHT}
