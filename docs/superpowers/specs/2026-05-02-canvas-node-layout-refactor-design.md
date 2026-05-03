@@ -66,23 +66,36 @@ export function useNodeExpanded() {
 ### 各节点使用模式
 
 ```tsx
-const { expanded, toggle } = useNodeExpanded()
+const { expanded, toggle, collapse } = useNodeExpanded()
 
-// 1. 预览卡 — 点击触发 toggle
-<div
-  onClick={toggle}
-  className="node-preview-card"   // 见下方 CSS 约定
->
-  {/* 标题栏 + 媒体预览内容 */}
+// 外层：preview-wrap 作为 handle 按钮的定位锚点
+<div className="node-preview-wrap">
+  {/* Handle 按钮 — 默认隐藏，hover preview-wrap 时弹出 */}
+  <Handle type="target" position={Position.Left} className="node-handle-left" />
+  <Handle type="source" position={Position.Right} className="node-handle-right" />
+
+  {/* 预览卡 — 点击触发 toggle */}
+  <div onClick={toggle} className="node-preview-card">
+    {/* 标题栏 + 媒体预览内容 */}
+    <div className="node-edit-hint">点击编辑</div>
+  </div>
 </div>
 
-// 2. 设置面板 — expanded 时渲染，内部点击不冒泡
+{/* 间距层 */}
+{expanded && (
+  <div className="node-gap-dots">
+    <span /><span /><span />
+  </div>
+)}
+
+{/* 设置面板 — expanded 时渲染，内部点击不冒泡 */}
 {expanded && (
   <div
     onClick={e => e.stopPropagation()}
     className="node-settings-panel"
   >
-    {/* prompt 输入、模型选择、控制条等 */}
+    {/* prompt 输入框（width: 100%） */}
+    {/* 控件行：pills + 生成按钮（white-space: nowrap） */}
   </div>
 )}
 ```
@@ -103,41 +116,106 @@ useEffect(() => {
 
 ## 视觉规格
 
-### 预览卡（`node-preview-card`）
+> 风格基准：DESIGN.md（Miro 风格）暗色适配 — Blue 450、ring shadow、12px 圆角、极简层次。
+
+### 色彩
+
+| Token | 值 | 用途 |
+|-------|----|------|
+| canvas 背景 | `#08080f` | React Flow 画布底色 |
+| 卡片背景 | `#13131e` | 预览卡 / 设置面板 |
+| 卡片内区域 | `#0d0d16` | 图片/视频占位、prompt 输入框 |
+| 默认边框 | `0 0 0 1px rgba(255,255,255,0.07)` | ring shadow |
+| 选中边框 | `0 0 0 1.5px #5b76fe` | Blue 450 |
+| 选中光晕 | `0 4px 24px rgba(91,118,254,0.18)` | 蓝色外发光 |
+| 主交互色 | `#5b76fe` | Blue 450，按钮 / 选中 / handle hover |
+| 副文字 | `#8a8fa8` | 控件标签 |
+| 占位文字 | `#444458` | 输入框 placeholder、尺寸信息 |
+
+### 预览卡（`.node-preview-wrap` + `.node-preview-card`）
 
 ```
-背景:        var(--node-bg)           // #0d0d1a
-边框:        1px solid var(--ui-line) // 默认状态
-边框(展开):  1.5px solid rgba(74,158,255,0.4)
-圆角:        10px
+外层 wrap:   position: relative; width: <节点宽度>
+卡片背景:    #13131e
+圆角:        12px
+边框(默认):  box-shadow: 0 0 0 1px rgba(255,255,255,0.07)
+边框(hover): box-shadow: 0 0 0 1.5px rgba(91,118,254,0.5), 0 4px 20px rgba(91,118,254,0.1)
+边框(选中):  box-shadow: 0 0 0 1.5px #5b76fe, 0 4px 24px rgba(91,118,254,0.18)
 溢出:        hidden
 光标:        pointer
+transition:  box-shadow 0.2s ease
 ```
 
-**收起状态** — 右下角显示淡色「点击编辑」提示（absolute 定位，hover 时才可见）。
+**标题栏**：padding 8px 14px，`border-bottom: 1px solid rgba(255,255,255,0.05)`，标题 12px `#e8e8f0` font-weight 600，副信息 10px `#444458`。
 
-**展开状态** — 蓝色边框 + 浅蓝 box-shadow 高亮。
+**「点击编辑」提示**：absolute 定位右下角，默认 `opacity: 0`，`.node-preview-wrap:hover` 时 `opacity: 1`，`transition: opacity 0.2s ease`。
+
+### 连接 Handle（+ 按钮）
+
+置于 `.node-preview-wrap` 内，以预览卡高度垂直居中（`top: 50%`），展开设置面板后位置**不变**。
+
+```
+定位:       position: absolute; top: 50%; translateY(-50%)
+左侧距卡片: right: calc(100% + 10px)
+右侧距卡片: left:  calc(100% + 10px)
+尺寸:       28px × 28px, border-radius: 50%
+背景:       #1a1a2c, border: 1px solid rgba(255,255,255,0.1)
+颜色:       #5b6080
+默认:       opacity: 0; translateX(±8px)  // 隐藏，轻微内移
+Hover触发:  .node-preview-wrap:hover → opacity: 1; translateX(0)
+动画曲线:   cubic-bezier(0.34, 1.56, 0.64, 1)  // 弹簧弹出
+时长:       0.25s
+Handle hover: background #5b76fe, box-shadow: 0 0 0 4px rgba(91,118,254,0.2), scale(1.15)
+```
 
 ### 间距层（预览卡与设置面板之间）
 
 ```
-高度:   14px
-内容:   三个 2px 圆点（居中，color: var(--ui-line-muted)）
-作用:   视觉连接两个卡片，暗示从属关系
+高度:   16px
+内容:   三个 2×2px 圆点，居中，color: #2a2a3a
 ```
 
-### 设置面板（`node-settings-panel`）
+### 设置面板（`.node-settings-panel`）
 
 ```
-背景:   略深于预览卡（#12121f）
-边框:   1px solid var(--ui-line)
-圆角:   10px
-内边距: 12px
+display:     inline-flex; flex-direction: column; gap: 10px
+宽度:        动态（不设固定宽度），由控件行自然撑开
+最小宽度:    220px
+背景:        #13131e
+圆角:        12px
+边框:        box-shadow: 0 0 0 1px rgba(255,255,255,0.07)
+内边距:      14px
 ```
 
-### 连接 Handle（+ 按钮）
+**Prompt 输入框**：
+```
+背景: #0d0d16, border: 1px solid rgba(255,255,255,0.06)
+圆角: 8px, padding: 10px 12px, min-height: 72px
+width: 100%（填满面板宽度）
+```
 
-固定在**预览卡**垂直中心两侧，展开状态下不随设置面板移动。设置面板无独立 handle，不参与连线。
+**控件行**：单行 `display: flex; white-space: nowrap; gap: 6px; align-items: center`
+
+**控制 pill**：
+```
+background: rgba(255,255,255,0.04)
+border:     1px solid rgba(255,255,255,0.08)
+border-radius: 6px
+padding:    5px 10px
+font-size:  11px, color: #8a8fa8
+hover:      background rgba(255,255,255,0.08), color #c8c8e0
+```
+
+**生成按钮**（文字按钮，与 pill 同高同圆角）：
+```
+background:    #5b76fe
+border-radius: 6px
+padding:       5px 14px
+font-size:     11px, font-weight: 600, color: #fff
+margin-left:   auto
+box-shadow:    0 2px 8px rgba(91,118,254,0.35)
+hover:         background #4a65ed, translateY(-1px)
+```
 
 ---
 
