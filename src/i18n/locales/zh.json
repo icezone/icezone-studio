@@ -152,6 +152,7 @@
   },
   "canvas": {
     "addImage": "添加图片",
+    "clickToEdit": "点击编辑",
     "saveStatus": {
       "saving": "保存中...",
       "saved": "已保存",

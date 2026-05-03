@@ -152,6 +152,7 @@
   },
   "canvas": {
     "addImage": "Add Image",
+    "clickToEdit": "Click to edit",
     "saveStatus": {
       "saving": "Saving...",
       "saved": "Saved",
