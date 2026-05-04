@@ -17,7 +17,8 @@ import {
   type VideoGenNodeData,
 } from '@/features/canvas/domain/canvasNodes';
 import { resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
-import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canvas/ui/NodeHeader';
+import { NodeHeader } from '@/features/canvas/ui/NodeHeader';
+import { useNodeExpanded } from './shared/useNodeExpanded';
 import { NodeResizeHandle } from '@/features/canvas/ui/NodeResizeHandle';
 import {
   canvasVideoAiGateway,
@@ -118,7 +119,6 @@ function VideoGenNodeComponent({
   data,
   selected,
   width,
-  height,
 }: VideoGenNodeProps): React.JSX.Element {
   const { t } = useTranslation();
   const [promptDraft, setPromptDraft] = useState(data.prompt);
@@ -190,10 +190,6 @@ function VideoGenNodeComponent({
   const resolvedWidth = Math.max(
     VIDEO_GEN_NODE_MIN_WIDTH,
     Math.round(width ?? VIDEO_GEN_NODE_DEFAULT_WIDTH)
-  );
-  const resolvedHeight = Math.max(
-    VIDEO_GEN_NODE_MIN_HEIGHT,
-    Math.round(height ?? VIDEO_GEN_NODE_DEFAULT_HEIGHT)
   );
 
   // Auto-collapse sections when video generation starts or completes
@@ -694,477 +690,515 @@ function VideoGenNodeComponent({
     [aspectRatioOptions, data.aspectRatio]
   );
 
+  const { expanded, toggle, collapse } = useNodeExpanded();
+  const prevSelected = useRef(selected);
+  useEffect(() => {
+    if (prevSelected.current && !selected) collapse();
+    prevSelected.current = selected;
+  }, [selected, collapse]);
+
   return (
     <div
-      className={`
-        flex flex-col rounded-xl border-2 bg-[var(--canvas-node-bg)] shadow-xl transition-all p-3
-        ${
-          selected
-            ? 'border-accent shadow-accent/30'
-            : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'
-        }
-      `}
-      style={{ width: `${resolvedWidth}px`, minHeight: `${resolvedHeight}px` }}
-      onClick={() => setSelectedNode(id)}
+      className="node-wrap"
+      style={{ width: `${resolvedWidth}px` }}
+      data-testid="node-videoGen"
     >
-      <NodeHeader
-        className={NODE_HEADER_FLOATING_POSITION_CLASS}
-        icon={<Sparkles className="h-4 w-4" />}
-        titleText={resolvedTitle}
-        editable
-        onTitleChange={(nextTitle) => updateNodeData(id, { displayName: nextTitle })}
-      />
-
-      {/* Content Wrapper */}
-      <div className="flex flex-col gap-2">
-        {/* Prompt Input */}
-        <div className="rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] shrink-0">
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={(e) => {
-              e.stopPropagation();
-              setPromptCollapsed(!promptCollapsed);
-            }}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setPromptCollapsed(!promptCollapsed); }}
-            className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)] transition-colors cursor-pointer"
-          >
-            <span>{t('node.videoGen.promptPlaceholder')}</span>
-            <div className="flex items-center gap-1">
-              <PresetPickerButton onInsert={handlePresetInsert} />
-              {promptCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
-            </div>
+      <div className="node-preview-wrap" style={{ width: `${resolvedWidth}px` }}>
+        <Handle
+          type="target"
+          id="target"
+          position={Position.Left}
+          className="!h-3 !w-3 !border-surface-dark !bg-accent"
+        />
+        <Handle
+          type="source"
+          id="source"
+          position={Position.Right}
+          className="!h-3 !w-3 !border-surface-dark !bg-accent"
+        />
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={(e) => { e.stopPropagation(); setSelectedNode(id); toggle(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setSelectedNode(id); toggle(); } }}
+          className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
+        >
+          <div className="node-preview-header">
+            <Sparkles className="h-3.5 w-3.5 shrink-0 text-[var(--canvas-node-fg-muted)]" />
+            <span className="truncate text-[12px] font-semibold leading-none text-[var(--canvas-node-fg)]">
+              {resolvedTitle}
+            </span>
           </div>
-          {!promptCollapsed && (
-            <div className="relative p-2 border-t border-[var(--canvas-node-border)]" style={{ height: '150px' }}>
-              <div className="relative h-full overflow-hidden">
-                <div
-                  ref={promptHighlightRef}
-                  aria-hidden="true"
-                  className="ui-scrollbar pointer-events-none absolute inset-0 overflow-y-auto overflow-x-hidden text-sm leading-6 text-[var(--canvas-node-fg)]"
-                  style={{ scrollbarGutter: 'stable' }}
-                >
-                  <div className="min-h-full whitespace-pre-wrap break-words px-1 py-0.5">
-                    {renderPromptWithHighlights(promptDraft, incomingImages.length)}
-                  </div>
-                </div>
-
-                <textarea
-                  ref={promptRef}
-                  value={promptDraft}
-                  onChange={(event) => {
-                    const nextValue = event.target.value;
-                    setPromptDraft(nextValue);
-                    commitPromptDraft(nextValue);
-                  }}
-                  onKeyDown={handlePromptKeyDown}
-                  onScroll={syncPromptHighlightScroll}
-                  onMouseDown={(event) => event.stopPropagation()}
-                  placeholder={t('node.videoGen.promptPlaceholder')}
-                  className="ui-scrollbar nodrag nowheel relative z-10 h-full w-full resize-none overflow-y-auto overflow-x-hidden border-none bg-transparent px-1 py-0.5 text-sm leading-6 text-transparent caret-[var(--canvas-node-fg)] outline-none placeholder:text-[var(--canvas-node-fg-muted)]/80 focus:border-transparent whitespace-pre-wrap break-words"
-                  style={{ scrollbarGutter: 'stable' }}
-                />
-
-                {showImagePicker && incomingImageItems.length > 0 && (
-                  <div
-                    className="nowheel absolute z-30 w-[120px] overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
-                    style={{ left: pickerAnchor.left, top: pickerAnchor.top }}
-                    onMouseDown={(event) => event.stopPropagation()}
-                    onWheelCapture={(event) => event.stopPropagation()}
-                  >
-                    <div
-                      className="ui-scrollbar nowheel max-h-[180px] overflow-y-auto"
-                      onWheelCapture={(event) => event.stopPropagation()}
-                    >
-                      {incomingImageItems.map((item, index) => (
-                        <button
-                          key={`${item.imageUrl}-${index}`}
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            insertImageReference(index);
-                          }}
-                          onMouseEnter={() => setPickerActiveIndex(index)}
-                          className={`flex w-full items-center gap-2 border border-transparent bg-[var(--canvas-node-section-bg)] px-2 py-2 text-left text-sm text-[var(--canvas-node-fg)] transition-colors hover:border-[var(--canvas-node-border)] ${
-                            pickerActiveIndex === index
-                              ? 'border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)]'
-                              : ''
-                          }`}
-                        >
-                          <img
-                            src={item.displayUrl}
-                            alt={item.label}
-                            className="h-8 w-8 rounded object-cover"
-                            draggable={false}
-                          />
-                          <span>{item.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Frame Selection */}
-        {!data.isGenerating && (
-          <div className="flex shrink-0 gap-3 px-1">
-            {/* Start Frame Slot */}
-            <div className="relative flex-1">
-              <div className="mb-1.5 text-xs text-[var(--canvas-node-fg-muted)]">{t('node.videoGen.startFrame')}</div>
-              {data.startFrameUrl ? (
-                <div className="relative aspect-video overflow-hidden rounded-lg border-2 border-accent ring-2 ring-accent/30">
-                  <img
-                    src={resolveImageDisplayUrl(data.startFrameUrl)}
-                    alt={t('node.videoGen.startFrame')}
-                    className="h-full w-full object-cover"
-                  />
-                  <button
-                    className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-white transition-colors hover:bg-black/80"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      updateNodeData(id, { startFrameUrl: null });
-                    }}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] transition-colors hover:border-[var(--canvas-node-hover-border)] hover:bg-[var(--canvas-drop-zone-hover-bg)]"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (incomingImageItems.length > 0) {
-                      setStartFramePickerOpen(!startFramePickerOpen);
-                      setEndFramePickerOpen(false);
-                    } else {
-                      setFrameUploadTarget('start');
-                      frameUploadRef.current?.click();
-                    }
-                  }}
-                >
-                  <ImagePlus className="h-5 w-5 text-[var(--canvas-node-fg-muted)]/60" />
-                </button>
-              )}
-              {startFramePickerOpen && incomingImageItems.length > 0 && !data.startFrameUrl && (
-                <div
-                  className="nowheel absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
-                  onMouseDown={(e) => e.stopPropagation()}
-                >
-                  <div className="ui-scrollbar nowheel max-h-[200px] overflow-y-auto p-1.5">
-                    {incomingImageItems.map((item, index) => (
-                      <button
-                        key={`start-pick-${index}`}
-                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          updateNodeData(id, { startFrameUrl: item.imageUrl });
-                          setStartFramePickerOpen(false);
-                        }}
-                      >
-                        <img src={item.displayUrl} alt={item.label} className="h-8 w-8 rounded object-cover" draggable={false} />
-                        <span>{item.label}</span>
-                      </button>
-                    ))}
-                    <button
-                      className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setStartFramePickerOpen(false);
-                        setFrameUploadTarget('start');
-                        frameUploadRef.current?.click();
-                      }}
-                    >
-                      <ImagePlus className="h-4 w-4" />
-                      <span>{t('node.videoGen.uploadImage')}</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* End Frame Slot */}
-            <div className="relative flex-1">
-              <div className="mb-1.5 text-xs text-[var(--canvas-node-fg-muted)]">
-                {t('node.videoGen.endFrame')}
-                <span className="ml-1 text-[10px] text-[var(--canvas-node-fg-muted)]/60">({t('node.videoGen.optional')})</span>
-              </div>
-              {data.endFrameUrl ? (
-                <div className="relative aspect-video overflow-hidden rounded-lg border-2 border-accent ring-2 ring-accent/30">
-                  <img
-                    src={resolveImageDisplayUrl(data.endFrameUrl)}
-                    alt={t('node.videoGen.endFrame')}
-                    className="h-full w-full object-cover"
-                  />
-                  <button
-                    className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-white transition-colors hover:bg-black/80"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      updateNodeData(id, { endFrameUrl: null });
-                    }}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] transition-colors hover:border-[var(--canvas-node-hover-border)] hover:bg-[var(--canvas-drop-zone-hover-bg)]"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (incomingImageItems.length > 0) {
-                      setEndFramePickerOpen(!endFramePickerOpen);
-                      setStartFramePickerOpen(false);
-                    } else {
-                      setFrameUploadTarget('end');
-                      frameUploadRef.current?.click();
-                    }
-                  }}
-                >
-                  <ImagePlus className="h-5 w-5 text-[var(--canvas-node-fg-muted)]/60" />
-                </button>
-              )}
-              {endFramePickerOpen && incomingImageItems.length > 0 && !data.endFrameUrl && (
-                <div
-                  className="nowheel absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
-                  onMouseDown={(e) => e.stopPropagation()}
-                >
-                  <div className="ui-scrollbar nowheel max-h-[200px] overflow-y-auto p-1.5">
-                    {incomingImageItems.map((item, index) => (
-                      <button
-                        key={`end-pick-${index}`}
-                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          updateNodeData(id, { endFrameUrl: item.imageUrl });
-                          setEndFramePickerOpen(false);
-                        }}
-                      >
-                        <img src={item.displayUrl} alt={item.label} className="h-8 w-8 rounded object-cover" draggable={false} />
-                        <span>{item.label}</span>
-                      </button>
-                    ))}
-                    <button
-                      className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEndFramePickerOpen(false);
-                        setFrameUploadTarget('end');
-                        frameUploadRef.current?.click();
-                      }}
-                    >
-                      <ImagePlus className="h-4 w-4" />
-                      <span>{t('node.videoGen.uploadImage')}</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <input
-              ref={frameUploadRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFrameFileChange}
-            />
-          </div>
-        )}
-
-        {/* Video Preview */}
-        {data.videoUrl && !data.isGenerating && (
-          <div className="rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-2 flex items-center justify-center min-h-[200px]">
-            <video
-              src={data.videoUrl}
-              controls
-              className="max-h-full max-w-full rounded object-contain"
-            />
-          </div>
-        )}
-
-        {/* Download Controls */}
-        {data.videoUrl && !data.isGenerating && (
-          <div className="flex shrink-0 items-center gap-2">
-          <div className="ml-auto" />
-          {videoDownloadPresetPaths.length > 0 ? (
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {videoDownloadPresetPaths.slice(0, 3).map((path, index) => (
-                <UiButton
-                  key={index}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    void handleDownload(path);
-                  }}
-                  variant="muted"
-                  size="sm"
-                  className="text-xs"
-                  disabled={downloading}
-                >
-                  <Download className="h-3 w-3" />
-                  {downloading ? 'Downloading...' : path.split(/[/\\]/).pop() || `Path ${index + 1}`}
-                </UiButton>
-              ))}
-              {videoDownloadPresetPaths.length > 3 && (
-                <span className="text-xs text-[var(--canvas-node-fg-muted)]">
-                  +{videoDownloadPresetPaths.length - 3} more
-                </span>
-              )}
-            </div>
-          ) : (
-            <UiButton
-              onClick={(e) => {
-                e.stopPropagation();
-                void handleDownload();
-              }}
-              variant="primary"
-              size="sm"
-              disabled={downloading}
-            >
-              <Download className="h-4 w-4" />
-              {downloading ? 'Downloading...' : t('node.videoGen.download')}
-            </UiButton>
-          )}
-          </div>
-        )}
-
-        {/* Generation Progress */}
-        {data.isGenerating && (
-          <div className="mt-2 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-3 shrink-0">
-            <div className="mb-2 flex items-center justify-between text-sm text-[var(--canvas-node-fg-muted)]">
-              <span>{t('node.videoGen.generating')}</span>
-              <span>{Math.round(pollingProgress)}%</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-[var(--canvas-node-section-bg)]">
-              <div
-                className="h-full bg-accent transition-all duration-300"
-                style={{ width: `${pollingProgress}%` }}
+          <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
+            {data.videoUrl ? (
+              <video
+                src={data.videoUrl}
+                className="h-full w-full object-cover"
+                muted
+                preload="metadata"
               />
-            </div>
+            ) : (
+              <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
+            )}
+            <div className="node-edit-hint">{t('canvas.clickToEdit')}</div>
           </div>
-        )}
-      </div>
-
-      {/* Controls */}
-      <div className="mt-2 flex shrink-0 flex-col gap-3">
-        <div className="flex items-center gap-1.5">
-          <VideoParamsControls
-            videoModels={videoModels}
-            selectedModel={selectedModel}
-            selectedDuration={selectedDuration}
-            selectedAspectRatio={selectedAspectRatio}
-            durationOptions={durationOptions}
-            aspectRatioOptions={aspectRatioOptions}
-            onModelChange={(modelId) => {
-              updateNodeData(id, { model: modelId });
-            }}
-            onDurationChange={(duration) => {
-              updateNodeData(id, { duration });
-            }}
-            onAspectRatioChange={(aspectRatio) => {
-              updateNodeData(id, { aspectRatio });
-            }}
-            extraParams={data.extraParams}
-            onExtraParamChange={(key, value) => {
-              updateNodeData(id, {
-                extraParams: {
-                  ...(data.extraParams ?? {}),
-                  [key]: value,
-                },
-              });
-            }}
-            incomingImages={incomingImageItems}
-            enableAudio={data.enableAudio}
-            onEnableAudioChange={(enabled) => {
-              updateNodeData(id, { enableAudio: enabled });
-            }}
-            seed={data.seed}
-            onSeedChange={(seed) => {
-              updateNodeData(id, { seed });
-            }}
-            klingElements={data.extraParams?.['kling_elements'] as unknown[]}
-            onKlingElementsChange={(elements) => {
-              updateNodeData(id, {
-                extraParams: {
-                  ...(data.extraParams ?? {}),
-                  kling_elements: elements,
-                },
-              });
-            }}
-            triggerSize="sm"
-            chipClassName={NODE_CONTROL_CHIP_CLASS}
-            modelChipClassName={NODE_CONTROL_MODEL_CHIP_CLASS}
-            paramsChipClassName={NODE_CONTROL_PARAMS_CHIP_CLASS}
-          />
-
-          <div className="ml-auto" />
-
-          {/* Generate/Retry Button */}
-          {!data.isGenerating && (
-            <UiButton
-              onClick={(event) => {
-                event.stopPropagation();
-                if (error || data.errorMessage) {
-                  handleRetry();
-                } else {
-                  void handleGenerate();
-                }
-              }}
-              variant="primary"
-              className={`shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
-            >
-              {error || data.errorMessage ? (
-                <>
-                  <RefreshCw className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
-                  {t('node.videoGen.retry')}
-                </>
-              ) : (
-                <>
-                  <Sparkles className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
-                  {t('node.videoGen.generate')}
-                </>
-              )}
-            </UiButton>
-          )}
         </div>
-
-        {/* Kling Elements Display */}
-        {data.extraParams?.['kling_elements'] &&
-         Array.isArray(data.extraParams['kling_elements']) &&
-         data.extraParams['kling_elements'].length > 0 ? (
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-[var(--canvas-node-fg-muted)]">{t('node.videoGen.klingElements')}:</span>
-            {(data.extraParams['kling_elements'] as Array<{ name: string; description?: string }>)
-              .filter((element) => element && typeof element === 'object' && 'name' in element)
-              .map((element, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center rounded bg-accent/20 px-2 py-0.5 text-xs text-accent border border-accent/30"
-                >
-                  @{String(element.name)}
-                </span>
-              ))}
-          </div>
-        ) : null}
-
       </div>
 
-      {error && (
-        <div className="mt-1 shrink-0 text-xs text-red-400">{error}</div>
+      {expanded && (
+        <div className="node-gap-dots">
+          <span className="node-dot" /><span className="node-dot" /><span className="node-dot" />
+        </div>
       )}
 
-      <Handle
-        type="target"
-        id="target"
-        position={Position.Left}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent"
-      />
-      <Handle
-        type="source"
-        id="source"
-        position={Position.Right}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent"
-      />
+      {expanded && (
+        <div onClick={(e) => e.stopPropagation()} className="node-settings-panel">
+          <NodeHeader
+            icon={<Sparkles className="h-4 w-4" />}
+            titleText={resolvedTitle}
+            editable
+            onTitleChange={(nextTitle) => updateNodeData(id, { displayName: nextTitle })}
+          />
+
+          {/* Content Wrapper */}
+          <div className="flex flex-col gap-2">
+            {/* Prompt Input */}
+            <div className="rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] shrink-0">
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPromptCollapsed(!promptCollapsed);
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setPromptCollapsed(!promptCollapsed); }}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)] transition-colors cursor-pointer"
+              >
+                <span>{t('node.videoGen.promptPlaceholder')}</span>
+                <div className="flex items-center gap-1">
+                  <PresetPickerButton onInsert={handlePresetInsert} />
+                  {promptCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+                </div>
+              </div>
+              {!promptCollapsed && (
+                <div className="relative p-2 border-t border-[var(--canvas-node-border)]" style={{ height: '150px' }}>
+                  <div className="relative h-full overflow-hidden">
+                    <div
+                      ref={promptHighlightRef}
+                      aria-hidden="true"
+                      className="ui-scrollbar pointer-events-none absolute inset-0 overflow-y-auto overflow-x-hidden text-sm leading-6 text-[var(--canvas-node-fg)]"
+                      style={{ scrollbarGutter: 'stable' }}
+                    >
+                      <div className="min-h-full whitespace-pre-wrap break-words px-1 py-0.5">
+                        {renderPromptWithHighlights(promptDraft, incomingImages.length)}
+                      </div>
+                    </div>
+
+                    <textarea
+                      ref={promptRef}
+                      value={promptDraft}
+                      onChange={(event) => {
+                        const nextValue = event.target.value;
+                        setPromptDraft(nextValue);
+                        commitPromptDraft(nextValue);
+                      }}
+                      onKeyDown={handlePromptKeyDown}
+                      onScroll={syncPromptHighlightScroll}
+                      onMouseDown={(event) => event.stopPropagation()}
+                      placeholder={t('node.videoGen.promptPlaceholder')}
+                      className="ui-scrollbar nodrag nowheel relative z-10 h-full w-full resize-none overflow-y-auto overflow-x-hidden border-none bg-transparent px-1 py-0.5 text-sm leading-6 text-transparent caret-[var(--canvas-node-fg)] outline-none placeholder:text-[var(--canvas-node-fg-muted)]/80 focus:border-transparent whitespace-pre-wrap break-words"
+                      style={{ scrollbarGutter: 'stable' }}
+                    />
+
+                    {showImagePicker && incomingImageItems.length > 0 && (
+                      <div
+                        className="nowheel absolute z-30 w-[120px] overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
+                        style={{ left: pickerAnchor.left, top: pickerAnchor.top }}
+                        onMouseDown={(event) => event.stopPropagation()}
+                        onWheelCapture={(event) => event.stopPropagation()}
+                      >
+                        <div
+                          className="ui-scrollbar nowheel max-h-[180px] overflow-y-auto"
+                          onWheelCapture={(event) => event.stopPropagation()}
+                        >
+                          {incomingImageItems.map((item, index) => (
+                            <button
+                              key={`${item.imageUrl}-${index}`}
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                insertImageReference(index);
+                              }}
+                              onMouseEnter={() => setPickerActiveIndex(index)}
+                              className={`flex w-full items-center gap-2 border border-transparent bg-[var(--canvas-node-section-bg)] px-2 py-2 text-left text-sm text-[var(--canvas-node-fg)] transition-colors hover:border-[var(--canvas-node-border)] ${
+                                pickerActiveIndex === index
+                                  ? 'border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)]'
+                                  : ''
+                              }`}
+                            >
+                              <img
+                                src={item.displayUrl}
+                                alt={item.label}
+                                className="h-8 w-8 rounded object-cover"
+                                draggable={false}
+                              />
+                              <span>{item.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Frame Selection */}
+            {!data.isGenerating && (
+              <div className="flex shrink-0 gap-3 px-1">
+                {/* Start Frame Slot */}
+                <div className="relative flex-1">
+                  <div className="mb-1.5 text-xs text-[var(--canvas-node-fg-muted)]">{t('node.videoGen.startFrame')}</div>
+                  {data.startFrameUrl ? (
+                    <div className="relative aspect-video overflow-hidden rounded-lg border-2 border-accent ring-2 ring-accent/30">
+                      <img
+                        src={resolveImageDisplayUrl(data.startFrameUrl)}
+                        alt={t('node.videoGen.startFrame')}
+                        className="h-full w-full object-cover"
+                      />
+                      <button
+                        className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-white transition-colors hover:bg-black/80"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateNodeData(id, { startFrameUrl: null });
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] transition-colors hover:border-[var(--canvas-node-hover-border)] hover:bg-[var(--canvas-drop-zone-hover-bg)]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (incomingImageItems.length > 0) {
+                          setStartFramePickerOpen(!startFramePickerOpen);
+                          setEndFramePickerOpen(false);
+                        } else {
+                          setFrameUploadTarget('start');
+                          frameUploadRef.current?.click();
+                        }
+                      }}
+                    >
+                      <ImagePlus className="h-5 w-5 text-[var(--canvas-node-fg-muted)]/60" />
+                    </button>
+                  )}
+                  {startFramePickerOpen && incomingImageItems.length > 0 && !data.startFrameUrl && (
+                    <div
+                      className="nowheel absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
+                      <div className="ui-scrollbar nowheel max-h-[200px] overflow-y-auto p-1.5">
+                        {incomingImageItems.map((item, index) => (
+                          <button
+                            key={`start-pick-${index}`}
+                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateNodeData(id, { startFrameUrl: item.imageUrl });
+                              setStartFramePickerOpen(false);
+                            }}
+                          >
+                            <img src={item.displayUrl} alt={item.label} className="h-8 w-8 rounded object-cover" draggable={false} />
+                            <span>{item.label}</span>
+                          </button>
+                        ))}
+                        <button
+                          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setStartFramePickerOpen(false);
+                            setFrameUploadTarget('start');
+                            frameUploadRef.current?.click();
+                          }}
+                        >
+                          <ImagePlus className="h-4 w-4" />
+                          <span>{t('node.videoGen.uploadImage')}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* End Frame Slot */}
+                <div className="relative flex-1">
+                  <div className="mb-1.5 text-xs text-[var(--canvas-node-fg-muted)]">
+                    {t('node.videoGen.endFrame')}
+                    <span className="ml-1 text-[10px] text-[var(--canvas-node-fg-muted)]/60">({t('node.videoGen.optional')})</span>
+                  </div>
+                  {data.endFrameUrl ? (
+                    <div className="relative aspect-video overflow-hidden rounded-lg border-2 border-accent ring-2 ring-accent/30">
+                      <img
+                        src={resolveImageDisplayUrl(data.endFrameUrl)}
+                        alt={t('node.videoGen.endFrame')}
+                        className="h-full w-full object-cover"
+                      />
+                      <button
+                        className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-white transition-colors hover:bg-black/80"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateNodeData(id, { endFrameUrl: null });
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] transition-colors hover:border-[var(--canvas-node-hover-border)] hover:bg-[var(--canvas-drop-zone-hover-bg)]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (incomingImageItems.length > 0) {
+                          setEndFramePickerOpen(!endFramePickerOpen);
+                          setStartFramePickerOpen(false);
+                        } else {
+                          setFrameUploadTarget('end');
+                          frameUploadRef.current?.click();
+                        }
+                      }}
+                    >
+                      <ImagePlus className="h-5 w-5 text-[var(--canvas-node-fg-muted)]/60" />
+                    </button>
+                  )}
+                  {endFramePickerOpen && incomingImageItems.length > 0 && !data.endFrameUrl && (
+                    <div
+                      className="nowheel absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
+                      <div className="ui-scrollbar nowheel max-h-[200px] overflow-y-auto p-1.5">
+                        {incomingImageItems.map((item, index) => (
+                          <button
+                            key={`end-pick-${index}`}
+                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateNodeData(id, { endFrameUrl: item.imageUrl });
+                              setEndFramePickerOpen(false);
+                            }}
+                          >
+                            <img src={item.displayUrl} alt={item.label} className="h-8 w-8 rounded object-cover" draggable={false} />
+                            <span>{item.label}</span>
+                          </button>
+                        ))}
+                        <button
+                          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEndFramePickerOpen(false);
+                            setFrameUploadTarget('end');
+                            frameUploadRef.current?.click();
+                          }}
+                        >
+                          <ImagePlus className="h-4 w-4" />
+                          <span>{t('node.videoGen.uploadImage')}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <input
+                  ref={frameUploadRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFrameFileChange}
+                />
+              </div>
+            )}
+
+            {/* Video Preview */}
+            {data.videoUrl && !data.isGenerating && (
+              <div className="rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-2 flex items-center justify-center min-h-[200px]">
+                <video
+                  src={data.videoUrl}
+                  controls
+                  className="max-h-full max-w-full rounded object-contain"
+                />
+              </div>
+            )}
+
+            {/* Download Controls */}
+            {data.videoUrl && !data.isGenerating && (
+              <div className="flex shrink-0 items-center gap-2">
+              <div className="ml-auto" />
+              {videoDownloadPresetPaths.length > 0 ? (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {videoDownloadPresetPaths.slice(0, 3).map((path, index) => (
+                    <UiButton
+                      key={index}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void handleDownload(path);
+                      }}
+                      variant="muted"
+                      size="sm"
+                      className="text-xs"
+                      disabled={downloading}
+                    >
+                      <Download className="h-3 w-3" />
+                      {downloading ? 'Downloading...' : path.split(/[/\\]/).pop() || `Path ${index + 1}`}
+                    </UiButton>
+                  ))}
+                  {videoDownloadPresetPaths.length > 3 && (
+                    <span className="text-xs text-[var(--canvas-node-fg-muted)]">
+                      +{videoDownloadPresetPaths.length - 3} more
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <UiButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void handleDownload();
+                  }}
+                  variant="primary"
+                  size="sm"
+                  disabled={downloading}
+                >
+                  <Download className="h-4 w-4" />
+                  {downloading ? 'Downloading...' : t('node.videoGen.download')}
+                </UiButton>
+              )}
+              </div>
+            )}
+
+            {/* Generation Progress */}
+            {data.isGenerating && (
+              <div className="mt-2 rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] p-3 shrink-0">
+                <div className="mb-2 flex items-center justify-between text-sm text-[var(--canvas-node-fg-muted)]">
+                  <span>{t('node.videoGen.generating')}</span>
+                  <span>{Math.round(pollingProgress)}%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-[var(--canvas-node-section-bg)]">
+                  <div
+                    className="h-full bg-accent transition-all duration-300"
+                    style={{ width: `${pollingProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Controls */}
+          <div className="mt-2 flex shrink-0 flex-col gap-3">
+            <div className="flex items-center gap-1.5">
+              <VideoParamsControls
+                videoModels={videoModels}
+                selectedModel={selectedModel}
+                selectedDuration={selectedDuration}
+                selectedAspectRatio={selectedAspectRatio}
+                durationOptions={durationOptions}
+                aspectRatioOptions={aspectRatioOptions}
+                onModelChange={(modelId) => {
+                  updateNodeData(id, { model: modelId });
+                }}
+                onDurationChange={(duration) => {
+                  updateNodeData(id, { duration });
+                }}
+                onAspectRatioChange={(aspectRatio) => {
+                  updateNodeData(id, { aspectRatio });
+                }}
+                extraParams={data.extraParams}
+                onExtraParamChange={(key, value) => {
+                  updateNodeData(id, {
+                    extraParams: {
+                      ...(data.extraParams ?? {}),
+                      [key]: value,
+                    },
+                  });
+                }}
+                incomingImages={incomingImageItems}
+                enableAudio={data.enableAudio}
+                onEnableAudioChange={(enabled) => {
+                  updateNodeData(id, { enableAudio: enabled });
+                }}
+                seed={data.seed}
+                onSeedChange={(seed) => {
+                  updateNodeData(id, { seed });
+                }}
+                klingElements={data.extraParams?.['kling_elements'] as unknown[]}
+                onKlingElementsChange={(elements) => {
+                  updateNodeData(id, {
+                    extraParams: {
+                      ...(data.extraParams ?? {}),
+                      kling_elements: elements,
+                    },
+                  });
+                }}
+                triggerSize="sm"
+                chipClassName={NODE_CONTROL_CHIP_CLASS}
+                modelChipClassName={NODE_CONTROL_MODEL_CHIP_CLASS}
+                paramsChipClassName={NODE_CONTROL_PARAMS_CHIP_CLASS}
+              />
+
+              <div className="ml-auto" />
+
+              {/* Generate/Retry Button */}
+              {!data.isGenerating && (
+                <UiButton
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (error || data.errorMessage) {
+                      handleRetry();
+                    } else {
+                      void handleGenerate();
+                    }
+                  }}
+                  variant="primary"
+                  className={`shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
+                >
+                  {error || data.errorMessage ? (
+                    <>
+                      <RefreshCw className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
+                      {t('node.videoGen.retry')}
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
+                      {t('node.videoGen.generate')}
+                    </>
+                  )}
+                </UiButton>
+              )}
+            </div>
+
+            {/* Kling Elements Display */}
+            {data.extraParams?.['kling_elements'] &&
+             Array.isArray(data.extraParams['kling_elements']) &&
+             data.extraParams['kling_elements'].length > 0 ? (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-xs text-[var(--canvas-node-fg-muted)]">{t('node.videoGen.klingElements')}:</span>
+                {(data.extraParams['kling_elements'] as Array<{ name: string; description?: string }>)
+                  .filter((element) => element && typeof element === 'object' && 'name' in element)
+                  .map((element, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center rounded bg-accent/20 px-2 py-0.5 text-xs text-accent border border-accent/30"
+                    >
+                      @{String(element.name)}
+                    </span>
+                  ))}
+              </div>
+            ) : null}
+
+          </div>
+
+          {error && (
+            <div className="mt-1 shrink-0 text-xs text-red-400">{error}</div>
+          )}
+        </div>
+      )}
 
       <NodeResizeHandle
         minWidth={VIDEO_GEN_NODE_MIN_WIDTH}
