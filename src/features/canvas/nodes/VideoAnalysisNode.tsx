@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNodeExpanded } from './shared/useNodeExpanded';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { Film, Search, Loader2, CheckSquare, Square, Upload, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +13,7 @@ import {
 } from '@/features/canvas/domain/canvasNodes';
 import type { ReversePromptStyle } from '@/features/canvas/domain/videoAnalysisTypes';
 import { resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
-import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canvas/ui/NodeHeader';
+import { NodeHeader } from '@/features/canvas/ui/NodeHeader';
 import { NodeResizeHandle } from '@/features/canvas/ui/NodeResizeHandle';
 import { NODE_CONTROL_PRIMARY_BUTTON_CLASS } from '@/features/canvas/ui/nodeControlStyles';
 import { UiButton } from '@/components/ui';
@@ -173,7 +174,6 @@ function VideoAnalysisNodeComponent({
   );
 
   const resolvedWidth = Math.max(MIN_WIDTH, Math.round(width ?? DEFAULT_WIDTH));
-  const resolvedHeight = Math.max(MIN_HEIGHT, Math.round(height ?? DEFAULT_HEIGHT));
 
   const hasVideo = Boolean(data.videoUrl);
   const canAnalyze = hasVideo && !data.isAnalyzing;
@@ -330,210 +330,240 @@ function VideoAnalysisNodeComponent({
     createStoryboardFromSelection(data.scenes.filter((s) => s.selected), ctx);
   }, [selectedCount, data.scenes, buildExpandContext]);
 
+  const { expanded, toggle, collapse } = useNodeExpanded();
+  const prevSelected = useRef(selected);
+  useEffect(() => {
+    if (prevSelected.current && !selected) collapse();
+    prevSelected.current = selected;
+  }, [selected, collapse]);
+
   return (
-    <div
-      className={`
-        flex flex-col rounded-xl border-2 bg-[var(--canvas-node-bg)] shadow-xl transition-all p-3 overflow-hidden
-        ${selected
-          ? 'border-accent shadow-accent/30'
-          : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'}
-      `}
-      data-testid="node-videoAnalysis"
-      style={{ width: resolvedWidth, height: resolvedHeight }}
-      onClick={() => setSelectedNode(id)}
-    >
-      <NodeHeader
-        className={NODE_HEADER_FLOATING_POSITION_CLASS}
-        icon={<Film className="h-4 w-4" />}
-        titleText={resolvedTitle}
-        editable
-        onTitleChange={(nextTitle) => updateNodeData(id, { displayName: nextTitle })}
-      />
-
-      <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-2">
-        {hasVideo ? (
-          <div className="relative flex-1 min-h-0 rounded-lg overflow-hidden bg-black/20">
-            <video
-              src={data.videoUrl ?? undefined}
-              className="h-full w-full object-contain"
-              controls
-              muted
-              onMouseDown={(e) => e.stopPropagation()}
-            />
+    <div className="node-wrap" style={{ width: `${resolvedWidth}px` }} data-testid="node-videoAnalysis">
+      <div className="node-preview-wrap" style={{ width: `${resolvedWidth}px` }}>
+        <Handle type="target" id="target" position={Position.Left}
+          className="!h-3 !w-3 !border-surface-dark !bg-accent" />
+        <Handle type="source" id="source" position={Position.Right}
+          className="!h-3 !w-3 !border-surface-dark !bg-accent" />
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={(e) => { e.stopPropagation(); setSelectedNode(id); toggle(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); toggle(); } }}
+          className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
+        >
+          <div className="node-preview-header">
+            <Film className="h-3.5 w-3.5 shrink-0 text-[var(--canvas-node-fg-muted)]" />
+            <span className="truncate text-[12px] font-semibold leading-none text-[var(--canvas-node-fg)]">
+              {resolvedTitle}
+            </span>
           </div>
-        ) : (
-          <label
-            className="flex flex-1 min-h-0 flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] bg-[var(--canvas-drop-zone-hover-bg)] cursor-pointer hover:border-[var(--canvas-node-hover-border)] transition-colors"
-            onDrop={handleDrop}
-            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-          >
-            <Upload className="h-8 w-8 text-[var(--canvas-node-fg-muted)]/60" />
-            <span className="text-xs text-[var(--canvas-node-fg-muted)]">{t('node.videoAnalysis.uploadHint')}</span>
-            <input type="file" accept="video/*" className="hidden" onChange={handleVideoUpload} />
-          </label>
-        )}
-
-        {data.videoFileName && (
-          <div className="text-xs text-[var(--canvas-node-fg-muted)] px-1 truncate">{data.videoFileName}</div>
-        )}
-
-        <div className="flex items-center gap-2 px-1">
-          <span className="text-xs text-[var(--canvas-node-fg-muted)] shrink-0 w-16">{t('node.videoAnalysis.sensitivity')}:</span>
-          <input type="range" min={0.1} max={1.0} step={0.05} value={data.sensitivityThreshold}
-            onChange={(e) => { e.stopPropagation(); handleSensitivityChange(parseFloat(e.target.value)); }}
-            onMouseDown={(e) => e.stopPropagation()} className="nodrag flex-1 h-1.5 accent-accent" />
-          <span className="text-xs text-[var(--canvas-node-fg)] w-8 text-right">{data.sensitivityThreshold.toFixed(2)}</span>
-        </div>
-
-        <div className="flex items-center gap-2 px-1">
-          <span className="text-xs text-[var(--canvas-node-fg-muted)] shrink-0 w-16">{t('node.videoAnalysis.minDuration')}:</span>
-          <select value={data.minSceneDurationMs}
-            onChange={(e) => { e.stopPropagation(); handleMinDurationChange(parseInt(e.target.value, 10)); }}
-            onMouseDown={(e) => e.stopPropagation()}
-            className="nodrag rounded-md border border-[rgba(15,23,42,0.15)] bg-[var(--canvas-node-bg)] px-2 py-0.5 text-xs text-[var(--canvas-node-fg)] outline-none dark:border-[rgba(255,255,255,0.1)]">
-            <option className="bg-[var(--canvas-node-bg)] text-[var(--canvas-node-fg)]" value={200}>200ms</option>
-            <option className="bg-[var(--canvas-node-bg)] text-[var(--canvas-node-fg)]" value={500}>500ms</option>
-            <option className="bg-[var(--canvas-node-bg)] text-[var(--canvas-node-fg)]" value={1000}>1s</option>
-            <option className="bg-[var(--canvas-node-bg)] text-[var(--canvas-node-fg)]" value={2000}>2s</option>
-          </select>
-        </div>
-
-        <div className="flex items-center gap-2 px-1">
-          <span className="text-xs text-[var(--canvas-node-fg-muted)] shrink-0 w-16">{t('node.videoAnalysis.maxKeyframes')}:</span>
-          <input type="number" min={1} max={200} value={data.maxKeyframes}
-            onChange={(e) => { e.stopPropagation(); handleMaxKeyframesChange(parseInt(e.target.value, 10) || 50); }}
-            onMouseDown={(e) => e.stopPropagation()}
-            className="nodrag w-16 rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/45 px-2 py-0.5 text-xs text-[var(--canvas-node-fg)] outline-none dark:border-[rgba(255,255,255,0.1)]" />
-        </div>
-
-        <div className="px-1">
-          <UiButton onClick={(e) => { e.stopPropagation(); void handleAnalyze(); }} disabled={!canAnalyze}
-            variant="primary" size="sm" className={`w-full ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}>
-            {data.isAnalyzing ? (
-              <><Loader2 className="h-4 w-4 animate-spin" />{t('node.videoAnalysis.analyzing')}</>
+          <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
+            {data.videoUrl ? (
+              <video src={data.videoUrl} className="h-full w-full object-cover" muted preload="metadata" />
             ) : (
-              <><Search className="h-4 w-4" />{t('node.videoAnalysis.analyzeButton')}</>
+              <Film className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
             )}
-          </UiButton>
-        </div>
-
-        {data.isAnalyzing && data.analysisProgress > 0 && (
-          <div className="px-1">
-            <div className="h-1.5 rounded-full bg-bg-dark/40 overflow-hidden">
-              <div className="h-full bg-accent transition-all duration-300" style={{ width: `${data.analysisProgress}%` }} />
-            </div>
+            <div className="node-edit-hint">{t('canvas.clickToEdit')}</div>
           </div>
-        )}
-
-        {(error || data.errorMessage) && (
-          <div className="px-1 text-xs text-red-400">{error || data.errorMessage}</div>
-        )}
-
-        {data.scenes?.length > 0 && (
-          <>
-            <div className="px-1 flex items-center justify-between gap-2">
-              <span className="text-xs font-medium text-[var(--canvas-node-fg-muted)]">
-                {t('node.videoAnalysis.scenesDetected', { count: data.scenes.length })}
-              </span>
-              <div className="flex items-center gap-2">
-                <div
-                  className="flex items-center gap-1 rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/40 px-1 py-0.5 dark:border-[rgba(255,255,255,0.1)]"
-                  onClick={(e) => e.stopPropagation()}
-                  onMouseDown={(e) => e.stopPropagation()}
-                >
-                  <Languages className="h-3 w-3 text-[var(--canvas-node-fg-muted)]" />
-                  <button
-                    onClick={() => handleReversePromptStyleChange('generic')}
-                    className={`nodrag text-[10px] px-1 rounded ${reversePromptStyle === 'generic' ? 'bg-accent text-white' : 'text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)]'}`}
-                  >EN</button>
-                  <button
-                    onClick={() => handleReversePromptStyleChange('chinese')}
-                    className={`nodrag text-[10px] px-1 rounded ${reversePromptStyle === 'chinese' ? 'bg-accent text-white' : 'text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)]'}`}
-                  >中文</button>
-                </div>
-                <button onClick={(e) => { e.stopPropagation(); toggleAllScenes(selectedCount < data.scenes.length); }}
-                  className="text-[10px] text-accent hover:text-accent/80 transition-colors">
-                  {selectedCount === data.scenes.length
-                    ? t('node.videoAnalysis.deselectAll')
-                    : t('node.videoAnalysis.selectAll')}
-                </button>
-              </div>
-            </div>
-
-            {(shotAnalysisLoading || data.shotAnalysis) && (
-              <div className="px-1">
-                <div className="rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/30 px-2 py-1 text-[10px] text-[var(--canvas-node-fg-muted)] dark:border-[rgba(255,255,255,0.1)]">
-                  {shotAnalysisLoading ? (
-                    <span className="inline-flex items-center gap-1">
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      {t('node.videoAnalysis.shotAnalysisRunning')}
-                    </span>
-                  ) : data.shotAnalysis ? (
-                    <span className="block truncate">
-                      <span className="text-accent font-medium">{data.shotAnalysis.shotType}</span>
-                      <span className="mx-1">·</span>
-                      <span>{data.shotAnalysis.cameraMovement}</span>
-                      <span className="mx-1">·</span>
-                      <span>{data.shotAnalysis.mood}</span>
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-            )}
-
-            <div className="flex-1 min-h-0 overflow-y-auto ui-scrollbar rounded-lg border border-[rgba(15,23,42,0.15)] bg-bg-dark/30 p-2 dark:border-[rgba(255,255,255,0.1)]">
-              <div className="grid grid-cols-3 gap-1.5">
-                {data.scenes.map((scene) => (
-                  <button key={scene.id}
-                    onClick={(e) => { e.stopPropagation(); toggleSceneSelection(scene.id); }}
-                    className={`relative rounded overflow-hidden border transition-all ${
-                      scene.selected ? 'border-accent ring-1 ring-accent/30' : 'border-transparent opacity-60 hover:opacity-80'
-                    }`}>
-                    {scene.keyframeUrl ? (
-                      <img src={scene.keyframeUrl} alt={`Scene ${formatTime(scene.startTimeMs)}`}
-                        className="w-full aspect-video object-cover" />
-                    ) : (
-                      <div className="w-full aspect-video bg-bg-dark/60 flex items-center justify-center">
-                        <Film className="h-4 w-4 text-[var(--canvas-node-fg-muted)]/40" />
-                      </div>
-                    )}
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1 py-0.5 text-[9px] text-white text-center">
-                      {formatTime(scene.startTimeMs)}
-                    </div>
-                    <div className="absolute top-0.5 left-0.5">
-                      {scene.selected
-                        ? <CheckSquare className="h-3 w-3 text-accent" />
-                        : <Square className="h-3 w-3 text-white/60" />}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="px-1 shrink-0 flex gap-1.5">
-              <UiButton onClick={(e) => { e.stopPropagation(); handleExportKeyframes(); }}
-                disabled={selectedCount === 0} variant="primary" size="sm"
-                className={`flex-1 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}>
-                {selectedCount > 0
-                  ? t('node.videoAnalysis.exportKeyframesCount', { count: selectedCount })
-                  : t('node.videoAnalysis.exportKeyframes')}
-              </UiButton>
-              <UiButton onClick={(e) => { e.stopPropagation(); handleCreateStoryboard(); }}
-                disabled={selectedCount === 0} variant="muted" size="sm"
-                className="flex-1">
-                {t('node.videoAnalysis.createStoryboard')}
-              </UiButton>
-            </div>
-          </>
-        )}
+        </div>
       </div>
 
-      <Handle type="target" id="target" position={Position.Left}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent" />
-      <Handle type="source" id="source" position={Position.Right}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent" />
+      {expanded && (
+        <div className="node-gap-dots">
+          <span className="node-dot" /><span className="node-dot" /><span className="node-dot" />
+        </div>
+      )}
 
-      <NodeResizeHandle minWidth={MIN_WIDTH} minHeight={MIN_HEIGHT} maxWidth={MAX_WIDTH} maxHeight={MAX_HEIGHT} />
+      {expanded && (
+        <div onClick={(e) => e.stopPropagation()} className="node-settings-panel">
+          <NodeHeader
+            icon={<Film className="h-4 w-4" />}
+            titleText={resolvedTitle}
+            editable
+            onTitleChange={(nextTitle) => updateNodeData(id, { displayName: nextTitle })}
+          />
+
+          <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-2">
+            {hasVideo ? (
+              <div className="relative flex-1 min-h-0 rounded-lg overflow-hidden bg-black/20">
+                <video
+                  src={data.videoUrl ?? undefined}
+                  className="h-full w-full object-contain"
+                  controls
+                  muted
+                  onMouseDown={(e) => e.stopPropagation()}
+                />
+              </div>
+            ) : (
+              <label
+                className="flex flex-1 min-h-0 flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] bg-[var(--canvas-drop-zone-hover-bg)] cursor-pointer hover:border-[var(--canvas-node-hover-border)] transition-colors"
+                onDrop={handleDrop}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              >
+                <Upload className="h-8 w-8 text-[var(--canvas-node-fg-muted)]/60" />
+                <span className="text-xs text-[var(--canvas-node-fg-muted)]">{t('node.videoAnalysis.uploadHint')}</span>
+                <input type="file" accept="video/*" className="hidden" onChange={handleVideoUpload} />
+              </label>
+            )}
+
+            {data.videoFileName && (
+              <div className="text-xs text-[var(--canvas-node-fg-muted)] px-1 truncate">{data.videoFileName}</div>
+            )}
+
+            <div className="flex items-center gap-2 px-1">
+              <span className="text-xs text-[var(--canvas-node-fg-muted)] shrink-0 w-16">{t('node.videoAnalysis.sensitivity')}:</span>
+              <input type="range" min={0.1} max={1.0} step={0.05} value={data.sensitivityThreshold}
+                onChange={(e) => { e.stopPropagation(); handleSensitivityChange(parseFloat(e.target.value)); }}
+                onMouseDown={(e) => e.stopPropagation()} className="nodrag flex-1 h-1.5 accent-accent" />
+              <span className="text-xs text-[var(--canvas-node-fg)] w-8 text-right">{data.sensitivityThreshold.toFixed(2)}</span>
+            </div>
+
+            <div className="flex items-center gap-2 px-1">
+              <span className="text-xs text-[var(--canvas-node-fg-muted)] shrink-0 w-16">{t('node.videoAnalysis.minDuration')}:</span>
+              <select value={data.minSceneDurationMs}
+                onChange={(e) => { e.stopPropagation(); handleMinDurationChange(parseInt(e.target.value, 10)); }}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="nodrag rounded-md border border-[rgba(15,23,42,0.15)] bg-[var(--canvas-node-bg)] px-2 py-0.5 text-xs text-[var(--canvas-node-fg)] outline-none dark:border-[rgba(255,255,255,0.1)]">
+                <option className="bg-[var(--canvas-node-bg)] text-[var(--canvas-node-fg)]" value={200}>200ms</option>
+                <option className="bg-[var(--canvas-node-bg)] text-[var(--canvas-node-fg)]" value={500}>500ms</option>
+                <option className="bg-[var(--canvas-node-bg)] text-[var(--canvas-node-fg)]" value={1000}>1s</option>
+                <option className="bg-[var(--canvas-node-bg)] text-[var(--canvas-node-fg)]" value={2000}>2s</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2 px-1">
+              <span className="text-xs text-[var(--canvas-node-fg-muted)] shrink-0 w-16">{t('node.videoAnalysis.maxKeyframes')}:</span>
+              <input type="number" min={1} max={200} value={data.maxKeyframes}
+                onChange={(e) => { e.stopPropagation(); handleMaxKeyframesChange(parseInt(e.target.value, 10) || 50); }}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="nodrag w-16 rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/45 px-2 py-0.5 text-xs text-[var(--canvas-node-fg)] outline-none dark:border-[rgba(255,255,255,0.1)]" />
+            </div>
+
+            <div className="px-1">
+              <UiButton onClick={(e) => { e.stopPropagation(); void handleAnalyze(); }} disabled={!canAnalyze}
+                variant="primary" size="sm" className={`w-full ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}>
+                {data.isAnalyzing ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" />{t('node.videoAnalysis.analyzing')}</>
+                ) : (
+                  <><Search className="h-4 w-4" />{t('node.videoAnalysis.analyzeButton')}</>
+                )}
+              </UiButton>
+            </div>
+
+            {data.isAnalyzing && data.analysisProgress > 0 && (
+              <div className="px-1">
+                <div className="h-1.5 rounded-full bg-bg-dark/40 overflow-hidden">
+                  <div className="h-full bg-accent transition-all duration-300" style={{ width: `${data.analysisProgress}%` }} />
+                </div>
+              </div>
+            )}
+
+            {(error || data.errorMessage) && (
+              <div className="px-1 text-xs text-red-400">{error || data.errorMessage}</div>
+            )}
+
+            {data.scenes?.length > 0 && (
+              <>
+                <div className="px-1 flex items-center justify-between gap-2">
+                  <span className="text-xs font-medium text-[var(--canvas-node-fg-muted)]">
+                    {t('node.videoAnalysis.scenesDetected', { count: data.scenes.length })}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="flex items-center gap-1 rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/40 px-1 py-0.5 dark:border-[rgba(255,255,255,0.1)]"
+                      onClick={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
+                      <Languages className="h-3 w-3 text-[var(--canvas-node-fg-muted)]" />
+                      <button
+                        onClick={() => handleReversePromptStyleChange('generic')}
+                        className={`nodrag text-[10px] px-1 rounded ${reversePromptStyle === 'generic' ? 'bg-accent text-white' : 'text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)]'}`}
+                      >EN</button>
+                      <button
+                        onClick={() => handleReversePromptStyleChange('chinese')}
+                        className={`nodrag text-[10px] px-1 rounded ${reversePromptStyle === 'chinese' ? 'bg-accent text-white' : 'text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)]'}`}
+                      >中文</button>
+                    </div>
+                    <button onClick={(e) => { e.stopPropagation(); toggleAllScenes(selectedCount < data.scenes.length); }}
+                      className="text-[10px] text-accent hover:text-accent/80 transition-colors">
+                      {selectedCount === data.scenes.length
+                        ? t('node.videoAnalysis.deselectAll')
+                        : t('node.videoAnalysis.selectAll')}
+                    </button>
+                  </div>
+                </div>
+
+                {(shotAnalysisLoading || data.shotAnalysis) && (
+                  <div className="px-1">
+                    <div className="rounded-md border border-[rgba(15,23,42,0.15)] bg-bg-dark/30 px-2 py-1 text-[10px] text-[var(--canvas-node-fg-muted)] dark:border-[rgba(255,255,255,0.1)]">
+                      {shotAnalysisLoading ? (
+                        <span className="inline-flex items-center gap-1">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          {t('node.videoAnalysis.shotAnalysisRunning')}
+                        </span>
+                      ) : data.shotAnalysis ? (
+                        <span className="block truncate">
+                          <span className="text-accent font-medium">{data.shotAnalysis.shotType}</span>
+                          <span className="mx-1">·</span>
+                          <span>{data.shotAnalysis.cameraMovement}</span>
+                          <span className="mx-1">·</span>
+                          <span>{data.shotAnalysis.mood}</span>
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex-1 min-h-0 overflow-y-auto ui-scrollbar rounded-lg border border-[rgba(15,23,42,0.15)] bg-bg-dark/30 p-2 dark:border-[rgba(255,255,255,0.1)]">
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {data.scenes.map((scene) => (
+                      <button key={scene.id}
+                        onClick={(e) => { e.stopPropagation(); toggleSceneSelection(scene.id); }}
+                        className={`relative rounded overflow-hidden border transition-all ${
+                          scene.selected ? 'border-accent ring-1 ring-accent/30' : 'border-transparent opacity-60 hover:opacity-80'
+                        }`}>
+                        {scene.keyframeUrl ? (
+                          <img src={scene.keyframeUrl} alt={`Scene ${formatTime(scene.startTimeMs)}`}
+                            className="w-full aspect-video object-cover" />
+                        ) : (
+                          <div className="w-full aspect-video bg-bg-dark/60 flex items-center justify-center">
+                            <Film className="h-4 w-4 text-[var(--canvas-node-fg-muted)]/40" />
+                          </div>
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1 py-0.5 text-[9px] text-white text-center">
+                          {formatTime(scene.startTimeMs)}
+                        </div>
+                        <div className="absolute top-0.5 left-0.5">
+                          {scene.selected
+                            ? <CheckSquare className="h-3 w-3 text-accent" />
+                            : <Square className="h-3 w-3 text-white/60" />}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="px-1 shrink-0 flex gap-1.5">
+                  <UiButton onClick={(e) => { e.stopPropagation(); handleExportKeyframes(); }}
+                    disabled={selectedCount === 0} variant="primary" size="sm"
+                    className={`flex-1 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}>
+                    {selectedCount > 0
+                      ? t('node.videoAnalysis.exportKeyframesCount', { count: selectedCount })
+                      : t('node.videoAnalysis.exportKeyframes')}
+                  </UiButton>
+                  <UiButton onClick={(e) => { e.stopPropagation(); handleCreateStoryboard(); }}
+                    disabled={selectedCount === 0} variant="muted" size="sm"
+                    className="flex-1">
+                    {t('node.videoAnalysis.createStoryboard')}
+                  </UiButton>
+                </div>
+              </>
+            )}
+          </div>
+
+          <NodeResizeHandle minWidth={MIN_WIDTH} minHeight={MIN_HEIGHT} maxWidth={MAX_WIDTH} maxHeight={MAX_HEIGHT} />
+        </div>
+      )}
     </div>
   );
 }
