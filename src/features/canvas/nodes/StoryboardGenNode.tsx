@@ -78,6 +78,7 @@ import {
 import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canvas/ui/NodeHeader';
 import { NodeResizeHandle } from '@/features/canvas/ui/NodeResizeHandle';
 import { FrameReferenceEditor } from '@/features/canvas/ui/FrameReferenceEditor';
+import { useNodeExpanded } from './shared/useNodeExpanded';
 import { FrameControlEditor } from '@/features/canvas/ui/FrameControlEditor';
 import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker';
 import type { StoryboardFrameMode } from '@/features/canvas/domain/canvasNodes';
@@ -754,6 +755,19 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
     baseFrameLayout.nodeHeight,
     Math.round(height ?? baseFrameLayout.nodeHeight)
   );
+
+  const { expanded, toggle, collapse } = useNodeExpanded();
+
+  const prevSelectedRef = useRef<boolean | undefined>(selected);
+  useEffect(() => {
+    if (prevSelectedRef.current && !selected) collapse();
+    prevSelectedRef.current = selected;
+  }, [selected, collapse]);
+
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [expanded, id, updateNodeInternals]);
+
   useEffect(() => {
     frameDescriptionDraftsRef.current = frameDescriptionDrafts;
   }, [frameDescriptionDrafts]);
@@ -1466,402 +1480,452 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
 
   return (
     <div
-      ref={rootRef}
+      className="node-wrap"
+      style={{ width: `${resolvedNodeWidth}px` }}
       data-testid="node-storyboardGen"
-      className={`
-        group relative flex h-full flex-col overflow-visible rounded-[var(--node-radius)] border bg-[var(--canvas-node-bg)] p-3 transition-colors duration-150
-        ${selected
-          ? 'border-accent shadow-[0_0_0_1px_rgba(59,130,246,0.32)]'
-          : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'
-        }
-      `}
-      style={{
-        width: `${resolvedNodeWidth}px`,
-        height: `${resolvedNodeHeight}px`,
-      }}
-      onClick={() => setSelectedNode(id)}
     >
-      {/* Floating title */}
-      <NodeHeader
-        className={NODE_HEADER_FLOATING_POSITION_CLASS}
-        icon={<Sparkles className="h-4 w-4" />}
-        titleText={resolvedTitle}
-        headerAdjust={STORYBOARD_GEN_HEADER_ADJUST}
-        iconAdjust={STORYBOARD_GEN_ICON_ADJUST}
-        titleAdjust={STORYBOARD_GEN_TITLE_ADJUST}
-        rightSlot={undefined}
-        editable
-        onTitleChange={(nextTitle) => updateNodeData(id, { displayName: nextTitle })}
-      />
-
-      {/* Frame summary + grid settings */}
-      <div className="mb-2.5 flex shrink-0 items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
-          <GridStepperControl
-            label={t('node.storyboardGen.rowsShort')}
-            value={nodeData.gridRows}
-            onDecrease={() => handleRowChange(-1)}
-            onIncrease={() => handleRowChange(1)}
-          />
-          <GridStepperControl
-            label={t('node.storyboardGen.colsShort')}
-            value={nodeData.gridCols}
-            onDecrease={() => handleColChange(-1)}
-            onIncrease={() => handleColChange(1)}
-          />
-        </div>
-
-        {showStoryboardGenAdvancedRatioControls && (
-          <div className="min-w-0 flex-1 rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] px-2 py-0.5 text-center text-[10px] text-[var(--canvas-node-fg-muted)]">
-            <span>{t('node.storyboardGen.cellAspectRatio')}: {resolvedAspectRatios.cellAspectRatioLabel}</span>
-            <span className="mx-1 text-[rgba(255,255,255,0.22)]">|</span>
-            <span>{t('node.storyboardGen.overallAspectRatio')}: {resolvedAspectRatios.overallAspectRatioLabel}</span>
+      {/* Preview card */}
+      <div className="node-preview-wrap" style={{ width: `${resolvedNodeWidth}px` }}>
+        <Handle
+          type="target"
+          id="target"
+          position={Position.Left}
+          className="!h-3 !w-3 !border-surface-dark !bg-accent"
+        />
+        <Handle
+          type="source"
+          id="source"
+          position={Position.Right}
+          className="!h-3 !w-3 !border-surface-dark !bg-accent"
+        />
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={(e) => { e.stopPropagation(); setSelectedNode(id); toggle(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); toggle(); } }}
+          className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
+        >
+          <div className="node-preview-header">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span className="truncate text-[12px] font-semibold leading-none text-[var(--canvas-node-fg)]">
+              {resolvedTitle}
+            </span>
           </div>
-        )}
-
-        <div className="flex items-center gap-1">
-          {showStoryboardGenAdvancedRatioControls && (
-            <div className="flex h-5 items-center rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.04)] p-0.5">
-              <button
-                type="button"
-                className={`${RATIO_CONTROL_MODE_BUTTON_CLASS} ${ratioControlMode === 'overall'
-                  ? 'border-accent/55 bg-accent/18 text-[var(--canvas-node-fg)]'
-                  : 'border-transparent bg-transparent text-[var(--canvas-node-fg-muted)] hover:bg-white/5'
-                  }`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  updateNodeData(id, { ratioControlMode: 'overall' });
-                }}
-              >
-                {t('node.storyboardGen.ratioModeOverall')}
-              </button>
-              <button
-                type="button"
-                className={`${RATIO_CONTROL_MODE_BUTTON_CLASS} ${ratioControlMode === 'cell'
-                  ? 'border-accent/55 bg-accent/18 text-[var(--canvas-node-fg)]'
-                  : 'border-transparent bg-transparent text-[var(--canvas-node-fg-muted)] hover:bg-white/5'
-                  }`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  updateNodeData(id, { ratioControlMode: 'cell' });
-                }}
-              >
-                {t('node.storyboardGen.ratioModeCell')}
-              </button>
-            </div>
-          )}
-          <div className={GRID_SUMMARY_CLASS}>
-            {t('node.storyboardGen.frameCount', { count: totalFrames })}
+          <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
+            {nodeData.frames && nodeData.frames.length > 0 ? (
+              <div className="flex h-full w-full gap-0.5 overflow-hidden">
+                {nodeData.frames.slice(0, 4).map((frame, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-1 items-center justify-center overflow-hidden bg-[var(--canvas-node-section-bg)] p-1"
+                  >
+                    {frame.description ? (
+                      <span className="line-clamp-3 text-center text-[8px] leading-tight text-[var(--canvas-node-fg-muted)]">
+                        {frame.description}
+                      </span>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
+            )}
+            <div className="node-edit-hint">{t('canvas.clickToEdit')}</div>
           </div>
         </div>
       </div>
 
-      {/* Frame Grid */}
-      <div className="mb-2 flex min-h-0 flex-1 items-stretch">
+      {/* Gap dots */}
+      {expanded && (
+        <div className="node-gap-dots">
+          <span className="node-dot" />
+          <span className="node-dot" />
+          <span className="node-dot" />
+        </div>
+      )}
+
+      {/* Settings panel */}
+      {expanded && (
         <div
-          className="grid gap-0.5 w-full"
+          ref={rootRef}
+          onClick={(e) => e.stopPropagation()}
+          className="node-settings-panel"
           style={{
-            gridTemplateColumns: `repeat(${nodeData.gridCols}, 1fr)`,
-            gridTemplateRows: `repeat(${nodeData.gridRows}, 1fr)`,
+            width: `${resolvedNodeWidth}px`,
+            height: `${resolvedNodeHeight}px`,
           }}
         >
-          {nodeData.frames.map((frame, index) => {
-            const frameDescription = frameDescriptionDrafts[frame.id] ?? frame.description;
-            const handlePresetInsert = (content: string) => {
-              const el = frameTextareaRefs.current[frame.id];
-              if (!el) return;
-              const start = el.selectionStart ?? el.value.length;
-              const end = el.selectionEnd ?? el.value.length;
-              const next = el.value.slice(0, start) + content + el.value.slice(end);
-              handleFrameDescriptionChange(index, next);
-              requestAnimationFrame(() => {
-                el.focus();
-                el.setSelectionRange(start + content.length, start + content.length);
-              });
-            };
-            return (
-              <div
-                key={frame.id}
-                className="relative overflow-hidden rounded border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)]"
-              >
-                <div
-                  ref={(element) => {
-                    frameHighlightRefs.current[frame.id] = element;
-                  }}
-                  aria-hidden="true"
-                  className="ui-scrollbar pointer-events-none absolute inset-0 overflow-y-auto overflow-x-hidden text-[10px] leading-4 text-[var(--canvas-node-fg)]"
-                  style={{ scrollbarGutter: 'stable' }}
-                >
-                  <div className="min-h-full whitespace-pre-wrap break-words px-1.5 py-1 text-left">
-                    {renderFrameDescriptionWithHighlights(frameDescription, incomingImages.length)}
-                  </div>
-                </div>
-                <textarea
-                  ref={(element) => {
-                    frameTextareaRefs.current[frame.id] = element;
-                  }}
-                  value={frameDescription}
-                  onChange={(event) => {
-                    const nextValue = event.target.value;
-                    handleFrameDescriptionChange(index, nextValue);
-                  }}
-                  onKeyDown={(event) => handleFrameDescriptionKeyDown(index, event)}
-                  onScroll={() => syncFrameHighlightScroll(frame.id)}
-                  onPointerDown={(event) => {
-                    lastPointerAnchorRef.current = {
-                      frameIndex: index,
-                      anchor: resolvePointerAnchor(rootRef.current, event.clientX, event.clientY, zoom),
-                    };
-                  }}
-                  onFocus={(event) => {
-                    activeFrameTextareaRef.current = event.currentTarget;
-                    syncFrameHighlightScroll(frame.id);
-                  }}
-                  placeholder={t('node.storyboardGen.framePlaceholder', {
-                    index: String(index + 1).padStart(2, '0'),
-                  })}
-                  wrap="soft"
-                  className="ui-scrollbar nodrag nowheel relative z-10 h-full w-full resize-none overflow-y-auto overflow-x-hidden bg-transparent px-1.5 py-1 text-left text-[10px] leading-4 text-transparent caret-text-dark placeholder:text-[var(--canvas-node-fg-muted)]/40 focus:border-accent/50 focus:outline-none whitespace-pre-wrap break-words"
-                  style={{ scrollbarGutter: 'stable' }}
-                />
+          {/* Floating title */}
+          <NodeHeader
+            className={NODE_HEADER_FLOATING_POSITION_CLASS}
+            icon={<Sparkles className="h-4 w-4" />}
+            titleText={resolvedTitle}
+            headerAdjust={STORYBOARD_GEN_HEADER_ADJUST}
+            iconAdjust={STORYBOARD_GEN_ICON_ADJUST}
+            titleAdjust={STORYBOARD_GEN_TITLE_ADJUST}
+            rightSlot={undefined}
+            editable
+            onTitleChange={(nextTitle) => updateNodeData(id, { displayName: nextTitle })}
+          />
 
-                {/* Preset prompt picker (top-right) */}
-                <div className="absolute right-0.5 top-0.5 z-20">
-                  <PresetPickerButton onInsert={handlePresetInsert} />
-                </div>
+          {/* Frame summary + grid settings */}
+          <div className="mb-2.5 flex shrink-0 items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5">
+              <GridStepperControl
+                label={t('node.storyboardGen.rowsShort')}
+                value={nodeData.gridRows}
+                onDecrease={() => handleRowChange(-1)}
+                onIncrease={() => handleRowChange(1)}
+              />
+              <GridStepperControl
+                label={t('node.storyboardGen.colsShort')}
+                value={nodeData.gridCols}
+                onDecrease={() => handleColChange(-1)}
+                onIncrease={() => handleColChange(1)}
+              />
+            </div>
 
-                {/* Frame control icon (bottom-left) */}
-                {incomingImages.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveFrameControlEditorFrameIndex(
-                        activeFrameControlEditorFrameIndex === index ? null : index
-                      );
-                      setActiveReferenceEditorFrameIndex(null);
-                    }}
-                    className={`absolute bottom-0.5 left-0.5 z-20 flex h-4 w-4 items-center justify-center rounded transition-colors ${
-                      frame.startFrameMode !== 'none' || frame.endFrameMode !== 'none'
-                        ? 'bg-accent/30 text-accent'
-                        : 'text-[var(--canvas-node-fg-muted)]/40 hover:bg-white/10 hover:text-[var(--canvas-node-fg-muted)]'
-                    }`}
-                    title={t('node.storyboardGen.frameControl')}
-                  >
-                    <Film className="h-2.5 w-2.5" />
-                  </button>
-                )}
-
-                {/* Multi-reference icon (bottom-right) */}
-                {incomingImages.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveReferenceEditorFrameIndex(
-                        activeReferenceEditorFrameIndex === index ? null : index
-                      );
-                      setActiveFrameControlEditorFrameIndex(null);
-                    }}
-                    className={`absolute bottom-0.5 right-0.5 z-20 flex h-4 w-4 items-center justify-center rounded transition-colors ${
-                      frame.referenceImageUrls && frame.referenceImageUrls.length > 0
-                        ? 'bg-accent/30 text-accent'
-                        : 'text-[var(--canvas-node-fg-muted)]/40 hover:bg-white/10 hover:text-[var(--canvas-node-fg-muted)]'
-                    }`}
-                    title={t('node.storyboardGen.multiReference')}
-                  >
-                    <Images className="h-2.5 w-2.5" />
-                    {frame.referenceImageUrls && frame.referenceImageUrls.length > 0 && (
-                      <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-accent text-[6px] font-bold text-white">
-                        {frame.referenceImageUrls.length}
-                      </span>
-                    )}
-                  </button>
-                )}
-
-                {/* Frame Control Editor popup */}
-                {activeFrameControlEditorFrameIndex === index && (
-                  <FrameControlEditor
-                    startFrameUrl={frame.startFrameUrl ?? null}
-                    endFrameUrl={frame.endFrameUrl ?? null}
-                    startFrameMode={frame.startFrameMode ?? 'none'}
-                    endFrameMode={frame.endFrameMode ?? 'none'}
-                    incomingImages={incomingImages}
-                    onStartFrameChange={(url, mode) => handleFrameControlChange(index, 'start', url, mode)}
-                    onEndFrameChange={(url, mode) => handleFrameControlChange(index, 'end', url, mode)}
-                    onClose={() => setActiveFrameControlEditorFrameIndex(null)}
-                  />
-                )}
-
-                {/* Frame Reference Editor popup */}
-                {activeReferenceEditorFrameIndex === index && (
-                  <FrameReferenceEditor
-                    referenceImageUrls={frame.referenceImageUrls ?? []}
-                    referenceWeights={frame.referenceWeights ?? []}
-                    incomingImages={incomingImages}
-                    onReferenceImagesChange={(urls, weights) => handleFrameReferenceImagesChange(index, urls, weights)}
-                    onClose={() => setActiveReferenceEditorFrameIndex(null)}
-                  />
-                )}
+            {showStoryboardGenAdvancedRatioControls && (
+              <div className="min-w-0 flex-1 rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] px-2 py-0.5 text-center text-[10px] text-[var(--canvas-node-fg-muted)]">
+                <span>{t('node.storyboardGen.cellAspectRatio')}: {resolvedAspectRatios.cellAspectRatioLabel}</span>
+                <span className="mx-1 text-[rgba(255,255,255,0.22)]">|</span>
+                <span>{t('node.storyboardGen.overallAspectRatio')}: {resolvedAspectRatios.overallAspectRatioLabel}</span>
               </div>
-            );
-          })}
-        </div>
-      </div>
+            )}
 
-      {showImagePicker && incomingImageItems.length > 0 && (
-        <div
-          className="nowheel absolute z-30 w-[120px] overflow-hidden rounded-xl border border-[rgba(255,255,255,0.16)] bg-surface-dark shadow-xl"
-          style={{ left: pickerAnchor.left, top: pickerAnchor.top }}
-          onMouseDown={(event) => event.stopPropagation()}
-          onWheelCapture={(event) => event.stopPropagation()}
-        >
-          <div
-            className="ui-scrollbar nowheel max-h-[180px] overflow-y-auto"
-            onWheelCapture={(event) => event.stopPropagation()}
-          >
-            {incomingImageItems.map((item, imageIndex) => (
-              <button
-                key={`${item.imageUrl}-${imageIndex}`}
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  insertImageReference(imageIndex);
-                }}
-                onMouseEnter={() => setPickerActiveIndex(imageIndex)}
-                className={`flex w-full items-center gap-2 border border-transparent bg-bg-dark/70 px-2 py-2 text-left text-sm text-[var(--canvas-node-fg)] transition-colors hover:border-[rgba(255,255,255,0.18)] ${pickerActiveIndex === imageIndex
-                  ? 'border-[rgba(255,255,255,0.24)] bg-bg-dark'
-                  : ''
-                  }`}
-              >
-                <CanvasNodeImage
-                  src={item.displayUrl}
-                  alt={item.label}
-                  viewerSourceUrl={resolveImageDisplayUrl(item.imageUrl)}
-                  viewerImageList={incomingImageViewerList}
-                  className="h-8 w-8 rounded object-cover"
-                />
-                <span>{item.label}</span>
-              </button>
-            ))}
+            <div className="flex items-center gap-1">
+              {showStoryboardGenAdvancedRatioControls && (
+                <div className="flex h-5 items-center rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.04)] p-0.5">
+                  <button
+                    type="button"
+                    className={`${RATIO_CONTROL_MODE_BUTTON_CLASS} ${ratioControlMode === 'overall'
+                      ? 'border-accent/55 bg-accent/18 text-[var(--canvas-node-fg)]'
+                      : 'border-transparent bg-transparent text-[var(--canvas-node-fg-muted)] hover:bg-white/5'
+                      }`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      updateNodeData(id, { ratioControlMode: 'overall' });
+                    }}
+                  >
+                    {t('node.storyboardGen.ratioModeOverall')}
+                  </button>
+                  <button
+                    type="button"
+                    className={`${RATIO_CONTROL_MODE_BUTTON_CLASS} ${ratioControlMode === 'cell'
+                      ? 'border-accent/55 bg-accent/18 text-[var(--canvas-node-fg)]'
+                      : 'border-transparent bg-transparent text-[var(--canvas-node-fg-muted)] hover:bg-white/5'
+                      }`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      updateNodeData(id, { ratioControlMode: 'cell' });
+                    }}
+                  >
+                    {t('node.storyboardGen.ratioModeCell')}
+                  </button>
+                </div>
+              )}
+              <div className={GRID_SUMMARY_CLASS}>
+                {t('node.storyboardGen.frameCount', { count: totalFrames })}
+              </div>
+            </div>
           </div>
-        </div>
-      )}
 
-      {error && <div className="mb-1.5 shrink-0 text-[10px] text-red-400">{error}</div>}
-
-      {/* AI Parameters */}
-      <div
-        className="relative w-full mt-auto flex shrink-0 items-center justify-between"
-      >
-        <ModelParamsControls
-          imageModels={imageModels}
-          selectedModel={selectedModel}
-          resolutionOptions={resolutionOptions}
-          selectedResolution={selectedResolution}
-          selectedAspectRatio={selectedAspectRatio}
-          aspectRatioOptions={aspectRatioOptions}
-          onModelChange={(modelId) => updateNodeData(id, { model: modelId })}
-          onResolutionChange={(resolution) =>
-            updateNodeData(id, { size: resolution as ImageSize })
-          }
-          onAspectRatioChange={(aspectRatio) =>
-            updateNodeData(id, { requestAspectRatio: aspectRatio })
-          }
-          extraParams={nodeData.extraParams}
-          onExtraParamChange={(key, value) =>
-            updateNodeData(id, {
-              extraParams: {
-                ...(nodeData.extraParams ?? {}),
-                [key]: value,
-              },
-            })
-          }
-          showWebSearchToggle={showWebSearchToggle}
-          webSearchEnabled={webSearchEnabled}
-          onWebSearchToggle={(enabled) =>
-            updateNodeData(id, {
-              extraParams: {
-                ...(nodeData.extraParams ?? {}),
-                enable_web_search: enabled,
-              },
-            })
-          }
-          triggerSize="sm"
-          chipClassName={NODE_CONTROL_CHIP_CLASS}
-          modelChipClassName={NODE_CONTROL_MODEL_CHIP_CLASS}
-          paramsChipClassName={NODE_CONTROL_PARAMS_CHIP_CLASS}
-          modelPanelAlign="center"
-          paramsPanelAlign="center"
-          modelPanelClassName="inline-block min-w-[300px] max-w-[calc(100vw-32px)] p-2"
-          paramsPanelClassName="w-[420px] p-3"
-        />
-
-        <div className="flex shrink-0 items-center gap-1">
-          <UiButton
-            onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
-              event.stopPropagation();
-              const previewGridOnly =
-                enableStoryboardGenGridPreviewShortcut && event.ctrlKey && event.altKey && event.shiftKey;
-              void handleGenerate(previewGridOnly);
-            }}
-            variant="primary"
-            size="sm"
-            className={`!min-w-0 shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
-          >
-            <Sparkles className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
-            {t('canvas.generate')}
-          </UiButton>
-
-          <UiButton
-            onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
-              event.stopPropagation();
-              void handleBatchGenerate();
-            }}
-            variant="primary"
-            size="sm"
-            disabled={isBatchGenerating}
-            className={`!min-w-0 shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
-          >
-            <Zap className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
-            {t('node.storyboardGen.batchGenerate', { count: totalFrames })}
-          </UiButton>
-        </div>
-      </div>
-
-      {/* Batch progress bar */}
-      {batchProgress && (
-        <div className="mx-3 mb-1 flex items-center gap-2">
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[rgba(255,255,255,0.08)]">
+          {/* Frame Grid */}
+          <div className="mb-2 flex min-h-0 flex-1 items-stretch">
             <div
-              className="h-full rounded-full bg-accent transition-all duration-300"
-              style={{ width: `${batchProgress.total > 0 ? (batchProgress.completed / batchProgress.total) * 100 : 0}%` }}
-            />
+              className="grid gap-0.5 w-full"
+              style={{
+                gridTemplateColumns: `repeat(${nodeData.gridCols}, 1fr)`,
+                gridTemplateRows: `repeat(${nodeData.gridRows}, 1fr)`,
+              }}
+            >
+              {nodeData.frames.map((frame, index) => {
+                const frameDescription = frameDescriptionDrafts[frame.id] ?? frame.description;
+                const handlePresetInsert = (content: string) => {
+                  const el = frameTextareaRefs.current[frame.id];
+                  if (!el) return;
+                  const start = el.selectionStart ?? el.value.length;
+                  const end = el.selectionEnd ?? el.value.length;
+                  const next = el.value.slice(0, start) + content + el.value.slice(end);
+                  handleFrameDescriptionChange(index, next);
+                  requestAnimationFrame(() => {
+                    el.focus();
+                    el.setSelectionRange(start + content.length, start + content.length);
+                  });
+                };
+                return (
+                  <div
+                    key={frame.id}
+                    className="relative overflow-hidden rounded border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)]"
+                  >
+                    <div
+                      ref={(element) => {
+                        frameHighlightRefs.current[frame.id] = element;
+                      }}
+                      aria-hidden="true"
+                      className="ui-scrollbar pointer-events-none absolute inset-0 overflow-y-auto overflow-x-hidden text-[10px] leading-4 text-[var(--canvas-node-fg)]"
+                      style={{ scrollbarGutter: 'stable' }}
+                    >
+                      <div className="min-h-full whitespace-pre-wrap break-words px-1.5 py-1 text-left">
+                        {renderFrameDescriptionWithHighlights(frameDescription, incomingImages.length)}
+                      </div>
+                    </div>
+                    <textarea
+                      ref={(element) => {
+                        frameTextareaRefs.current[frame.id] = element;
+                      }}
+                      value={frameDescription}
+                      onChange={(event) => {
+                        const nextValue = event.target.value;
+                        handleFrameDescriptionChange(index, nextValue);
+                      }}
+                      onKeyDown={(event) => handleFrameDescriptionKeyDown(index, event)}
+                      onScroll={() => syncFrameHighlightScroll(frame.id)}
+                      onPointerDown={(event) => {
+                        lastPointerAnchorRef.current = {
+                          frameIndex: index,
+                          anchor: resolvePointerAnchor(rootRef.current, event.clientX, event.clientY, zoom),
+                        };
+                      }}
+                      onFocus={(event) => {
+                        activeFrameTextareaRef.current = event.currentTarget;
+                        syncFrameHighlightScroll(frame.id);
+                      }}
+                      placeholder={t('node.storyboardGen.framePlaceholder', {
+                        index: String(index + 1).padStart(2, '0'),
+                      })}
+                      wrap="soft"
+                      className="ui-scrollbar nodrag nowheel relative z-10 h-full w-full resize-none overflow-y-auto overflow-x-hidden bg-transparent px-1.5 py-1 text-left text-[10px] leading-4 text-transparent caret-text-dark placeholder:text-[var(--canvas-node-fg-muted)]/40 focus:border-accent/50 focus:outline-none whitespace-pre-wrap break-words"
+                      style={{ scrollbarGutter: 'stable' }}
+                    />
+
+                    {/* Preset prompt picker (top-right) */}
+                    <div className="absolute right-0.5 top-0.5 z-20">
+                      <PresetPickerButton onInsert={handlePresetInsert} />
+                    </div>
+
+                    {/* Frame control icon (bottom-left) */}
+                    {incomingImages.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveFrameControlEditorFrameIndex(
+                            activeFrameControlEditorFrameIndex === index ? null : index
+                          );
+                          setActiveReferenceEditorFrameIndex(null);
+                        }}
+                        className={`absolute bottom-0.5 left-0.5 z-20 flex h-4 w-4 items-center justify-center rounded transition-colors ${
+                          frame.startFrameMode !== 'none' || frame.endFrameMode !== 'none'
+                            ? 'bg-accent/30 text-accent'
+                            : 'text-[var(--canvas-node-fg-muted)]/40 hover:bg-white/10 hover:text-[var(--canvas-node-fg-muted)]'
+                        }`}
+                        title={t('node.storyboardGen.frameControl')}
+                      >
+                        <Film className="h-2.5 w-2.5" />
+                      </button>
+                    )}
+
+                    {/* Multi-reference icon (bottom-right) */}
+                    {incomingImages.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveReferenceEditorFrameIndex(
+                            activeReferenceEditorFrameIndex === index ? null : index
+                          );
+                          setActiveFrameControlEditorFrameIndex(null);
+                        }}
+                        className={`absolute bottom-0.5 right-0.5 z-20 flex h-4 w-4 items-center justify-center rounded transition-colors ${
+                          frame.referenceImageUrls && frame.referenceImageUrls.length > 0
+                            ? 'bg-accent/30 text-accent'
+                            : 'text-[var(--canvas-node-fg-muted)]/40 hover:bg-white/10 hover:text-[var(--canvas-node-fg-muted)]'
+                        }`}
+                        title={t('node.storyboardGen.multiReference')}
+                      >
+                        <Images className="h-2.5 w-2.5" />
+                        {frame.referenceImageUrls && frame.referenceImageUrls.length > 0 && (
+                          <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-accent text-[6px] font-bold text-white">
+                            {frame.referenceImageUrls.length}
+                          </span>
+                        )}
+                      </button>
+                    )}
+
+                    {/* Frame Control Editor popup */}
+                    {activeFrameControlEditorFrameIndex === index && (
+                      <FrameControlEditor
+                        startFrameUrl={frame.startFrameUrl ?? null}
+                        endFrameUrl={frame.endFrameUrl ?? null}
+                        startFrameMode={frame.startFrameMode ?? 'none'}
+                        endFrameMode={frame.endFrameMode ?? 'none'}
+                        incomingImages={incomingImages}
+                        onStartFrameChange={(url, mode) => handleFrameControlChange(index, 'start', url, mode)}
+                        onEndFrameChange={(url, mode) => handleFrameControlChange(index, 'end', url, mode)}
+                        onClose={() => setActiveFrameControlEditorFrameIndex(null)}
+                      />
+                    )}
+
+                    {/* Frame Reference Editor popup */}
+                    {activeReferenceEditorFrameIndex === index && (
+                      <FrameReferenceEditor
+                        referenceImageUrls={frame.referenceImageUrls ?? []}
+                        referenceWeights={frame.referenceWeights ?? []}
+                        incomingImages={incomingImages}
+                        onReferenceImagesChange={(urls, weights) => handleFrameReferenceImagesChange(index, urls, weights)}
+                        onClose={() => setActiveReferenceEditorFrameIndex(null)}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <span className="shrink-0 text-[9px] text-[var(--canvas-node-fg-muted)]">
-            {batchProgress.completed}/{batchProgress.total}
-          </span>
+
+          {showImagePicker && incomingImageItems.length > 0 && (
+            <div
+              className="nowheel absolute z-30 w-[120px] overflow-hidden rounded-xl border border-[rgba(255,255,255,0.16)] bg-surface-dark shadow-xl"
+              style={{ left: pickerAnchor.left, top: pickerAnchor.top }}
+              onMouseDown={(event) => event.stopPropagation()}
+              onWheelCapture={(event) => event.stopPropagation()}
+            >
+              <div
+                className="ui-scrollbar nowheel max-h-[180px] overflow-y-auto"
+                onWheelCapture={(event) => event.stopPropagation()}
+              >
+                {incomingImageItems.map((item, imageIndex) => (
+                  <button
+                    key={`${item.imageUrl}-${imageIndex}`}
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      insertImageReference(imageIndex);
+                    }}
+                    onMouseEnter={() => setPickerActiveIndex(imageIndex)}
+                    className={`flex w-full items-center gap-2 border border-transparent bg-bg-dark/70 px-2 py-2 text-left text-sm text-[var(--canvas-node-fg)] transition-colors hover:border-[rgba(255,255,255,0.18)] ${pickerActiveIndex === imageIndex
+                      ? 'border-[rgba(255,255,255,0.24)] bg-bg-dark'
+                      : ''
+                      }`}
+                  >
+                    <CanvasNodeImage
+                      src={item.displayUrl}
+                      alt={item.label}
+                      viewerSourceUrl={resolveImageDisplayUrl(item.imageUrl)}
+                      viewerImageList={incomingImageViewerList}
+                      className="h-8 w-8 rounded object-cover"
+                    />
+                    <span>{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {error && <div className="mb-1.5 shrink-0 text-[10px] text-red-400">{error}</div>}
+
+          {/* AI Parameters */}
+          <div
+            className="relative w-full mt-auto flex shrink-0 items-center justify-between"
+          >
+            <ModelParamsControls
+              imageModels={imageModels}
+              selectedModel={selectedModel}
+              resolutionOptions={resolutionOptions}
+              selectedResolution={selectedResolution}
+              selectedAspectRatio={selectedAspectRatio}
+              aspectRatioOptions={aspectRatioOptions}
+              onModelChange={(modelId) => updateNodeData(id, { model: modelId })}
+              onResolutionChange={(resolution) =>
+                updateNodeData(id, { size: resolution as ImageSize })
+              }
+              onAspectRatioChange={(aspectRatio) =>
+                updateNodeData(id, { requestAspectRatio: aspectRatio })
+              }
+              extraParams={nodeData.extraParams}
+              onExtraParamChange={(key, value) =>
+                updateNodeData(id, {
+                  extraParams: {
+                    ...(nodeData.extraParams ?? {}),
+                    [key]: value,
+                  },
+                })
+              }
+              showWebSearchToggle={showWebSearchToggle}
+              webSearchEnabled={webSearchEnabled}
+              onWebSearchToggle={(enabled) =>
+                updateNodeData(id, {
+                  extraParams: {
+                    ...(nodeData.extraParams ?? {}),
+                    enable_web_search: enabled,
+                  },
+                })
+              }
+              triggerSize="sm"
+              chipClassName={NODE_CONTROL_CHIP_CLASS}
+              modelChipClassName={NODE_CONTROL_MODEL_CHIP_CLASS}
+              paramsChipClassName={NODE_CONTROL_PARAMS_CHIP_CLASS}
+              modelPanelAlign="center"
+              paramsPanelAlign="center"
+              modelPanelClassName="inline-block min-w-[300px] max-w-[calc(100vw-32px)] p-2"
+              paramsPanelClassName="w-[420px] p-3"
+            />
+
+            <div className="flex shrink-0 items-center gap-1">
+              <UiButton
+                onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
+                  event.stopPropagation();
+                  const previewGridOnly =
+                    enableStoryboardGenGridPreviewShortcut && event.ctrlKey && event.altKey && event.shiftKey;
+                  void handleGenerate(previewGridOnly);
+                }}
+                variant="primary"
+                size="sm"
+                className={`!min-w-0 shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
+              >
+                <Sparkles className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
+                {t('canvas.generate')}
+              </UiButton>
+
+              <UiButton
+                onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
+                  event.stopPropagation();
+                  void handleBatchGenerate();
+                }}
+                variant="primary"
+                size="sm"
+                disabled={isBatchGenerating}
+                className={`!min-w-0 shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
+              >
+                <Zap className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
+                {t('node.storyboardGen.batchGenerate', { count: totalFrames })}
+              </UiButton>
+            </div>
+          </div>
+
+          {/* Batch progress bar */}
+          {batchProgress && (
+            <div className="mx-3 mb-1 flex items-center gap-2">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[rgba(255,255,255,0.08)]">
+                <div
+                  className="h-full rounded-full bg-accent transition-all duration-300"
+                  style={{ width: `${batchProgress.total > 0 ? (batchProgress.completed / batchProgress.total) * 100 : 0}%` }}
+                />
+              </div>
+              <span className="shrink-0 text-[9px] text-[var(--canvas-node-fg-muted)]">
+                {batchProgress.completed}/{batchProgress.total}
+              </span>
+            </div>
+          )}
+
+          <NodeResizeHandle
+            minWidth={baseFrameLayout.nodeWidth}
+            minHeight={baseFrameLayout.nodeHeight}
+            maxWidth={1800}
+            maxHeight={1400}
+          />
         </div>
       )}
-
-      <Handle
-        type="target"
-        id="target"
-        position={Position.Left}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent"
-      />
-      <Handle
-        type="source"
-        id="source"
-        position={Position.Right}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent"
-      />
-      <NodeResizeHandle
-        minWidth={baseFrameLayout.nodeWidth}
-        minHeight={baseFrameLayout.nodeHeight}
-        maxWidth={1800}
-        maxHeight={1400}
-      />
     </div>
   );
 });
