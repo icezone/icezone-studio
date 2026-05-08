@@ -718,8 +718,8 @@ function VideoGenNodeComponent({
         <div
           role="button"
           tabIndex={0}
-          onClick={(e) => { e.stopPropagation(); setSelectedNode(id); expand(); }}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setSelectedNode(id); expand(); } }}
+          onClick={() => { setSelectedNode(id); expand(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedNode(id); expand(); } }}
           className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
         >
           <div className="node-preview-header">

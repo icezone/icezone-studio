@@ -344,7 +344,7 @@ function VideoAnalysisNodeComponent({
         <div
           role="button"
           tabIndex={0}
-          onClick={(e) => { e.stopPropagation(); setSelectedNode(id); expand(); }}
+          onClick={() => { setSelectedNode(id); expand(); }}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); expand(); } }}
           className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
         >

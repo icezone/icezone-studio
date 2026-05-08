@@ -699,15 +699,13 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
         <div
           role="button"
           tabIndex={0}
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={() => {
             setSelectedNode(id);
             expand();
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              e.stopPropagation();
               setSelectedNode(id);
               expand();
             }

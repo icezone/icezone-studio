@@ -1500,8 +1500,8 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
         <div
           role="button"
           tabIndex={0}
-          onClick={(e) => { e.stopPropagation(); setSelectedNode(id); expand(); }}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); expand(); } }}
+          onClick={() => { setSelectedNode(id); expand(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); expand(); } }}
           className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
         >
           <div className="node-preview-header">
