@@ -102,8 +102,8 @@ export const DisconnectableEdge = memo(function DisconnectableEdge(props: EdgePr
   const processingStroke = 'rgb(var(--accent-rgb) / 0.94)';
   const processingDashStroke = 'rgb(var(--accent-rgb) / 1)';
   const baseStrokeWidth = isProcessingEdge
-    ? (selected ? 2.7 : 2.2)
-    : (selected ? 2.4 : 1.9);
+    ? (selected ? 3.2 : 2.7)
+    : (selected ? 2.9 : 2.4);
 
   return (
     <>
@@ -112,7 +112,7 @@ export const DisconnectableEdge = memo(function DisconnectableEdge(props: EdgePr
           d={edgePath}
           fill="none"
           stroke={processingDashStroke}
-          strokeWidth={selected ? 2.5 : 2.1}
+          strokeWidth={selected ? 3.0 : 2.6}
           strokeLinecap="round"
           strokeDasharray="8 10"
           className="canvas-processing-edge__flow"

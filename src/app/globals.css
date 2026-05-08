@@ -356,10 +356,10 @@ input[type="number"] {
   position: relative;
 }
 
-/* React Flow Handles — 36px circle, spring pop, 20px outside card edge */
+/* React Flow Handles — 48px circle, spring pop, 20px outside card edge */
 .node-preview-wrap .react-flow__handle {
-  width: 36px !important;
-  height: 36px !important;
+  width: 48px !important;
+  height: 48px !important;
   min-width: 0 !important;
   min-height: 0 !important;
   border-radius: 50% !important;
@@ -371,7 +371,7 @@ input[type="number"] {
 }
 /* Initial hidden state — just inside card edge, will spring out */
 .node-preview-wrap .react-flow__handle-left {
-  transform: translateY(-50%) translateX(-8px) !important;
+  transform: translateY(-50%) translateX(-10px) !important;
   transition:
     opacity 0.3s ease,
     transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -379,22 +379,22 @@ input[type="number"] {
     box-shadow 0.18s ease !important;
 }
 .node-preview-wrap .react-flow__handle-right {
-  transform: translateY(-50%) translateX(8px) !important;
+  transform: translateY(-50%) translateX(10px) !important;
   transition:
     opacity 0.3s ease,
     transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
     background 0.18s ease,
     box-shadow 0.18s ease !important;
 }
-/* Visible state — 20px outside card edges (38px = handle_width/2 + 20px) */
+/* Visible state — 20px outside card edges (44px = handle_width/2 + 20px) */
 .node-preview-wrap:hover .react-flow__handle {
   opacity: 1;
 }
 .node-preview-wrap:hover .react-flow__handle-left {
-  transform: translateY(-50%) translateX(-38px) !important;
+  transform: translateY(-50%) translateX(-44px) !important;
 }
 .node-preview-wrap:hover .react-flow__handle-right {
-  transform: translateY(-50%) translateX(38px) !important;
+  transform: translateY(-50%) translateX(44px) !important;
 }
 /* Per-handle hover — blue glow, keep fly-out position */
 .node-preview-wrap .react-flow__handle:hover {
@@ -403,10 +403,10 @@ input[type="number"] {
   box-shadow: 0 0 0 6px rgba(91, 118, 254, 0.22), 0 4px 18px rgba(91, 118, 254, 0.65) !important;
 }
 .node-preview-wrap:hover .react-flow__handle-left:hover {
-  transform: translateY(-50%) translateX(-38px) scale(1.1) !important;
+  transform: translateY(-50%) translateX(-44px) scale(1.1) !important;
 }
 .node-preview-wrap:hover .react-flow__handle-right:hover {
-  transform: translateY(-50%) translateX(38px) scale(1.1) !important;
+  transform: translateY(-50%) translateX(44px) scale(1.1) !important;
 }
 /* + icon */
 .node-preview-wrap .react-flow__handle::after {
@@ -416,7 +416,7 @@ input[type="number"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 300;
   line-height: 1;
   color: #6b7899;
@@ -424,7 +424,7 @@ input[type="number"] {
 }
 .node-preview-wrap .react-flow__handle:hover::after {
   color: #fff;
-  font-size: 22px;
+  font-size: 24px;
 }
 
 .node-preview-card {
