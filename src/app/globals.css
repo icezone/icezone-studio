@@ -400,6 +400,21 @@ input[type="number"] {
   box-shadow: 0 0 0 4px rgba(91, 118, 254, 0.2), 0 3px 12px rgba(91, 118, 254, 0.5) !important;
   transform: translateY(-50%) scale(1.15) !important;
 }
+.node-preview-wrap .react-flow__handle::after {
+  content: '+';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  color: #5b6080;
+  pointer-events: none;
+}
+.node-preview-wrap .react-flow__handle:hover::after {
+  color: #fff;
+}
 
 .node-preview-card {
   width: 100%;

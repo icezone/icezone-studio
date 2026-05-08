@@ -76,7 +76,7 @@ import {
   UiButton,
 } from '@/components/ui';
 import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canvas/ui/NodeHeader';
-import { NodeResizeHandle } from '@/features/canvas/ui/NodeResizeHandle';
+
 import { FrameReferenceEditor } from '@/features/canvas/ui/FrameReferenceEditor';
 import { useNodeExpanded } from './shared/useNodeExpanded';
 import { FrameControlEditor } from '@/features/canvas/ui/FrameControlEditor';
@@ -756,13 +756,12 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
     Math.round(height ?? baseFrameLayout.nodeHeight)
   );
 
-  const { expanded, toggle, collapse } = useNodeExpanded();
+  const { expanded, expand, collapse } = useNodeExpanded();
 
-  const prevSelectedRef = useRef<boolean | undefined>(selected);
+  const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
   useEffect(() => {
-    if (prevSelectedRef.current && !selected) collapse();
-    prevSelectedRef.current = selected;
-  }, [selected, collapse]);
+    if (selectedNodeId !== id) collapse();
+  }, [selectedNodeId, id, collapse]);
 
   useEffect(() => {
     updateNodeInternals(id);
@@ -1501,8 +1500,8 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
         <div
           role="button"
           tabIndex={0}
-          onClick={(e) => { e.stopPropagation(); setSelectedNode(id); toggle(); }}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); toggle(); } }}
+          onClick={(e) => { e.stopPropagation(); setSelectedNode(id); expand(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); expand(); } }}
           className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
         >
           <div className="node-preview-header">
@@ -1918,12 +1917,6 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
             </div>
           )}
 
-          <NodeResizeHandle
-            minWidth={baseFrameLayout.nodeWidth}
-            minHeight={baseFrameLayout.nodeHeight}
-            maxWidth={1800}
-            maxHeight={1400}
-          />
         </div>
       )}
     </div>

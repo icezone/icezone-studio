@@ -23,7 +23,7 @@ import {
 } from '@/features/canvas/domain/canvasNodes';
 import { resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
 import { NodeHeader } from '@/features/canvas/ui/NodeHeader';
-import { NodeResizeHandle } from '@/features/canvas/ui/NodeResizeHandle';
+
 import {
   canvasAiGateway,
   graphImageResolver,
@@ -666,17 +666,16 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
     }
   };
 
-  const { expanded, toggle, collapse } = useNodeExpanded();
+  const { expanded, expand, collapse } = useNodeExpanded();
 
   useEffect(() => {
     updateNodeInternals(id);
   }, [id, expanded, resolvedWidth, updateNodeInternals]);
 
-  const prevSelected = useRef(selected);
+  const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
   useEffect(() => {
-    if (prevSelected.current && !selected) collapse();
-    prevSelected.current = selected;
-  }, [selected, collapse]);
+    if (selectedNodeId !== id) collapse();
+  }, [selectedNodeId, id, collapse]);
 
   return (
     <div
@@ -703,14 +702,14 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
           onClick={(e) => {
             e.stopPropagation();
             setSelectedNode(id);
-            toggle();
+            expand();
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               e.stopPropagation();
               setSelectedNode(id);
-              toggle();
+              expand();
             }
           }}
           className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
@@ -881,12 +880,6 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
         </div>
       )}
 
-      <NodeResizeHandle
-        minWidth={IMAGE_EDIT_NODE_MIN_WIDTH}
-        minHeight={IMAGE_EDIT_NODE_MIN_HEIGHT}
-        maxWidth={IMAGE_EDIT_NODE_MAX_WIDTH}
-        maxHeight={IMAGE_EDIT_NODE_MAX_HEIGHT}
-      />
     </div>
   );
 });

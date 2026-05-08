@@ -6,6 +6,7 @@ import {
   useCallback,
   useRef,
 } from 'react';
+import { useNodeExpanded } from './shared/useNodeExpanded';
 import { createPortal } from 'react-dom';
 import {
   Handle,
@@ -25,7 +26,7 @@ import {
   type MergeStoryboardImagesResult,
 } from '@/commands/image';
 import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canvas/ui/NodeHeader';
-import { NodeResizeHandle } from '@/features/canvas/ui/NodeResizeHandle';
+
 import { CanvasNodeImage } from '@/features/canvas/ui/CanvasNodeImage';
 import type {
   CanvasNode,
@@ -494,9 +495,15 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
     Math.round(height ?? STORYBOARD_NODE_MIN_HEIGHT_PX)
   );
 
+  const { expanded, expand, collapse } = useNodeExpanded();
+  const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
+  useEffect(() => {
+    if (selectedNodeId !== id) collapse();
+  }, [selectedNodeId, id, collapse]);
+
   useEffect(() => {
     updateNodeInternals(id);
-  }, [id, resolvedNodeHeight, resolvedNodeWidth, updateNodeInternals]);
+  }, [id, resolvedNodeHeight, resolvedNodeWidth, expanded, updateNodeInternals]);
 
   const resolvedTitle = useMemo(
     () => resolveNodeDisplayName(CANVAS_NODE_TYPES.storyboardSplit, data, t),
@@ -1007,345 +1014,373 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
   );
 
   return (
-    <div
-      ref={rootRef}
-      className={`
-        group relative flex h-full flex-col overflow-visible rounded-[var(--node-radius)] border bg-[var(--canvas-node-bg)] p-2 transition-colors duration-150
-        ${selected
-          ? 'border-accent shadow-[0_0_0_1px_rgba(59,130,246,0.32)]'
-          : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'}
-      `}
-      style={{ width: `${resolvedNodeWidth}px`, height: `${resolvedNodeHeight}px` }}
-      onClick={() => setSelectedNode(id)}
-    >
-      <NodeHeader
-        className={NODE_HEADER_FLOATING_POSITION_CLASS}
-        icon={<SplitResultIcon className="h-3.5 w-3.5" />}
-        titleText={resolvedTitle}
-        headerAdjust={STORYBOARD_SPLIT_HEADER_ADJUST}
-        iconAdjust={STORYBOARD_SPLIT_ICON_ADJUST}
-        titleAdjust={STORYBOARD_SPLIT_TITLE_ADJUST}
-        editable
-        onTitleChange={(nextTitle) => updateNodeData(id, { displayName: nextTitle })}
-      />
-
-      <div
-        className="ui-scrollbar nowheel min-h-0 flex-1 overflow-auto"
-        onWheelCapture={(event) => event.stopPropagation()}
-      >
+    <div className="node-wrap" style={{ width: `${resolvedNodeWidth}px` }} data-testid="node-storyboard">
+      <div className="node-preview-wrap" style={{ width: `${resolvedNodeWidth}px` }}>
+        <Handle
+          type="target"
+          id="target"
+          position={Position.Left}
+          className="!h-3 !w-3 !border-surface-dark !bg-accent"
+        />
+        <Handle
+          type="source"
+          id="source"
+          position={Position.Right}
+          className="!h-3 !w-3 !border-surface-dark !bg-accent"
+        />
         <div
-          className="grid overflow-hidden rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)]"
-          style={{
-            gap: `${STORYBOARD_GRID_GAP_PX}px`,
-            gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
-          }}
+          role="button"
+          tabIndex={0}
+          onClick={(e) => { e.stopPropagation(); setSelectedNode(id); expand(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); expand(); } }}
+          className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
         >
-          {orderedFrames.map((frame, index) => (
-            <FrameCard
-              key={frame.id}
-              nodeId={id}
-              frame={frame}
-              index={index}
-              frameAspectRatioCss={frameAspectRatioCss}
-              imageFit={exportOptions.imageFit}
-              viewerImageList={frameViewerImageList}
-              draggedFrameId={draggedFrameId}
-              dropTargetFrameId={dropTargetFrameId}
-              onSortStart={handleSortStart}
-              onSortHover={handleSortHover}
-              onTogglePicker={handleTogglePicker}
-              onEditFrame={(targetFrame) => {
-                void handleEditFrame(targetFrame);
-              }}
-            />
-          ))}
-        </div>
-      </div>
-
-      {pickerState && typeof document !== 'undefined'
-        ? createPortal(
-          <div
-            ref={pickerMenuRef}
-            className="nowheel fixed z-[140] w-[120px] overflow-hidden rounded-xl border border-[rgba(255,255,255,0.16)] bg-surface-dark shadow-xl"
-            style={{ left: `${pickerState.x}px`, top: `${pickerState.y}px` }}
-            onMouseDown={(event) => event.stopPropagation()}
-            onWheelCapture={(event) => event.stopPropagation()}
-          >
-            {incomingImageItems.length > 0 ? (
-              <div
-                className="ui-scrollbar nowheel max-h-[180px] overflow-y-auto"
-                onWheelCapture={(event) => event.stopPropagation()}
-              >
-                {incomingImageItems.map((item) => (
-                  <button
-                    key={`${pickerState.frameId}-${item.imageUrl}`}
-                    type="button"
-                    className="flex w-full items-center gap-2 border border-transparent bg-bg-dark/70 px-2 py-2 text-left text-sm text-[var(--canvas-node-fg)] transition-colors hover:border-[rgba(255,255,255,0.18)]"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleReplaceFromInput(pickerState.frameId, item.imageUrl);
-                    }}
-                    title={item.label}
-                  >
-                    <CanvasNodeImage
-                      src={item.displayUrl}
-                      alt={item.label}
-                      viewerSourceUrl={resolveImageDisplayUrl(item.imageUrl)}
-                      viewerImageList={incomingImageViewerList}
-                      className="h-8 w-8 rounded object-cover"
-                      draggable={false}
-                    />
-                    <span className="truncate">{item.label}</span>
-                  </button>
+          <div className="node-preview-header">
+            <SplitResultIcon className="h-3.5 w-3.5" />
+            <span>{resolvedTitle}</span>
+          </div>
+          <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
+            {orderedFrames.length > 0 ? (
+              <div className="flex h-full w-full">
+                {orderedFrames.slice(0, 4).map((frame, i) => (
+                  <div key={i} className="flex-1 overflow-hidden bg-[var(--canvas-node-section-bg)]">
+                    {frame.imageUrl && (
+                      <img src={frame.imageUrl} alt="" className="h-full w-full object-cover" />
+                    )}
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="px-2 py-2 text-sm text-[var(--canvas-node-fg-muted)]">
-                暂无输入图片
-              </div>
+              <SplitResultIcon className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
             )}
-          </div>,
-          document.body
-        )
-        : null}
-
-      <div className="mt-2 flex shrink-0 items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <div ref={exportSettingsTriggerRef} className="nodrag relative flex">
-            <UiChipButton
-              active={isExportPanelOpen}
-              className={NODE_CONTROL_CHIP_CLASS}
-              onClick={(event) => {
-                event.stopPropagation();
-                if (isExportPanelOpen) {
-                  setIsExportPanelOpen(false);
-                  return;
-                }
-                setExportPanelAnchor(getPanelAnchor(exportSettingsTriggerRef.current));
-                setIsExportPanelOpen(true);
-              }}
-            >
-              <SlidersHorizontal className={`${NODE_CONTROL_ICON_CLASS} shrink-0`} />
-              <span>导出设置</span>
-            </UiChipButton>
+            <div className="node-edit-hint">{t('canvas.clickToEdit')}</div>
           </div>
-
-          <div className="truncate text-[11px] text-[var(--canvas-node-fg-muted)]/80">
-            {gridRows} x {gridCols} | {totalFrames} 格
-          </div>
-        </div>
-
-        <div className="flex min-w-0 items-center gap-2">
-          <UiButton
-            size="sm"
-            variant="muted"
-            className={`nodrag ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
-            onClick={(event) => {
-              event.stopPropagation();
-              void handlePackSingleImages();
-            }}
-            disabled={isAnyExporting}
-          >
-            <FolderOpen className={NODE_CONTROL_ICON_CLASS} />
-            {isPackingSingleImages ? '打包中...' : '打包下载'}
-          </UiButton>
-          <UiButton
-            size="sm"
-            variant="primary"
-            className={`nodrag ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
-            onClick={(event) => {
-              event.stopPropagation();
-              void handleExport();
-            }}
-            disabled={isAnyExporting}
-          >
-            <Download className={NODE_CONTROL_ICON_CLASS} />
-            {isExporting ? '导出中...' : '合并分镜'}
-          </UiButton>
         </div>
       </div>
 
-      {typeof document !== 'undefined' && isExportPanelOpen && createPortal(
-        <div
-          ref={exportSettingsPanelRef}
-          className={`fixed z-[120] w-[340px] transition-opacity duration-200 ease-out ${isExportPanelVisible ? 'opacity-100' : 'pointer-events-none opacity-0'
-            }`}
-          style={exportPanelAnchor
-            ? {
-              left: exportPanelAnchor.left,
-              top: exportPanelAnchor.top,
-              transform: 'translateX(-50%) translateY(-100%)',
-            }
-            : undefined}
-          onMouseDown={(event) => event.stopPropagation()}
-        >
-          <UiPanel className="p-2.5">
-            <div className="space-y-2 text-xs text-[var(--canvas-node-fg-muted)]">
-              <label className="flex items-center gap-2">
-                <UiCheckbox
-                  checked={exportOptions.showFrameIndex}
-                  onCheckedChange={(checked) => patchExportOptions({ showFrameIndex: checked })}
-                />
-                显示分镜序号
-              </label>
-
-              <label className="flex items-center gap-2">
-                <UiCheckbox
-                  checked={exportOptions.showFrameNote}
-                  onCheckedChange={(checked) => patchExportOptions({ showFrameNote: checked })}
-                />
-                显示分镜描述
-              </label>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <div className="mb-1">图片填充</div>
-                  <UiSelect
-                    value={exportOptions.imageFit}
-                    onChange={(event) =>
-                      patchExportOptions({
-                        imageFit: event.target.value === 'contain' ? 'contain' : 'cover',
-                      })
-                    }
-                  >
-                    <option value="cover">填充满格子</option>
-                    <option value="contain">完整显示</option>
-                  </UiSelect>
-                </div>
-                <div>
-                  <div className="mb-1">序号前缀</div>
-                  <UiInput
-                    value={exportOptions.frameIndexPrefix}
-                    maxLength={4}
-                    className="h-8"
-                    onChange={(event) => patchExportOptions({ frameIndexPrefix: event.target.value })}
-                  />
-                </div>
-                <div>
-                  <div className="mb-1">描述位置</div>
-                  <UiSelect
-                    value={exportOptions.notePlacement}
-                    onChange={(event) =>
-                      patchExportOptions({
-                        notePlacement: event.target.value === 'bottom' ? 'bottom' : 'overlay',
-                      })
-                    }
-                  >
-                    <option value="overlay">图上遮罩</option>
-                    <option value="bottom">图下文字</option>
-                  </UiSelect>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <div className="mb-1">间距</div>
-                  <UiInput
-                    type="number"
-                    min={0}
-                    max={120}
-                    value={exportOptions.cellGap}
-                    className="h-8"
-                    onChange={(event) =>
-                      patchExportOptions({ cellGap: Number(event.target.value) || 0 })
-                    }
-                  />
-                </div>
-                <div>
-                  <div className="mb-1">字号(%)</div>
-                  <UiInput
-                    type="number"
-                    min={1}
-                    max={20}
-                    value={exportOptions.fontSize}
-                    className="h-8"
-                    onChange={(event) =>
-                      patchExportOptions({ fontSize: Number(event.target.value) || 4 })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <label className="flex items-center gap-2">
-                  <span>背景</span>
-                  <input
-                    type="color"
-                    value={exportOptions.backgroundColor}
-                    onChange={(event) => patchExportOptions({ backgroundColor: event.target.value })}
-                    className="h-7 w-full rounded border border-[rgba(255,255,255,0.14)] bg-transparent"
-                  />
-                </label>
-                <label className="flex items-center gap-2">
-                  <span>文字</span>
-                  <input
-                    type="color"
-                    value={exportOptions.textColor}
-                    onChange={(event) => patchExportOptions({ textColor: event.target.value })}
-                    className="h-7 w-full rounded border border-[rgba(255,255,255,0.14)] bg-transparent"
-                  />
-                </label>
-              </div>
-            </div>
-          </UiPanel>
-        </div>,
-        document.body
+      {expanded && (
+        <div className="node-gap-dots">
+          <span className="node-dot" /><span className="node-dot" /><span className="node-dot" />
+        </div>
       )}
 
-      {exportError && <div className="mt-2 shrink-0 text-xs text-red-400">{exportError}</div>}
+      {expanded && (
+        <div
+          ref={rootRef}
+          onClick={(e) => e.stopPropagation()}
+          className="node-settings-panel"
+        >
+          <NodeHeader
+            icon={<SplitResultIcon className="h-3.5 w-3.5" />}
+            titleText={resolvedTitle}
+            headerAdjust={STORYBOARD_SPLIT_HEADER_ADJUST}
+            iconAdjust={STORYBOARD_SPLIT_ICON_ADJUST}
+            titleAdjust={STORYBOARD_SPLIT_TITLE_ADJUST}
+            editable
+            onTitleChange={(nextTitle) => updateNodeData(id, { displayName: nextTitle })}
+          />
 
-      <Handle
-        type="target"
-        id="target"
-        position={Position.Left}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent"
-      />
-      <Handle
-        type="source"
-        id="source"
-        position={Position.Right}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent"
-      />
-      <NodeResizeHandle
-        minWidth={STORYBOARD_NODE_WIDTH_PX}
-        minHeight={STORYBOARD_NODE_MIN_HEIGHT_PX}
-        maxWidth={1800}
-        maxHeight={1600}
-      />
+          <div
+            className="ui-scrollbar nowheel min-h-0 flex-1 overflow-auto"
+            onWheelCapture={(event) => event.stopPropagation()}
+          >
+            <div
+              className="grid overflow-hidden rounded-lg border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)]"
+              style={{
+                gap: `${STORYBOARD_GRID_GAP_PX}px`,
+                gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
+              }}
+            >
+              {orderedFrames.map((frame, index) => (
+                <FrameCard
+                  key={frame.id}
+                  nodeId={id}
+                  frame={frame}
+                  index={index}
+                  frameAspectRatioCss={frameAspectRatioCss}
+                  imageFit={exportOptions.imageFit}
+                  viewerImageList={frameViewerImageList}
+                  draggedFrameId={draggedFrameId}
+                  dropTargetFrameId={dropTargetFrameId}
+                  onSortStart={handleSortStart}
+                  onSortHover={handleSortHover}
+                  onTogglePicker={handleTogglePicker}
+                  onEditFrame={(targetFrame) => {
+                    void handleEditFrame(targetFrame);
+                  }}
+                />
+              ))}
+            </div>
+          </div>
 
-      {typeof document !== 'undefined' && isPackDoneDialogOpen
-        ? createPortal(
-          <div className="fixed inset-0 z-[220] flex items-center justify-center">
-            <div className="absolute inset-0 bg-black/55" />
-            <UiPanel className="relative w-[440px] p-4">
-              <div className="text-sm font-medium text-[var(--canvas-node-fg)]">导出完成</div>
-              <div className="mt-2 text-xs text-[var(--canvas-node-fg-muted)]">图片已导出到以下路径：</div>
-              <div className="mt-1 break-all rounded border border-[rgba(255,255,255,0.12)] bg-bg-dark/70 px-2 py-1.5 text-xs text-[var(--canvas-node-fg)]">
-                {packOutputDir}
-              </div>
-              <div className="mt-4 flex justify-end gap-2">
-                <UiButton
-                  size="sm"
-                  variant="muted"
-                  onClick={() => {
-                    void handleOpenPackFolder();
+          {pickerState && typeof document !== 'undefined'
+            ? createPortal(
+              <div
+                ref={pickerMenuRef}
+                className="nowheel fixed z-[140] w-[120px] overflow-hidden rounded-xl border border-[rgba(255,255,255,0.16)] bg-surface-dark shadow-xl"
+                style={{ left: `${pickerState.x}px`, top: `${pickerState.y}px` }}
+                onMouseDown={(event) => event.stopPropagation()}
+                onWheelCapture={(event) => event.stopPropagation()}
+              >
+                {incomingImageItems.length > 0 ? (
+                  <div
+                    className="ui-scrollbar nowheel max-h-[180px] overflow-y-auto"
+                    onWheelCapture={(event) => event.stopPropagation()}
+                  >
+                    {incomingImageItems.map((item) => (
+                      <button
+                        key={`${pickerState.frameId}-${item.imageUrl}`}
+                        type="button"
+                        className="flex w-full items-center gap-2 border border-transparent bg-bg-dark/70 px-2 py-2 text-left text-sm text-[var(--canvas-node-fg)] transition-colors hover:border-[rgba(255,255,255,0.18)]"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleReplaceFromInput(pickerState.frameId, item.imageUrl);
+                        }}
+                        title={item.label}
+                      >
+                        <CanvasNodeImage
+                          src={item.displayUrl}
+                          alt={item.label}
+                          viewerSourceUrl={resolveImageDisplayUrl(item.imageUrl)}
+                          viewerImageList={incomingImageViewerList}
+                          className="h-8 w-8 rounded object-cover"
+                          draggable={false}
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="px-2 py-2 text-sm text-[var(--canvas-node-fg-muted)]">
+                    暂无输入图片
+                  </div>
+                )}
+              </div>,
+              document.body
+            )
+            : null}
+
+          <div className="mt-2 flex shrink-0 items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <div ref={exportSettingsTriggerRef} className="nodrag relative flex">
+                <UiChipButton
+                  active={isExportPanelOpen}
+                  className={NODE_CONTROL_CHIP_CLASS}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (isExportPanelOpen) {
+                      setIsExportPanelOpen(false);
+                      return;
+                    }
+                    setExportPanelAnchor(getPanelAnchor(exportSettingsTriggerRef.current));
+                    setIsExportPanelOpen(true);
                   }}
                 >
-                  打开文件夹
-                </UiButton>
-                <UiButton
-                  size="sm"
-                  variant="primary"
-                  onClick={() => setIsPackDoneDialogOpen(false)}
-                >
-                  确定
-                </UiButton>
+                  <SlidersHorizontal className={`${NODE_CONTROL_ICON_CLASS} shrink-0`} />
+                  <span>导出设置</span>
+                </UiChipButton>
               </div>
-            </UiPanel>
-          </div>,
-          document.body
-        )
-        : null}
+
+              <div className="truncate text-[11px] text-[var(--canvas-node-fg-muted)]/80">
+                {gridRows} x {gridCols} | {totalFrames} 格
+              </div>
+            </div>
+
+            <div className="flex min-w-0 items-center gap-2">
+              <UiButton
+                size="sm"
+                variant="muted"
+                className={`nodrag ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  void handlePackSingleImages();
+                }}
+                disabled={isAnyExporting}
+              >
+                <FolderOpen className={NODE_CONTROL_ICON_CLASS} />
+                {isPackingSingleImages ? '打包中...' : '打包下载'}
+              </UiButton>
+              <UiButton
+                size="sm"
+                variant="primary"
+                className={`nodrag ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  void handleExport();
+                }}
+                disabled={isAnyExporting}
+              >
+                <Download className={NODE_CONTROL_ICON_CLASS} />
+                {isExporting ? '导出中...' : '合并分镜'}
+              </UiButton>
+            </div>
+          </div>
+
+          {typeof document !== 'undefined' && isExportPanelOpen && createPortal(
+            <div
+              ref={exportSettingsPanelRef}
+              className={`fixed z-[120] w-[340px] transition-opacity duration-200 ease-out ${isExportPanelVisible ? 'opacity-100' : 'pointer-events-none opacity-0'
+                }`}
+              style={exportPanelAnchor
+                ? {
+                  left: exportPanelAnchor.left,
+                  top: exportPanelAnchor.top,
+                  transform: 'translateX(-50%) translateY(-100%)',
+                }
+                : undefined}
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              <UiPanel className="p-2.5">
+                <div className="space-y-2 text-xs text-[var(--canvas-node-fg-muted)]">
+                  <label className="flex items-center gap-2">
+                    <UiCheckbox
+                      checked={exportOptions.showFrameIndex}
+                      onCheckedChange={(checked) => patchExportOptions({ showFrameIndex: checked })}
+                    />
+                    显示分镜序号
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <UiCheckbox
+                      checked={exportOptions.showFrameNote}
+                      onCheckedChange={(checked) => patchExportOptions({ showFrameNote: checked })}
+                    />
+                    显示分镜描述
+                  </label>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <div className="mb-1">图片填充</div>
+                      <UiSelect
+                        value={exportOptions.imageFit}
+                        onChange={(event) =>
+                          patchExportOptions({
+                            imageFit: event.target.value === 'contain' ? 'contain' : 'cover',
+                          })
+                        }
+                      >
+                        <option value="cover">填充满格子</option>
+                        <option value="contain">完整显示</option>
+                      </UiSelect>
+                    </div>
+                    <div>
+                      <div className="mb-1">序号前缀</div>
+                      <UiInput
+                        value={exportOptions.frameIndexPrefix}
+                        maxLength={4}
+                        className="h-8"
+                        onChange={(event) => patchExportOptions({ frameIndexPrefix: event.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <div className="mb-1">描述位置</div>
+                      <UiSelect
+                        value={exportOptions.notePlacement}
+                        onChange={(event) =>
+                          patchExportOptions({
+                            notePlacement: event.target.value === 'bottom' ? 'bottom' : 'overlay',
+                          })
+                        }
+                      >
+                        <option value="overlay">图上遮罩</option>
+                        <option value="bottom">图下文字</option>
+                      </UiSelect>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <div className="mb-1">间距</div>
+                      <UiInput
+                        type="number"
+                        min={0}
+                        max={120}
+                        value={exportOptions.cellGap}
+                        className="h-8"
+                        onChange={(event) =>
+                          patchExportOptions({ cellGap: Number(event.target.value) || 0 })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <div className="mb-1">字号(%)</div>
+                      <UiInput
+                        type="number"
+                        min={1}
+                        max={20}
+                        value={exportOptions.fontSize}
+                        className="h-8"
+                        onChange={(event) =>
+                          patchExportOptions({ fontSize: Number(event.target.value) || 4 })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <label className="flex items-center gap-2">
+                      <span>背景</span>
+                      <input
+                        type="color"
+                        value={exportOptions.backgroundColor}
+                        onChange={(event) => patchExportOptions({ backgroundColor: event.target.value })}
+                        className="h-7 w-full rounded border border-[rgba(255,255,255,0.14)] bg-transparent"
+                      />
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <span>文字</span>
+                      <input
+                        type="color"
+                        value={exportOptions.textColor}
+                        onChange={(event) => patchExportOptions({ textColor: event.target.value })}
+                        className="h-7 w-full rounded border border-[rgba(255,255,255,0.14)] bg-transparent"
+                      />
+                    </label>
+                  </div>
+                </div>
+              </UiPanel>
+            </div>,
+            document.body
+          )}
+
+          {exportError && <div className="mt-2 shrink-0 text-xs text-red-400">{exportError}</div>}
+
+          {typeof document !== 'undefined' && isPackDoneDialogOpen
+            ? createPortal(
+              <div className="fixed inset-0 z-[220] flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/55" />
+                <UiPanel className="relative w-[440px] p-4">
+                  <div className="text-sm font-medium text-[var(--canvas-node-fg)]">导出完成</div>
+                  <div className="mt-2 text-xs text-[var(--canvas-node-fg-muted)]">图片已导出到以下路径：</div>
+                  <div className="mt-1 break-all rounded border border-[rgba(255,255,255,0.12)] bg-bg-dark/70 px-2 py-1.5 text-xs text-[var(--canvas-node-fg)]">
+                    {packOutputDir}
+                  </div>
+                  <div className="mt-4 flex justify-end gap-2">
+                    <UiButton
+                      size="sm"
+                      variant="muted"
+                      onClick={() => {
+                        void handleOpenPackFolder();
+                      }}
+                    >
+                      打开文件夹
+                    </UiButton>
+                    <UiButton
+                      size="sm"
+                      variant="primary"
+                      onClick={() => setIsPackDoneDialogOpen(false)}
+                    >
+                      确定
+                    </UiButton>
+                  </div>
+                </UiPanel>
+              </div>,
+              document.body
+            )
+            : null}
+        </div>
+      )}
+
     </div>
   );
 });

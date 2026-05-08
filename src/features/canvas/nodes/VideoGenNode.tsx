@@ -19,7 +19,7 @@ import {
 import { resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
 import { NodeHeader } from '@/features/canvas/ui/NodeHeader';
 import { useNodeExpanded } from './shared/useNodeExpanded';
-import { NodeResizeHandle } from '@/features/canvas/ui/NodeResizeHandle';
+
 import {
   canvasVideoAiGateway,
   graphImageResolver,
@@ -690,12 +690,11 @@ function VideoGenNodeComponent({
     [aspectRatioOptions, data.aspectRatio]
   );
 
-  const { expanded, toggle, collapse } = useNodeExpanded();
-  const prevSelected = useRef(selected);
+  const { expanded, expand, collapse } = useNodeExpanded();
+  const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
   useEffect(() => {
-    if (prevSelected.current && !selected) collapse();
-    prevSelected.current = selected;
-  }, [selected, collapse]);
+    if (selectedNodeId !== id) collapse();
+  }, [selectedNodeId, id, collapse]);
 
   return (
     <div
@@ -719,8 +718,8 @@ function VideoGenNodeComponent({
         <div
           role="button"
           tabIndex={0}
-          onClick={(e) => { e.stopPropagation(); setSelectedNode(id); toggle(); }}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setSelectedNode(id); toggle(); } }}
+          onClick={(e) => { e.stopPropagation(); setSelectedNode(id); expand(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setSelectedNode(id); expand(); } }}
           className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
         >
           <div className="node-preview-header">
@@ -1200,12 +1199,6 @@ function VideoGenNodeComponent({
         </div>
       )}
 
-      <NodeResizeHandle
-        minWidth={VIDEO_GEN_NODE_MIN_WIDTH}
-        minHeight={VIDEO_GEN_NODE_MIN_HEIGHT}
-        maxWidth={VIDEO_GEN_NODE_MAX_WIDTH}
-        maxHeight={VIDEO_GEN_NODE_MAX_HEIGHT}
-      />
     </div>
   );
 }

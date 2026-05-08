@@ -2,7 +2,8 @@ import { useState, useCallback } from 'react';
 
 export function useNodeExpanded() {
   const [expanded, setExpanded] = useState(false);
-  const toggle = useCallback(() => setExpanded(v => !v), []);
+  const expand   = useCallback(() => setExpanded(true), []);
+  const toggle   = useCallback(() => setExpanded(v => !v), []);
   const collapse = useCallback(() => setExpanded(false), []);
-  return { expanded, toggle, collapse };
+  return { expanded, expand, toggle, collapse };
 }

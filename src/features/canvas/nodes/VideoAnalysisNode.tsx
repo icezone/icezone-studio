@@ -14,7 +14,7 @@ import {
 import type { ReversePromptStyle } from '@/features/canvas/domain/videoAnalysisTypes';
 import { resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
 import { NodeHeader } from '@/features/canvas/ui/NodeHeader';
-import { NodeResizeHandle } from '@/features/canvas/ui/NodeResizeHandle';
+
 import { NODE_CONTROL_PRIMARY_BUTTON_CLASS } from '@/features/canvas/ui/nodeControlStyles';
 import { UiButton } from '@/components/ui';
 import { useCanvasStore } from '@/stores/canvasStore';
@@ -330,25 +330,22 @@ function VideoAnalysisNodeComponent({
     createStoryboardFromSelection(data.scenes.filter((s) => s.selected), ctx);
   }, [selectedCount, data.scenes, buildExpandContext]);
 
-  const { expanded, toggle, collapse } = useNodeExpanded();
-  const prevSelected = useRef(selected);
+  const { expanded, expand, collapse } = useNodeExpanded();
+  const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
   useEffect(() => {
-    if (prevSelected.current && !selected) collapse();
-    prevSelected.current = selected;
-  }, [selected, collapse]);
+    if (selectedNodeId !== id) collapse();
+  }, [selectedNodeId, id, collapse]);
 
   return (
     <div className="node-wrap" style={{ width: `${resolvedWidth}px` }} data-testid="node-videoAnalysis">
       <div className="node-preview-wrap" style={{ width: `${resolvedWidth}px` }}>
-        <Handle type="target" id="target" position={Position.Left}
-          className="!h-3 !w-3 !border-surface-dark !bg-accent" />
-        <Handle type="source" id="source" position={Position.Right}
-          className="!h-3 !w-3 !border-surface-dark !bg-accent" />
+        <Handle type="target" id="target" position={Position.Left} />
+        <Handle type="source" id="source" position={Position.Right} />
         <div
           role="button"
           tabIndex={0}
-          onClick={(e) => { e.stopPropagation(); setSelectedNode(id); toggle(); }}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); toggle(); } }}
+          onClick={(e) => { e.stopPropagation(); setSelectedNode(id); expand(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); expand(); } }}
           className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
         >
           <div className="node-preview-header">
@@ -561,7 +558,6 @@ function VideoAnalysisNodeComponent({
             )}
           </div>
 
-          <NodeResizeHandle minWidth={MIN_WIDTH} minHeight={MIN_HEIGHT} maxWidth={MAX_WIDTH} maxHeight={MAX_HEIGHT} />
         </div>
       )}
     </div>
