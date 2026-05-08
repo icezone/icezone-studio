@@ -1020,13 +1020,11 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
           type="target"
           id="target"
           position={Position.Left}
-          className="!h-3 !w-3 !border-surface-dark !bg-accent"
         />
         <Handle
           type="source"
           id="source"
           position={Position.Right}
-          className="!h-3 !w-3 !border-surface-dark !bg-accent"
         />
         <div
           role="button"
@@ -1053,7 +1051,6 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
             ) : (
               <SplitResultIcon className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
             )}
-            <div className="node-edit-hint">{t('canvas.clickToEdit')}</div>
           </div>
         </div>
       </div>

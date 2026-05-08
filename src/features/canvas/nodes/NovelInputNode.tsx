@@ -223,15 +223,15 @@ function NovelInputNodeComponent({
   };
 
   return (
+    <div className="node-preview-wrap" data-testid="node-novelInput" style={{ width: resolvedWidth, height: resolvedHeight }}>
+      <Handle type="source" id="source" position={Position.Right} />
     <div
       className={`
-        flex flex-col rounded-xl border-2 bg-[var(--canvas-node-bg)] shadow-xl transition-all p-3 overflow-hidden
+        flex flex-col rounded-xl border-2 bg-[var(--canvas-node-bg)] shadow-xl transition-all p-3 overflow-hidden h-full w-full
         ${selected
           ? 'border-accent shadow-accent/30'
           : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'}
       `}
-      data-testid="node-novelInput"
-      style={{ width: resolvedWidth, height: resolvedHeight }}
       onClick={() => setSelectedNode(id)}
     >
       <NodeHeader
@@ -413,20 +413,13 @@ function NovelInputNodeComponent({
         )}
       </div>
 
-      {/* Source handle only */}
-      <Handle
-        type="source"
-        id="source"
-        position={Position.Right}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent"
-      />
-
       <NodeResizeHandle
         minWidth={MIN_WIDTH}
         minHeight={MIN_HEIGHT}
         maxWidth={MAX_WIDTH}
         maxHeight={MAX_HEIGHT}
       />
+    </div>
     </div>
   );
 }

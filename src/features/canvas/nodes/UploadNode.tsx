@@ -304,15 +304,15 @@ export const UploadNode = memo(({ id, data, selected, width, height }: UploadNod
   }, [id, resolvedHeight, resolvedWidth, updateNodeInternals]);
 
   return (
+    <div className="node-preview-wrap" data-testid="node-upload" style={{ width: resolvedWidth, height: resolvedHeight }}>
+      <Handle type="source" id="source" position={Position.Right} />
     <div
       className={`
-        group relative overflow-visible rounded-[var(--node-radius)] border bg-[var(--canvas-node-bg)] p-0 transition-colors duration-150
+        group relative overflow-visible rounded-[var(--node-radius)] border bg-[var(--canvas-node-bg)] p-0 transition-colors duration-150 h-full w-full
         ${selected
           ? 'border-accent shadow-[0_0_0_1px_rgba(59,130,246,0.32)]'
           : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'}
       `}
-      data-testid="node-upload"
-      style={{ width: resolvedWidth, height: resolvedHeight }}
       onClick={handleNodeClick}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
@@ -355,18 +355,13 @@ export const UploadNode = memo(({ id, data, selected, width, height }: UploadNod
         onChange={handleFileChange}
       />
 
-      <Handle
-        type="source"
-        id="source"
-        position={Position.Right}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent"
-      />
       <NodeResizeHandle
         minWidth={resizeMinWidth}
         minHeight={resizeMinHeight}
         maxWidth={1400}
         maxHeight={1400}
       />
+    </div>
     </div>
   );
 });

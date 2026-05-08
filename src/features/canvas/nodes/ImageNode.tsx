@@ -155,9 +155,12 @@ export const ImageNode = memo(({ id, data, selected, type, width, height }: Imag
   }, [data.imageUrl]);
 
   return (
+    <div className="node-preview-wrap" style={{ width: resolvedWidth, height: resolvedHeight }}>
+      <Handle type="target" id="target" position={Position.Left} />
+      <Handle type="source" id="source" position={Position.Right} />
     <div
       className={`
-        group relative overflow-visible rounded-[var(--node-radius)] border bg-[var(--canvas-node-bg)] p-0 transition-colors duration-150
+        group relative overflow-visible rounded-[var(--node-radius)] border bg-[var(--canvas-node-bg)] p-0 transition-colors duration-150 h-full w-full
         ${hasGenerationError
           ? (selected
             ? 'border-red-400 shadow-[0_0_0_1px_rgba(248,113,113,0.42)]'
@@ -166,7 +169,6 @@ export const ImageNode = memo(({ id, data, selected, type, width, height }: Imag
           ? 'border-accent shadow-[0_0_0_1px_rgba(59,130,246,0.32)]'
           : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'}
       `}
-      style={{ width: resolvedWidth, height: resolvedHeight }}
       onClick={() => setSelectedNode(id)}
     >
       <NodeHeader
@@ -224,24 +226,13 @@ export const ImageNode = memo(({ id, data, selected, type, width, height }: Imag
         )}
       </div>
 
-      <Handle
-        type="target"
-        id="target"
-        position={Position.Left}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent"
-      />
-      <Handle
-        type="source"
-        id="source"
-        position={Position.Right}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent"
-      />
       <NodeResizeHandle
         minWidth={resizeMinWidth}
         minHeight={resizeMinHeight}
         maxWidth={1600}
         maxHeight={1600}
       />
+    </div>
     </div>
   );
 });

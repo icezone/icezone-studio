@@ -396,12 +396,17 @@ input[type="number"] {
 .node-preview-wrap:hover .react-flow__handle-right {
   transform: translateY(-50%) translateX(38px) !important;
 }
-/* Per-handle hover — blue glow + scale */
+/* Per-handle hover — blue glow, keep fly-out position */
 .node-preview-wrap .react-flow__handle:hover {
   background: #5b76fe !important;
   border-color: #5b76fe !important;
   box-shadow: 0 0 0 6px rgba(91, 118, 254, 0.22), 0 4px 18px rgba(91, 118, 254, 0.65) !important;
-  transform: translateY(-50%) scale(1.2) !important;
+}
+.node-preview-wrap:hover .react-flow__handle-left:hover {
+  transform: translateY(-50%) translateX(-38px) scale(1.1) !important;
+}
+.node-preview-wrap:hover .react-flow__handle-right:hover {
+  transform: translateY(-50%) translateX(38px) scale(1.1) !important;
 }
 /* + icon */
 .node-preview-wrap .react-flow__handle::after {
@@ -456,23 +461,6 @@ input[type="number"] {
   overflow: hidden;
 }
 
-.node-edit-hint {
-  position: absolute;
-  bottom: 8px;
-  right: 10px;
-  font-size: 10px;
-  color: var(--canvas-node-fg-muted);
-  background: rgba(255, 255, 255, 0.04);
-  padding: 2px 8px;
-  border-radius: 6px;
-  border: 1px solid var(--canvas-node-border);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease 0.1s;
-}
-.node-wrap:hover .node-edit-hint {
-  opacity: 1;
-}
 
 .node-gap-dots {
   display: flex;

@@ -152,16 +152,17 @@ function VideoResultNodeComponent({
   };
 
   return (
+    <div className="node-preview-wrap" style={{ width: `${VIDEO_RESULT_NODE_WIDTH}px`, height: `${VIDEO_RESULT_NODE_HEIGHT}px` }}>
+      <Handle type="target" id="target" position={Position.Left} />
     <div
       className={`
-        flex flex-col rounded-xl border-2 bg-[var(--canvas-node-bg)] shadow-xl transition-all p-3
+        flex flex-col rounded-xl border-2 bg-[var(--canvas-node-bg)] shadow-xl transition-all p-3 h-full w-full
         ${
           selected
             ? 'border-accent shadow-accent/30'
             : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'
         }
       `}
-      style={{ width: `${VIDEO_RESULT_NODE_WIDTH}px`, height: `${VIDEO_RESULT_NODE_HEIGHT}px` }}
       onClick={() => setSelectedNode(id)}
     >
       <NodeHeader
@@ -238,12 +239,7 @@ function VideoResultNodeComponent({
         )}
       </div>
 
-      <Handle
-        type="target"
-        id="target"
-        position={Position.Left}
-        className="!h-3 !w-3 !border-surface-dark !bg-accent"
-      />
+    </div>
     </div>
   );
 }

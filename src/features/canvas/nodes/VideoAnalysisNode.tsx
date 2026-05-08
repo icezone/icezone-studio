@@ -360,7 +360,6 @@ function VideoAnalysisNodeComponent({
             ) : (
               <Film className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
             )}
-            <div className="node-edit-hint">{t('canvas.clickToEdit')}</div>
           </div>
         </div>
       </div>

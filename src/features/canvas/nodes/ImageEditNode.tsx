@@ -720,7 +720,6 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
           </div>
           <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
             <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
-            <div className="node-edit-hint">{t('canvas.clickToEdit')}</div>
           </div>
         </div>
       </div>
