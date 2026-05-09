@@ -356,7 +356,10 @@ input[type="number"] {
   position: relative;
 }
 
-/* React Flow Handles — 56px transparent hit area, 36px visual circle via ::before */
+/* React Flow Handles — 56px transparent hit area centered on node border
+   NO transform override: React Flow default translate(±50%,-50%) keeps
+   handle center exactly on the node edge, so edge anchors are correct.
+   Visual fly-out is done via ::before and ::after only. */
 .node-preview-wrap .react-flow__handle {
   width: 56px !important;
   height: 56px !important;
@@ -368,8 +371,9 @@ input[type="number"] {
   box-shadow: none !important;
   opacity: 0;
   cursor: crosshair;
+  transition: opacity 0.3s ease !important;
 }
-/* Visual 36px circle: inset 10px inside 56px element */
+/* Visual 36px circle — animates outward on hover via transform */
 .node-preview-wrap .react-flow__handle::before {
   content: '';
   position: absolute;
@@ -382,44 +386,34 @@ input[type="number"] {
   transition:
     background 0.18s ease,
     border-color 0.18s ease,
-    box-shadow 0.18s ease;
+    box-shadow 0.18s ease,
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-/* Initial hidden state — center at node edge (correct edge anchor), spring out on hover */
-.node-preview-wrap .react-flow__handle-left {
-  transform: translateY(-50%) translateX(-28px) !important;
-  transition:
-    opacity 0.3s ease,
-    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-}
-.node-preview-wrap .react-flow__handle-right {
-  transform: translateY(-50%) translateX(28px) !important;
-  transition:
-    opacity 0.3s ease,
-    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-}
-/* Visible state — center 20px outside card edges (28 + 20 = 48px) */
+/* Show handles on node hover */
 .node-preview-wrap:hover .react-flow__handle {
   opacity: 1;
 }
-.node-preview-wrap:hover .react-flow__handle-left {
-  transform: translateY(-50%) translateX(-48px) !important;
+/* Fly visual circle 20px outside node border on hover */
+.node-preview-wrap:hover .react-flow__handle-right::before {
+  transform: translateX(20px);
 }
-.node-preview-wrap:hover .react-flow__handle-right {
-  transform: translateY(-50%) translateX(48px) !important;
+.node-preview-wrap:hover .react-flow__handle-left::before {
+  transform: translateX(-20px);
 }
-/* Per-handle hover — blue glow on visual circle, keep fly-out position */
-.node-preview-wrap:hover .react-flow__handle:hover::before {
+/* Blue glow + scale on handle hover */
+.node-preview-wrap:hover .react-flow__handle-right:hover::before {
   background: #5b76fe;
   border-color: #5b76fe;
   box-shadow: 0 0 0 6px rgba(91, 118, 254, 0.22), 0 4px 18px rgba(91, 118, 254, 0.65);
+  transform: translateX(20px) scale(1.1);
 }
-.node-preview-wrap:hover .react-flow__handle-left:hover {
-  transform: translateY(-50%) translateX(-48px) scale(1.1) !important;
+.node-preview-wrap:hover .react-flow__handle-left:hover::before {
+  background: #5b76fe;
+  border-color: #5b76fe;
+  box-shadow: 0 0 0 6px rgba(91, 118, 254, 0.22), 0 4px 18px rgba(91, 118, 254, 0.65);
+  transform: translateX(-20px) scale(1.1);
 }
-.node-preview-wrap:hover .react-flow__handle-right:hover {
-  transform: translateY(-50%) translateX(48px) scale(1.1) !important;
-}
-/* + icon centered in visual circle (same inset as ::before) */
+/* + icon — co-animates with ::before circle */
 .node-preview-wrap .react-flow__handle::after {
   content: '+';
   position: absolute;
@@ -432,7 +426,15 @@ input[type="number"] {
   line-height: 1;
   color: #6b7899;
   pointer-events: none;
-  transition: color 0.18s ease;
+  transition:
+    color 0.18s ease,
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.node-preview-wrap:hover .react-flow__handle-right::after {
+  transform: translateX(20px);
+}
+.node-preview-wrap:hover .react-flow__handle-left::after {
+  transform: translateX(-20px);
 }
 .node-preview-wrap:hover .react-flow__handle:hover::after {
   color: #fff;
