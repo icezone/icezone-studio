@@ -438,10 +438,14 @@ input[type="number"] {
   color: #fff;
 }
 
-/* Dragging connection line — same thickness as existing edges */
+/* Dragging connection line — override React Flow CSS variables for thickness */
+.react-flow {
+  --xy-connectionline-stroke-width: 2.6;
+  --xy-connectionline-stroke: rgba(255, 255, 255, 0.65);
+}
 .react-flow__connection-path {
   stroke-width: 2.6px !important;
-  stroke: rgba(255, 255, 255, 0.55) !important;
+  stroke: rgba(255, 255, 255, 0.65) !important;
 }
 
 .node-preview-card {
