@@ -1,7 +1,7 @@
 'use client';
 
-import { memo, useCallback, useMemo, useRef, useState } from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Handle, Position, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
 import { BookOpen, Search, Loader2, CheckSquare, Square } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -73,8 +73,14 @@ function NovelInputNodeComponent({
     [data, t],
   );
 
+  const updateNodeInternals = useUpdateNodeInternals();
+
   const resolvedWidth = Math.max(MIN_WIDTH, Math.round(width ?? DEFAULT_WIDTH));
   const resolvedHeight = Math.max(MIN_HEIGHT, Math.round(height ?? DEFAULT_HEIGHT));
+
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [id, resolvedWidth, resolvedHeight, updateNodeInternals]);
 
   const textLength = data.text?.length ?? 0;
   const isOverLimit = textLength > MAX_CHARS;
