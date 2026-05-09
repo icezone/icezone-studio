@@ -356,75 +356,86 @@ input[type="number"] {
   position: relative;
 }
 
-/* React Flow Handles — 48px circle, spring pop, 20px outside card edge */
+/* React Flow Handles — 56px transparent hit area, 36px visual circle via ::before */
 .node-preview-wrap .react-flow__handle {
-  width: 48px !important;
-  height: 48px !important;
+  width: 56px !important;
+  height: 56px !important;
   min-width: 0 !important;
   min-height: 0 !important;
   border-radius: 50% !important;
-  background: #141424 !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.18) !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   opacity: 0;
   cursor: crosshair;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
 }
-/* Initial hidden state — just inside card edge, will spring out */
+/* Visual 36px circle: inset 10px inside 56px element */
+.node-preview-wrap .react-flow__handle::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  background: #141424;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+/* Initial hidden state — just inside card edge (center 10px inside), spring out on hover */
 .node-preview-wrap .react-flow__handle-left {
-  transform: translateY(-50%) translateX(-10px) !important;
+  transform: translateY(-50%) translateX(-18px) !important;
   transition:
     opacity 0.3s ease,
-    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-    background 0.18s ease,
-    box-shadow 0.18s ease !important;
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 .node-preview-wrap .react-flow__handle-right {
-  transform: translateY(-50%) translateX(10px) !important;
+  transform: translateY(-50%) translateX(18px) !important;
   transition:
     opacity 0.3s ease,
-    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-    background 0.18s ease,
-    box-shadow 0.18s ease !important;
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
-/* Visible state — 20px outside card edges (44px = handle_width/2 + 20px) */
+/* Visible state — center 20px outside card edges (28 + 20 = 48px) */
 .node-preview-wrap:hover .react-flow__handle {
   opacity: 1;
 }
 .node-preview-wrap:hover .react-flow__handle-left {
-  transform: translateY(-50%) translateX(-44px) !important;
+  transform: translateY(-50%) translateX(-48px) !important;
 }
 .node-preview-wrap:hover .react-flow__handle-right {
-  transform: translateY(-50%) translateX(44px) !important;
+  transform: translateY(-50%) translateX(48px) !important;
 }
-/* Per-handle hover — blue glow, keep fly-out position */
-.node-preview-wrap .react-flow__handle:hover {
-  background: #5b76fe !important;
-  border-color: #5b76fe !important;
-  box-shadow: 0 0 0 6px rgba(91, 118, 254, 0.22), 0 4px 18px rgba(91, 118, 254, 0.65) !important;
+/* Per-handle hover — blue glow on visual circle, keep fly-out position */
+.node-preview-wrap:hover .react-flow__handle:hover::before {
+  background: #5b76fe;
+  border-color: #5b76fe;
+  box-shadow: 0 0 0 6px rgba(91, 118, 254, 0.22), 0 4px 18px rgba(91, 118, 254, 0.65);
 }
 .node-preview-wrap:hover .react-flow__handle-left:hover {
-  transform: translateY(-50%) translateX(-44px) scale(1.1) !important;
+  transform: translateY(-50%) translateX(-48px) scale(1.1) !important;
 }
 .node-preview-wrap:hover .react-flow__handle-right:hover {
-  transform: translateY(-50%) translateX(44px) scale(1.1) !important;
+  transform: translateY(-50%) translateX(48px) scale(1.1) !important;
 }
-/* + icon */
+/* + icon centered in visual circle (same inset as ::before) */
 .node-preview-wrap .react-flow__handle::after {
   content: '+';
   position: absolute;
-  inset: 0;
+  inset: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 300;
   line-height: 1;
   color: #6b7899;
   pointer-events: none;
+  transition: color 0.18s ease;
 }
-.node-preview-wrap .react-flow__handle:hover::after {
+.node-preview-wrap:hover .react-flow__handle:hover::after {
   color: #fff;
-  font-size: 24px;
 }
 
 .node-preview-card {
