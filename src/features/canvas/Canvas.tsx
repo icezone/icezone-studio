@@ -52,7 +52,7 @@ import {
 import { embedStoryboardImageMetadata } from '@/commands/image';
 import { listModelProviders } from '@/features/canvas/models';
 import { nodeTypes } from './nodes';
-import { edgeTypes } from './edges';
+import { AlignedConnectionLine, edgeTypes } from './edges';
 import { NodeSelectionMenu } from './NodeSelectionMenu';
 import { SelectedNodeOverlay } from './ui/SelectedNodeOverlay';
 import { MultiSelectToolbar } from './ui/MultiSelectToolbar';
@@ -1863,6 +1863,7 @@ function CanvasInner() {
         onMoveEnd={handleMoveEnd}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        connectionLineComponent={AlignedConnectionLine}
         defaultEdgeOptions={{ type: 'disconnectableEdge' }}
         defaultViewport={DEFAULT_VIEWPORT}
         minZoom={0.1}

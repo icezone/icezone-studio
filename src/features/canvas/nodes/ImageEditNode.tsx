@@ -680,49 +680,48 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
   return (
     <div
       ref={rootRef}
-      className="node-wrap"
+      className="node-wrap node-preview-wrap"
       style={{ width: `${resolvedWidth}px` }}
       data-testid="node-imageEdit"
     >
-      {/* Preview wrap — Handles anchor here, vertically centred on preview card */}
-      <div className="node-preview-wrap" style={{ width: `${resolvedWidth}px` }}>
-        <Handle
-          type="target"
-          id="target"
-          position={Position.Left}
-        />
-        <Handle
-          type="source"
-          id="source"
-          position={Position.Right}
-        />
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => {
-            setSelectedNode(id);
-            expand();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
+        <div className="node-preview-area">
+          <Handle
+            type="target"
+            id="target"
+            position={Position.Left}
+          />
+          <Handle
+            type="source"
+            id="source"
+            position={Position.Right}
+          />
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => {
               setSelectedNode(id);
               expand();
-            }
-          }}
-          className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
-        >
-          <div className="node-preview-header">
-            <Sparkles className="h-3.5 w-3.5 shrink-0 text-[var(--canvas-node-fg-muted)]" />
-            <span className="truncate text-[12px] font-semibold leading-none text-[var(--canvas-node-fg)]">
-              {resolvedTitle}
-            </span>
-          </div>
-          <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
-            <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setSelectedNode(id);
+                expand();
+              }
+            }}
+            className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
+          >
+            <div className="node-preview-header">
+              <Sparkles className="h-3.5 w-3.5 shrink-0 text-[var(--canvas-node-fg-muted)]" />
+              <span className="truncate text-[12px] font-semibold leading-none text-[var(--canvas-node-fg)]">
+                {resolvedTitle}
+              </span>
+            </div>
+            <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
+              <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
+            </div>
           </div>
         </div>
-      </div>
 
       {expanded && (
         <div className="node-gap-dots">

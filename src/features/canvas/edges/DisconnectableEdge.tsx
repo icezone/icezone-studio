@@ -32,12 +32,29 @@ export const DisconnectableEdge = memo(function DisconnectableEdge(props: EdgePr
   const canvasEdgeRoutingMode = useSettingsStore((state) => state.canvasEdgeRoutingMode);
 
   const { edgePath, labelX, labelY } = useMemo(() => {
+    // Handle DOM extends 18px outside the node border (half-in/half-out).
+    // React Flow anchors edges at handleRect.right/left (the outer edge), which is 18px past
+    // the node border. Subtract that offset so the edge meets the node border exactly.
+    const HANDLE_OUTSIDE_OFFSET = 18;
+    const adjustedSourceX =
+      sourcePosition === Position.Right
+        ? sourceX - HANDLE_OUTSIDE_OFFSET
+        : sourcePosition === Position.Left
+          ? sourceX + HANDLE_OUTSIDE_OFFSET
+          : sourceX;
+    const adjustedTargetX =
+      targetPosition === Position.Left
+        ? targetX + HANDLE_OUTSIDE_OFFSET
+        : targetPosition === Position.Right
+          ? targetX - HANDLE_OUTSIDE_OFFSET
+          : targetX;
+
     if (canvasEdgeRoutingMode === 'spline') {
       const [path, nextLabelX, nextLabelY] = getBezierPath({
-        sourceX,
+        sourceX: adjustedSourceX,
         sourceY,
         sourcePosition,
-        targetX,
+        targetX: adjustedTargetX,
         targetY,
         targetPosition,
       });
@@ -51,10 +68,10 @@ export const DisconnectableEdge = memo(function DisconnectableEdge(props: EdgePr
     const route = buildOrthogonalRoute({
       sourceId: source,
       targetId: target,
-      sourceX,
+      sourceX: adjustedSourceX,
       sourceY,
       sourcePosition: sourcePosition ?? Position.Right,
-      targetX,
+      targetX: adjustedTargetX,
       targetY,
       targetPosition: targetPosition ?? Position.Left,
       nodes,

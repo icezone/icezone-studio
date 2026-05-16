@@ -1479,57 +1479,56 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
 
   return (
     <div
-      className="node-wrap"
+      className="node-wrap node-preview-wrap"
       style={{ width: `${resolvedNodeWidth}px` }}
       data-testid="node-storyboardGen"
     >
-      {/* Preview card */}
-      <div className="node-preview-wrap" style={{ width: `${resolvedNodeWidth}px` }}>
-        <Handle
-          type="target"
-          id="target"
-          position={Position.Left}
-        />
-        <Handle
-          type="source"
-          id="source"
-          position={Position.Right}
-        />
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => { setSelectedNode(id); expand(); }}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); expand(); } }}
-          className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
-        >
-          <div className="node-preview-header">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span className="truncate text-[12px] font-semibold leading-none text-[var(--canvas-node-fg)]">
-              {resolvedTitle}
-            </span>
-          </div>
-          <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
-            {nodeData.frames && nodeData.frames.length > 0 ? (
-              <div className="flex h-full w-full gap-0.5 overflow-hidden">
-                {nodeData.frames.slice(0, 4).map((frame, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-1 items-center justify-center overflow-hidden bg-[var(--canvas-node-section-bg)] p-1"
-                  >
-                    {frame.description ? (
-                      <span className="line-clamp-3 text-center text-[8px] leading-tight text-[var(--canvas-node-fg-muted)]">
-                        {frame.description}
-                      </span>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
-            )}
+        <div className="node-preview-area">
+          <Handle
+            type="target"
+            id="target"
+            position={Position.Left}
+          />
+          <Handle
+            type="source"
+            id="source"
+            position={Position.Right}
+          />
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => { setSelectedNode(id); expand(); }}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); expand(); } }}
+            className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
+          >
+            <div className="node-preview-header">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span className="truncate text-[12px] font-semibold leading-none text-[var(--canvas-node-fg)]">
+                {resolvedTitle}
+              </span>
+            </div>
+            <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
+              {nodeData.frames && nodeData.frames.length > 0 ? (
+                <div className="flex h-full w-full gap-0.5 overflow-hidden">
+                  {nodeData.frames.slice(0, 4).map((frame, i) => (
+                    <div
+                      key={i}
+                      className="flex flex-1 items-center justify-center overflow-hidden bg-[var(--canvas-node-section-bg)] p-1"
+                    >
+                      {frame.description ? (
+                        <span className="line-clamp-3 text-center text-[8px] leading-tight text-[var(--canvas-node-fg-muted)]">
+                          {frame.description}
+                        </span>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Gap dots */}
       {expanded && (

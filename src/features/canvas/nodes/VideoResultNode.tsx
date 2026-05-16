@@ -1,6 +1,6 @@
 import React from 'react';
-import { memo, useState, useMemo } from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { memo, useState, useMemo, useEffect } from 'react';
+import { Handle, Position, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
 import { Download, Video, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -37,6 +37,10 @@ function VideoResultNodeComponent({
   const findNodePosition = useCanvasStore((state) => state.findNodePosition);
   const videoDownloadPresetPaths = useSettingsStore((state) => state.videoDownloadPresetPaths);
   const [downloading, setDownloading] = useState(false);
+  const updateNodeInternals = useUpdateNodeInternals();
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [id, updateNodeInternals]);
 
   const resolvedTitle = resolveNodeDisplayName(CANVAS_NODE_TYPES.videoResult, data, t);
 

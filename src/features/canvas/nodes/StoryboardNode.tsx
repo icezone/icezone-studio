@@ -1014,46 +1014,46 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
   );
 
   return (
-    <div className="node-wrap" style={{ width: `${resolvedNodeWidth}px` }} data-testid="node-storyboard">
-      <div className="node-preview-wrap" style={{ width: `${resolvedNodeWidth}px` }}>
-        <Handle
-          type="target"
-          id="target"
-          position={Position.Left}
-        />
-        <Handle
-          type="source"
-          id="source"
-          position={Position.Right}
-        />
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => { setSelectedNode(id); expand(); }}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); expand(); } }}
-          className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
-        >
-          <div className="node-preview-header">
-            <SplitResultIcon className="h-3.5 w-3.5" />
-            <span>{resolvedTitle}</span>
-          </div>
-          <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
-            {orderedFrames.length > 0 ? (
-              <div className="flex h-full w-full">
-                {orderedFrames.slice(0, 4).map((frame, i) => (
-                  <div key={i} className="flex-1 overflow-hidden bg-[var(--canvas-node-section-bg)]">
-                    {frame.imageUrl && (
-                      <img src={frame.imageUrl} alt="" className="h-full w-full object-cover" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <SplitResultIcon className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
-            )}
+    <div className="node-wrap node-preview-wrap" style={{ width: `${resolvedNodeWidth}px` }} data-testid="node-storyboard">
+        <div className="node-preview-area">
+          <Handle
+            type="target"
+            id="target"
+            position={Position.Left}
+          />
+          <Handle
+            type="source"
+            id="source"
+            position={Position.Right}
+          />
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => { setSelectedNode(id); expand(); }}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); expand(); } }}
+            className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
+          >
+            <div className="node-preview-header">
+              <SplitResultIcon className="h-3.5 w-3.5" />
+              <span>{resolvedTitle}</span>
+            </div>
+            <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
+              {orderedFrames.length > 0 ? (
+                <div className="flex h-full w-full">
+                  {orderedFrames.slice(0, 4).map((frame, i) => (
+                    <div key={i} className="flex-1 overflow-hidden bg-[var(--canvas-node-section-bg)]">
+                      {frame.imageUrl && (
+                        <img src={frame.imageUrl} alt="" className="h-full w-full object-cover" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <SplitResultIcon className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
       {expanded && (
         <div className="node-gap-dots">

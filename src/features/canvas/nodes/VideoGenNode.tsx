@@ -8,7 +8,7 @@ import {
   useEffect,
   useRef,
 } from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { Handle, Position, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
 import { Sparkles, RefreshCw, Download, ChevronDown, ChevronUp, ImagePlus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -191,6 +191,11 @@ function VideoGenNodeComponent({
     VIDEO_GEN_NODE_MIN_WIDTH,
     Math.round(width ?? VIDEO_GEN_NODE_DEFAULT_WIDTH)
   );
+
+  const updateNodeInternals = useUpdateNodeInternals();
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [id, resolvedWidth, updateNodeInternals]);
 
   // Auto-collapse sections when video generation starts or completes
   useEffect(() => {
@@ -702,40 +707,42 @@ function VideoGenNodeComponent({
       style={{ width: `${resolvedWidth}px` }}
       data-testid="node-videoGen"
     >
-      <Handle
-        type="target"
-        id="target"
-        position={Position.Left}
-      />
-      <Handle
-        type="source"
-        id="source"
-        position={Position.Right}
-      />
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={() => { setSelectedNode(id); expand(); }}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedNode(id); expand(); } }}
-        className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
-      >
-        <div className="node-preview-header">
-          <Sparkles className="h-3.5 w-3.5 shrink-0 text-[var(--canvas-node-fg-muted)]" />
-          <span className="truncate text-[12px] font-semibold leading-none text-[var(--canvas-node-fg)]">
-            {resolvedTitle}
-          </span>
-        </div>
-        <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
-          {data.videoUrl ? (
-            <video
-              src={data.videoUrl}
-              className="h-full w-full object-cover"
-              muted
-              preload="metadata"
-            />
-          ) : (
-            <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
-          )}
+      <div className="node-preview-area">
+        <Handle
+          type="target"
+          id="target"
+          position={Position.Left}
+        />
+        <Handle
+          type="source"
+          id="source"
+          position={Position.Right}
+        />
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => { setSelectedNode(id); expand(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedNode(id); expand(); } }}
+          className={`node-preview-card${selected ? ' node-preview-card--selected' : ''}`}
+        >
+          <div className="node-preview-header">
+            <Sparkles className="h-3.5 w-3.5 shrink-0 text-[var(--canvas-node-fg-muted)]" />
+            <span className="truncate text-[12px] font-semibold leading-none text-[var(--canvas-node-fg)]">
+              {resolvedTitle}
+            </span>
+          </div>
+          <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
+            {data.videoUrl ? (
+              <video
+                src={data.videoUrl}
+                className="h-full w-full object-cover"
+                muted
+                preload="metadata"
+              />
+            ) : (
+              <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
+            )}
+          </div>
         </div>
       </div>
 
