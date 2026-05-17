@@ -1134,8 +1134,8 @@ export function AnnotateToolEditor({ options, onOptionsChange, sourceImageUrl }:
                     return newBox;
                   }}
                   rotateEnabled={false}
-                  borderStroke="#3b82f6"
-                  anchorStroke="#3b82f6"
+                  borderStroke="currentColor"
+                  anchorStroke="currentColor"
                   anchorFill="#ffffff"
                   anchorSize={8}
                   ignoreStroke

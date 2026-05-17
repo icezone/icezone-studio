@@ -65,6 +65,7 @@
   --color-ui-primary: var(--ui-primary);
   --color-ui-primary-pressed: var(--ui-primary-pressed);
   --color-ui-primary-subtle: var(--ui-primary-subtle);
+  --color-ui-primary-fg: var(--ui-primary-fg);
 }
 
 /* ─── Base — Light mode (default) ──────────────────────── */
@@ -84,6 +85,7 @@
   --ui-primary:         #0a0a0a;
   --ui-primary-pressed: #000000;
   --ui-primary-subtle:  rgba(0, 0, 0, 0.06);
+  --ui-primary-fg:      #ffffff;
 
   /* UI primitive vars */
   --ui-surface-field:   rgba(0, 0, 0, 0.04);
@@ -130,6 +132,7 @@
   --ui-primary:         #f5f5f5;
   --ui-primary-pressed: #ffffff;
   --ui-primary-subtle:  rgba(255, 255, 255, 0.10);
+  --ui-primary-fg:      #0a0a0a;
 
   /* UI primitive vars */
   --ui-surface-field:   rgba(255, 255, 255, 0.05);
@@ -139,21 +142,21 @@
   --ui-shadow-panel:    0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
   --accent-rgb:         245, 245, 245;
 
-  /* Canvas semantic tokens — dark mode */
-  --canvas-node-bg:             #111827;
+  /* Canvas semantic tokens — dark mode (pure neutral grayscale) */
+  --canvas-node-bg:             #1c1c1c;
   --canvas-node-border:         rgba(255,255,255,0.1);
   --canvas-node-shadow:         rgba(0,0,0,0.4) 0px 2px 8px;
-  --canvas-node-header-bg:      rgba(26,38,64,0.95);
-  --canvas-node-section-bg:     rgba(13,21,37,0.45);
+  --canvas-node-header-bg:      rgba(38,38,38,0.95);
+  --canvas-node-section-bg:     rgba(30,30,30,0.7);
   --canvas-node-hover-border:   rgba(255,255,255,0.4);
   --canvas-node-selected-border:#f5f5f5;
   --canvas-drop-zone-border:    rgba(255,255,255,0.25);
   --canvas-drop-zone-hover-bg:  rgba(255,255,255,0.04);
-  --canvas-node-fg:             #e2e8f0;
-  --canvas-node-fg-muted:       #6b7fa0;
-  --canvas-badge-bg:            rgba(26,38,64,0.9);
-  --canvas-overlay-bg:          rgba(17,24,39,0.85);
-  --canvas-menu-bg:             #1c1c21;
+  --canvas-node-fg:             #e5e5e5;
+  --canvas-node-fg-muted:       #a3a3a3;
+  --canvas-badge-bg:            rgba(38,38,38,0.9);
+  --canvas-overlay-bg:          rgba(28,28,28,0.85);
+  --canvas-menu-bg:             #1c1c1c;
   --canvas-menu-item-hover:     rgba(255,255,255,0.08);
 }
 

@@ -25,7 +25,7 @@ export const GroupNode = memo(({ id, data, selected }: GroupNodeProps) => {
   return (
     <div
       className={`group relative h-full w-full overflow-visible rounded-[var(--node-radius)] border-2 ${selected
-        ? 'border-accent shadow-[0_0_0_2px_rgba(59,130,246,0.35)]'
+        ? 'border-accent shadow-[0_0_0_2px_rgba(var(--accent-rgb),0.35)]'
         : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'
         }`}
       style={{

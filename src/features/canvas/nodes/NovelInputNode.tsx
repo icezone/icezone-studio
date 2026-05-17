@@ -280,7 +280,7 @@ function NovelInputNodeComponent({
                 onClick={(e) => { e.stopPropagation(); handleGranularityChange(g); }}
                 className={`rounded-md px-2 py-0.5 text-xs transition-colors ${
                   data.sceneGranularity === g
-                    ? 'bg-accent text-white'
+                    ? 'bg-accent text-[var(--ui-primary-fg)]'
                     : 'bg-[var(--canvas-node-section-bg)] text-[var(--canvas-node-fg-muted)] hover:bg-[var(--canvas-menu-item-hover)]'
                 }`}
               >

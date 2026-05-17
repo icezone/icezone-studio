@@ -166,7 +166,7 @@ export const ImageNode = memo(({ id, data, selected, type, width, height }: Imag
             ? 'border-red-400 shadow-[0_0_0_1px_rgba(248,113,113,0.42)]'
             : 'border-red-500/70 bg-[rgba(127,29,29,0.12)] hover:border-red-400/80 dark:border-red-500/70 dark:hover:border-red-400/80')
           : selected
-          ? 'border-accent shadow-[0_0_0_1px_rgba(59,130,246,0.32)]'
+          ? 'border-accent shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.32)]'
           : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'}
       `}
       onClick={() => setSelectedNode(id)}

@@ -41,7 +41,7 @@ export const CanvasToolbar = memo(({ isLocked, onToggleLock }: CanvasToolbarProp
           ${
             isLocked
               ? 'cursor-not-allowed bg-[var(--canvas-node-section-bg)] text-[var(--canvas-node-fg-muted)]'
-              : 'bg-accent text-white hover:bg-accent/80'
+              : 'bg-accent text-[var(--ui-primary-fg)] hover:bg-accent/80'
           }
         `}
       >

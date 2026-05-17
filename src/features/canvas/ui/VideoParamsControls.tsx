@@ -437,7 +437,7 @@ export const VideoParamsControls = memo(({
                       <button
                         key={provider.id}
                         className={`h-9 rounded-lg border px-3 text-xs font-medium transition-all ${active
-                          ? 'border-accent/55 bg-accent/20 text-white shadow-[0_0_0_1px_rgba(59,130,246,0.2)]'
+                          ? 'border-accent/55 bg-accent/20 text-white'
                           : 'border-white/10 bg-white/5 text-white/55 hover:border-white/20 hover:bg-white/8 hover:text-white/80'
                           }`}
                         onClick={(event) => {
@@ -477,7 +477,7 @@ export const VideoParamsControls = memo(({
                       <button
                         key={group.name}
                         className={`flex h-9 w-[120px] items-center justify-center rounded-lg border px-3 text-center text-xs font-medium transition-all ${active
-                          ? 'border-accent/55 bg-accent/20 text-white shadow-[0_0_0_1px_rgba(59,130,246,0.2)]'
+                          ? 'border-accent/55 bg-accent/20 text-white'
                           : 'border-white/10 bg-white/5 text-white/55 hover:border-white/20 hover:bg-white/8 hover:text-white/80'
                           }`}
                         onClick={(event) => {

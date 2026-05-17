@@ -53,7 +53,7 @@ export const TextAnnotationNode = memo(({
       className={`
         group relative h-full w-full overflow-visible rounded-[var(--node-radius)] border bg-[var(--canvas-node-bg)] p-1.5 transition-colors duration-150
         ${selected
-          ? 'border-accent shadow-[0_0_0_1px_rgba(59,130,246,0.32)]'
+          ? 'border-accent shadow-[0_0_0_1px_rgba(var(--accent-rgb),0.32)]'
           : 'border-[var(--canvas-node-border)] hover:border-[var(--canvas-node-hover-border)]'}
       `}
       style={{ width: resolvedWidth, height: resolvedHeight }}

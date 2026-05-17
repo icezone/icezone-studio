@@ -478,7 +478,7 @@ export const ModelParamsControls = memo(({
                       <button
                         key={provider.id}
                         className={`h-8 rounded-lg border px-3 text-xs font-medium transition-all ${providerOptionClassName} ${active
-                          ? 'border-accent/55 bg-accent/20 text-white shadow-[0_0_0_1px_rgba(59,130,246,0.2)]'
+                          ? 'border-accent/55 bg-accent/20 text-white'
                           : 'border-white/10 bg-white/5 text-white/55 hover:border-white/20 hover:bg-white/8 hover:text-white/80'
                           }`}
                         onClick={(event) => {
@@ -518,7 +518,7 @@ export const ModelParamsControls = memo(({
                       <button
                         key={group.name}
                         className={`inline-flex max-w-full items-center rounded-lg border px-3 text-xs font-medium leading-4 transition-all ${modelOptionClassName} ${active
-                          ? 'border-accent/55 bg-accent/20 text-white shadow-[0_0_0_1px_rgba(59,130,246,0.2)]'
+                          ? 'border-accent/55 bg-accent/20 text-white'
                           : 'border-white/10 bg-white/5 text-white/55 hover:border-white/20 hover:bg-white/8 hover:text-white/80'
                           }`}
                         onClick={(event) => {

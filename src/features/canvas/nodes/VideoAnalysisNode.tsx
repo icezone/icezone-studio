@@ -477,11 +477,11 @@ function VideoAnalysisNodeComponent({
                       <Languages className="h-3 w-3 text-[var(--canvas-node-fg-muted)]" />
                       <button
                         onClick={() => handleReversePromptStyleChange('generic')}
-                        className={`nodrag text-[10px] px-1 rounded ${reversePromptStyle === 'generic' ? 'bg-accent text-white' : 'text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)]'}`}
+                        className={`nodrag text-[10px] px-1 rounded ${reversePromptStyle === 'generic' ? 'bg-accent text-[var(--ui-primary-fg)]' : 'text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)]'}`}
                       >EN</button>
                       <button
                         onClick={() => handleReversePromptStyleChange('chinese')}
-                        className={`nodrag text-[10px] px-1 rounded ${reversePromptStyle === 'chinese' ? 'bg-accent text-white' : 'text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)]'}`}
+                        className={`nodrag text-[10px] px-1 rounded ${reversePromptStyle === 'chinese' ? 'bg-accent text-[var(--ui-primary-fg)]' : 'text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)]'}`}
                       >中文</button>
                     </div>
                     <button onClick={(e) => { e.stopPropagation(); toggleAllScenes(selectedCount < data.scenes.length); }}

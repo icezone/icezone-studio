@@ -1741,7 +1741,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
                       >
                         <Images className="h-2.5 w-2.5" />
                         {frame.referenceImageUrls && frame.referenceImageUrls.length > 0 && (
-                          <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-accent text-[6px] font-bold text-white">
+                          <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-accent text-[6px] font-bold text-[var(--ui-primary-fg)]">
                             {frame.referenceImageUrls.length}
                           </span>
                         )}
