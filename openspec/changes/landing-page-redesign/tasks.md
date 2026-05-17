@@ -1,7 +1,7 @@
 ## 1. Design Tokens & Foundation
 
 - [x] 1.1 Update `globals.css` — add new landing v2 palette tokens (`--color-hero-overlay`, `--color-glass`, `--color-glass-border`, `--color-text-hero`, `--color-text-secondary`) and any new keyframes needed for scroll-reveal animations
-- [ ] 1.2 Generate a poster image frame from `public/banner.mp4` (first frame) and save as `public/banner-poster.jpg` for video fallback
+- [x] 1.2 Generate a poster image frame from `public/banner.mp4` (first frame) and save as `public/banner-poster.jpg` for video fallback
 
 ## 2. Navigation Rebrand
 
@@ -50,8 +50,8 @@
 - [x] 8.4 Update `LandingNav.tsx` to use `t()` for navigation link text
 - [x] 8.5 Create language switcher toggle in `LandingNav.tsx` — compact 中/EN button calling `changeLanguage()` from `@/i18n`, positioned in nav bar
 - [x] 8.6 Add browser language detection — default to `zh` if `navigator.language` starts with `zh`, otherwise default to `en` (only when no `localStorage` preference exists)
-- [ ] 8.7 Verify language switching — toggle between Chinese and English, confirm all text updates without page reload and no raw keys are displayed
-- [ ] 8.8 Verify responsive text — check both languages on mobile (<768px) for overflow/truncation issues
+- [x] 8.7 Verify language switching — toggle between Chinese and English, confirm all text updates without page reload and no raw keys are displayed
+- [x] 8.8 Verify responsive text — check both languages on mobile (<768px) for overflow/truncation issues
 
 ## 9. Cleanup & Verification
 
@@ -59,4 +59,4 @@
 - [x] 9.2 Remove old data arrays (features, steps, plans, stats, useCases) from page.tsx
 - [x] 9.3 Run `npx tsc --noEmit` — fix any TypeScript errors
 - [x] 9.4 Run `npm run lint` — fix any lint warnings in modified/new files
-- [ ] 9.5 Visual verification — open landing page in browser, check all sections render correctly on desktop and mobile viewports, in both Chinese and English
+- [x] 9.5 Visual verification — open landing page in browser, check all sections render correctly on desktop and mobile viewports, in both Chinese and English
