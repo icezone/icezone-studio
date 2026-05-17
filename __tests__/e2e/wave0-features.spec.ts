@@ -88,6 +88,9 @@ test.describe('Wave 0: Video & LLM Analysis Features', () => {
       const videoAnalysisNode = page.locator('[data-testid="node-videoAnalysis"]').first()
       await expect(videoAnalysisNode).toBeVisible({ timeout: 5000 })
 
+      // Click preview card to expand the settings panel (preview/expand refactor)
+      await videoAnalysisNode.locator('.node-preview-card').first().click()
+
       // Check node has expected controls
       await expect(videoAnalysisNode.locator('text=灵敏度')).toBeVisible()
       await expect(videoAnalysisNode.locator('text=开始分析')).toBeVisible()
@@ -193,6 +196,9 @@ test.describe('Wave 1: Template & Enhancement Features', () => {
       const storyboardNode = page.locator('[data-testid="node-storyboardGen"]').first()
       await expect(storyboardNode).toBeVisible({ timeout: 5000 })
 
+      // Click preview card to expand the settings panel (preview/expand refactor)
+      await storyboardNode.locator('.node-preview-card').first().click()
+
       // Check for batch generate button (Zap icon or text)
       const batchButton = storyboardNode.locator('button:has-text("批量生成"), button[title*="批量"]')
       await expect(batchButton.first()).toBeVisible()
@@ -280,6 +286,9 @@ test.describe('Wave M4: Onboarding & Canvas UX', () => {
       // 验证节点存在
       const node = page.locator('[data-testid="node-imageEdit"], [data-testid="node-upload"]').first()
       await expect(node).toBeVisible({ timeout: 5000 })
+
+      // Click preview card to expand the settings panel (preview/expand refactor)
+      await node.locator('.node-preview-card').first().click()
 
       // 验证逻辑模型名出现（不应显示 "kie/" 前缀）；等待 capabilities fetch 完成
       const modelPicker = page.locator('[data-testid^="model-option-"]').first()
