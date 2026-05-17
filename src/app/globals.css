@@ -37,7 +37,8 @@
   --color-text-dark: #e2e8f0;
   --color-text-muted: #94a3b8;
   --color-border-dark: rgba(255,255,255,0.12);
-  --color-accent: #3b82f6;
+  /* Canvas accent → mode-aware neutral (black in light, white in dark) via ui-primary */
+  --color-accent: var(--ui-primary);
 
   /* Miro design system brand values (static) */
   --color-blue-450: #5b76fe;
@@ -80,9 +81,9 @@
   --ui-fg-placeholder:  #a5a8b5;
   --ui-line:            rgba(0, 0, 0, 0.09);
   --ui-line-strong:     #c7cad5;
-  --ui-primary:         #5b76fe;
-  --ui-primary-pressed: #2a41b6;
-  --ui-primary-subtle:  rgba(91, 118, 254, 0.08);
+  --ui-primary:         #0a0a0a;
+  --ui-primary-pressed: #000000;
+  --ui-primary-subtle:  rgba(0, 0, 0, 0.06);
 
   /* UI primitive vars */
   --ui-surface-field:   rgba(0, 0, 0, 0.04);
@@ -90,7 +91,7 @@
   --ui-border-soft:     rgba(0, 0, 0, 0.09);
   --ui-border-strong:   rgba(0, 0, 0, 0.18);
   --ui-shadow-panel:    0 4px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.06);
-  --accent-rgb:         91, 118, 254;
+  --accent-rgb:         10, 10, 10;
 
   --node-radius: 10px;
 
@@ -100,8 +101,8 @@
   --canvas-node-shadow:         rgb(224,226,232) 0px 0px 0px 1px;
   --canvas-node-header-bg:      rgba(245,247,250,0.95);
   --canvas-node-section-bg:     rgba(245,247,250,0.7);
-  --canvas-node-hover-border:   rgba(91,118,254,0.4);
-  --canvas-node-selected-border:#5b76fe;
+  --canvas-node-hover-border:   rgba(0,0,0,0.3);
+  --canvas-node-selected-border:#0a0a0a;
   --canvas-drop-zone-border:    rgba(15,23,42,0.2);
   --canvas-drop-zone-hover-bg:  rgba(15,23,42,0.04);
   --canvas-node-fg:             #1c1c1e;
@@ -126,9 +127,9 @@
   --ui-fg-placeholder:  #64748b;
   --ui-line:            rgba(255, 255, 255, 0.10);
   --ui-line-strong:     rgba(255, 255, 255, 0.20);
-  --ui-primary:         #5b76fe;
-  --ui-primary-pressed: #2a41b6;
-  --ui-primary-subtle:  rgba(91, 118, 254, 0.15);
+  --ui-primary:         #f5f5f5;
+  --ui-primary-pressed: #ffffff;
+  --ui-primary-subtle:  rgba(255, 255, 255, 0.10);
 
   /* UI primitive vars */
   --ui-surface-field:   rgba(255, 255, 255, 0.05);
@@ -136,7 +137,7 @@
   --ui-border-soft:     rgba(255, 255, 255, 0.14);
   --ui-border-strong:   rgba(255, 255, 255, 0.28);
   --ui-shadow-panel:    0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
-  --accent-rgb:         91, 118, 254;
+  --accent-rgb:         245, 245, 245;
 
   /* Canvas semantic tokens — dark mode */
   --canvas-node-bg:             #111827;
@@ -144,8 +145,8 @@
   --canvas-node-shadow:         rgba(0,0,0,0.4) 0px 2px 8px;
   --canvas-node-header-bg:      rgba(26,38,64,0.95);
   --canvas-node-section-bg:     rgba(13,21,37,0.45);
-  --canvas-node-hover-border:   rgba(91,118,254,0.5);
-  --canvas-node-selected-border:#5b76fe;
+  --canvas-node-hover-border:   rgba(255,255,255,0.4);
+  --canvas-node-selected-border:#f5f5f5;
   --canvas-drop-zone-border:    rgba(255,255,255,0.25);
   --canvas-drop-zone-hover-bg:  rgba(255,255,255,0.04);
   --canvas-node-fg:             #e2e8f0;
@@ -362,13 +363,12 @@ input[type="number"] {
   position: relative;
 }
 
-/* React Flow Handles — 36px hit area = visual circle position (half-in / half-out at node border).
-   This means hovering ONLY responds when the cursor is on the circle itself, not on the node interior.
-   Edge anchor adjustments are done in DisconnectableEdge.tsx (-18px) to compensate for the
-   handle DOM extending 18px outside the node border. */
+/* React Flow Handles — 12px minimal circular connector, no icon.
+   Visual circle = hit area, positioned half-in / half-out at node border.
+   Edge anchor offset (-6px) handled in DisconnectableEdge.tsx. */
 .node-preview-wrap .react-flow__handle {
-  width: 36px !important;
-  height: 36px !important;
+  width: 12px !important;
+  height: 12px !important;
   min-width: 0 !important;
   min-height: 0 !important;
   border-radius: 50% !important;
@@ -377,32 +377,29 @@ input[type="number"] {
   box-shadow: none !important;
   z-index: 10 !important;
   opacity: 0;
-  /* Always receive pointer events so the handle is hoverable even when its outer half lies
-     outside the node wrap (wrap:hover wouldn't fire there). Visual hiding via opacity. */
   pointer-events: all;
   cursor: crosshair;
-  transition: opacity 0.3s ease !important;
+  transition: opacity 0.2s ease !important;
 }
-/* right: -18 puts the handle DOM rect centered on the node right border (half-in / half-out) */
 .node-preview-wrap .react-flow__handle-right {
-  right: -18px !important;
+  right: -6px !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
 }
 .node-preview-wrap .react-flow__handle-left {
-  left: -18px !important;
+  left: -6px !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
 }
-/* Visual circle fills the entire handle — circle = handle hit area */
+/* Minimal dot — neutral palette via canvas + ui tokens (mode-aware) */
 .node-preview-wrap .react-flow__handle::before {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: #141424;
-  border: 1.5px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+  background: var(--canvas-node-bg);
+  border: 1.5px solid var(--canvas-node-fg-muted);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   pointer-events: none;
   transition:
     background 0.18s ease,
@@ -410,46 +407,27 @@ input[type="number"] {
     box-shadow 0.18s ease,
     transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-/* Reveal handles on node hover OR when cursor is on the handle itself
-   (handle's outer half lies outside the wrap, so handle:hover keeps it visible too) */
+/* Reveal handles on node hover OR when cursor is on the handle itself */
 .node-preview-wrap:hover .react-flow__handle,
 .node-preview-wrap .react-flow__handle:hover {
   opacity: 1;
 }
-/* Glow + scale ONLY when cursor is on the handle circle (not on node interior) */
+/* Hover: solid neutral fill + slight scale + subtle ring */
 .node-preview-wrap .react-flow__handle:hover::before {
-  background: #5b76fe;
-  border-color: #5b76fe;
-  box-shadow: 0 0 0 6px rgba(91, 118, 254, 0.22), 0 4px 18px rgba(91, 118, 254, 0.65);
-  transform: scale(1.15);
-}
-/* + icon centered in the circle */
-.node-preview-wrap .react-flow__handle::after {
-  content: '+';
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: 300;
-  line-height: 1;
-  color: #6b7899;
-  pointer-events: none;
-  transition: color 0.18s ease;
-}
-.node-preview-wrap .react-flow__handle:hover::after {
-  color: #fff;
+  background: var(--ui-primary);
+  border-color: var(--ui-primary);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.18);
+  transform: scale(1.3);
 }
 
-/* Dragging connection line — override React Flow CSS variables for thickness */
+/* Dragging connection line — neutral via canvas-node-fg-muted (auto adapts to mode) */
 .react-flow {
-  --xy-connectionline-stroke-width: 2.6;
-  --xy-connectionline-stroke: rgba(255, 255, 255, 0.65);
+  --xy-connectionline-stroke-width: 2.2;
+  --xy-connectionline-stroke: var(--canvas-node-fg-muted);
 }
 .react-flow__connection-path {
-  stroke-width: 2.6px !important;
-  stroke: rgba(255, 255, 255, 0.65) !important;
+  stroke-width: 2.2px !important;
+  stroke: var(--canvas-node-fg-muted) !important;
 }
 
 .node-preview-card {
@@ -462,10 +440,10 @@ input[type="number"] {
   transition: box-shadow 0.2s ease;
 }
 .node-wrap:hover .node-preview-card {
-  box-shadow: 0 0 0 1.5px rgba(91, 118, 254, 0.5), 0 4px 20px rgba(91, 118, 254, 0.1);
+  box-shadow: 0 0 0 1.5px var(--canvas-node-hover-border), 0 4px 20px rgba(var(--accent-rgb), 0.06);
 }
 .node-preview-card--selected {
-  box-shadow: 0 0 0 1.5px #5b76fe, 0 4px 24px rgba(91, 118, 254, 0.18) !important;
+  box-shadow: 0 0 0 1.5px var(--canvas-node-selected-border), 0 4px 24px rgba(var(--accent-rgb), 0.12) !important;
 }
 
 .node-preview-header {

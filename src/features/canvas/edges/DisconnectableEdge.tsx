@@ -32,10 +32,10 @@ export const DisconnectableEdge = memo(function DisconnectableEdge(props: EdgePr
   const canvasEdgeRoutingMode = useSettingsStore((state) => state.canvasEdgeRoutingMode);
 
   const { edgePath, labelX, labelY } = useMemo(() => {
-    // Handle DOM extends 18px outside the node border (half-in/half-out).
-    // React Flow anchors edges at handleRect.right/left (the outer edge), which is 18px past
+    // Handle DOM extends 6px outside the node border (12px dot, half-in/half-out).
+    // React Flow anchors edges at handleRect.right/left (the outer edge), which is 6px past
     // the node border. Subtract that offset so the edge meets the node border exactly.
-    const HANDLE_OUTSIDE_OFFSET = 18;
+    const HANDLE_OUTSIDE_OFFSET = 6;
     const adjustedSourceX =
       sourcePosition === Position.Right
         ? sourceX - HANDLE_OUTSIDE_OFFSET
