@@ -68,7 +68,7 @@ interface UiModalProps {
 
 function resolveButtonVariant(variant: ButtonVariant): string {
   if (variant === 'primary') {
-    return 'bg-ui-primary text-white hover:bg-ui-primary-pressed';
+    return 'bg-ui-primary text-[var(--ui-primary-fg)] hover:bg-ui-primary-pressed';
   }
 
   if (variant === 'ghost') {
