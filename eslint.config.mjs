@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Ignore leftover worktree directories
     ".claude/worktrees/**",
+    // One-off dev/build helper scripts (Node CJS, not app source)
+    "scripts/**",
   ]),
   // Downgrade react-compiler plugin rules to warnings.
   // These patterns appear throughout code ported from the desktop version and
