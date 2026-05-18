@@ -366,7 +366,7 @@ function VideoGenNodeComponent({
             key={`token-${tokenIndex}`}
             className={`rounded px-0.5 ${
               isValid
-                ? 'bg-blue-500/30 text-blue-300'
+                ? 'bg-accent/30 text-accent'
                 : 'bg-red-500/30 text-red-300 line-through'
             }`}
           >

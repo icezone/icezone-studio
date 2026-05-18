@@ -169,7 +169,7 @@ const NODES: NodeData[] = [
     x: 28, y: 60, w: 148, h: 110,
     label: 'Source Image',
     type: 'source',
-    color: '#3b82f6',
+    color: 'currentColor',
     icon: '🖼️',
   },
   {

@@ -44,7 +44,7 @@ const NODE_BORDER    = 'rgba(255,255,255,0.10)';
 const NODE_HEADER_BG = 'rgba(26,38,64,0.95)';
 const NODE_FG        = '#e2e8f0';
 const NODE_FG_MUTED  = '#6b7fa0';
-const ACCENT         = '#3b82f6';
+const ACCENT         = 'var(--ui-primary)';
 const AMBER          = '#f59631';
 const HANDLE_SIZE    = 12;
 

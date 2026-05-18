@@ -51,3 +51,11 @@ next-env.d.ts
 .superpowers/
 .plans/
 supabase/.temp/
+
+# stray local env / artifact dirs (must NOT be committed — env.supabase has secrets)
+env.supabase
+.claude/scheduled_tasks.lock
+.claude/settings.json
+.playwright-mcp/
+canvas-screenshots/
+verify-screenshots/

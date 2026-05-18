@@ -29,7 +29,7 @@ export function FallbackToast({ payload, onDismiss }: FallbackToastProps) {
               {a.errorCode != null && <span className="text-red-300 opacity-80">{a.errorCode}</span>}
             </div>
           ))}
-          <a href="/settings" className="mt-1 text-blue-300 underline">在 Settings 调整偏好</a>
+          <a href="/settings" className="mt-1 text-accent underline">在 Settings 调整偏好</a>
         </div>
       )}
     </div>

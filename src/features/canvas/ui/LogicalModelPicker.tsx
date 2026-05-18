@@ -37,7 +37,7 @@ function ModelButton({ model, locked, selected, onSelect, onLocked }: ModelButto
       className={[
         'flex items-center gap-1 rounded-md border px-2 py-1 text-xs transition-colors',
         selected
-          ? 'border-blue-500 bg-blue-50 text-blue-700'
+          ? 'border-accent bg-accent/10 text-accent'
           : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300',
         locked ? 'opacity-50' : '',
       ].join(' ')}

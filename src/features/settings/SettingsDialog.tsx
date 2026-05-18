@@ -114,7 +114,7 @@ export function SettingsDialog() {
                   onClick={() => setTheme(mode)}
                   className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm transition-colors ${
                     theme === mode
-                      ? 'border-blue-500/60 bg-blue-500/15 text-blue-300'
+                      ? 'border-accent/60 bg-accent/15 text-accent'
                       : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/80'
                   }`}
                 >
@@ -143,7 +143,7 @@ export function SettingsDialog() {
                   onClick={() => handleLangChange(lang)}
                   className={`rounded-lg border px-4 py-2 text-sm transition-colors ${
                     currentLang === lang
-                      ? 'border-blue-500/60 bg-blue-500/15 text-blue-300'
+                      ? 'border-accent/60 bg-accent/15 text-accent'
                       : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/80'
                   }`}
                 >
