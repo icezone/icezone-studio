@@ -43,7 +43,7 @@ const SidebarButton = memo(({ onClick, title, disabled, children, variant = 'def
       ? 'hover:bg-red-500/15 text-red-400'
       : variant === 'active'
         ? 'bg-accent/20 text-accent'
-        : 'hover:bg-white/10 text-[#aaaaaa] hover:text-white';
+        : 'hover:bg-[var(--canvas-menu-item-hover)] text-[var(--canvas-node-fg-muted)] hover:text-[var(--canvas-node-fg)]';
 
   return (
     <button
@@ -60,7 +60,7 @@ const SidebarButton = memo(({ onClick, title, disabled, children, variant = 'def
 SidebarButton.displayName = 'SidebarButton';
 
 const Divider = () => (
-  <div className="mx-auto my-1 h-px w-7 bg-white/10" />
+  <div className="mx-auto my-1 h-px w-7 bg-[var(--canvas-node-border)]" />
 );
 
 export const CanvasSidebar = memo(({ isLocked, onToggleLock, onAddNode, onOpenTemplates }: CanvasSidebarProps) => {
@@ -87,7 +87,7 @@ export const CanvasSidebar = memo(({ isLocked, onToggleLock, onAddNode, onOpenTe
   const handleBackToDashboard = useCallback(() => { router.push('/dashboard'); }, [router]);
 
   return (
-    <div className="relative z-20 flex h-full w-12 flex-col items-center gap-0.5 border-r border-white/8 bg-[#141414] py-2">
+    <div className="relative z-20 flex h-full w-12 flex-col items-center gap-0.5 border-r border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] py-2">
       {/* Back to dashboard */}
       <SidebarButton onClick={handleBackToDashboard} title={t('canvas.sidebar.backToDashboard')}>
         <ChevronLeft className="h-4 w-4" />

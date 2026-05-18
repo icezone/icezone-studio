@@ -17,10 +17,10 @@ type Lang = 'zh' | 'en';
 
 function SectionBlock({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-white/8 bg-white/[0.03] p-4">
+    <div className="rounded-xl border border-[var(--ui-border-soft)] bg-[var(--ui-surface-field)] p-4">
       <div className="mb-3">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-white/65">{title}</h3>
-        {desc && <p className="mt-0.5 text-xs text-white/50">{desc}</p>}
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--ui-fg)]">{title}</h3>
+        {desc && <p className="mt-0.5 text-xs text-[var(--ui-fg-muted)]">{desc}</p>}
       </div>
       {children}
     </div>
@@ -67,23 +67,23 @@ export function SettingsDialog() {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-[200] bg-black/50 backdrop-blur-[2px]"
+        className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-[2px]"
         onClick={handleClose}
       />
 
       {/* Panel */}
       <div
         ref={panelRef}
-        className="fixed right-0 top-0 z-[201] flex h-full w-[400px] flex-col border-l border-white/10 bg-[#141418] shadow-2xl"
+        className="fixed right-0 top-0 z-[201] flex h-full w-[400px] flex-col border-l border-[var(--ui-border-soft)] bg-[var(--ui-bg-raised)] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex flex-shrink-0 items-center justify-between border-b border-white/8 px-5 py-4">
-          <h2 className="text-sm font-semibold text-white">{t('settings.title')}</h2>
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--ui-border-soft)] px-5 py-4">
+          <h2 className="text-sm font-semibold text-[var(--ui-fg)]">{t('settings.title')}</h2>
           <button
             type="button"
             onClick={handleClose}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-white/40 transition-colors hover:bg-white/8 hover:text-white"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--ui-fg-muted)] transition-colors hover:bg-[var(--ui-surface-field)] hover:text-[var(--ui-fg)]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -94,12 +94,12 @@ export function SettingsDialog() {
           {/* Profile */}
           <SectionBlock title={t('settings.profile')}>
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-sm font-medium text-white">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--ui-surface-field)] text-sm font-medium text-[var(--ui-fg)]">
                 {user?.email?.charAt(0).toUpperCase() ?? '?'}
               </div>
               <div>
-                <div className="text-sm text-white/80">{user?.email}</div>
-                <div className="text-xs text-white/50">{user?.id?.slice(0, 8)}...</div>
+                <div className="text-sm text-[var(--ui-fg)]">{user?.email}</div>
+                <div className="text-xs text-[var(--ui-fg-muted)]">{user?.id?.slice(0, 8)}...</div>
               </div>
             </div>
           </SectionBlock>
@@ -115,7 +115,7 @@ export function SettingsDialog() {
                   className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm transition-colors ${
                     theme === mode
                       ? 'border-accent/60 bg-accent/15 text-accent'
-                      : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/80'
+                      : 'border-[var(--ui-border-soft)] text-[var(--ui-fg-muted)] hover:border-[var(--ui-border-strong)] hover:text-[var(--ui-fg)]'
                   }`}
                 >
                   {mode === 'light' ? (
@@ -144,7 +144,7 @@ export function SettingsDialog() {
                   className={`rounded-lg border px-4 py-2 text-sm transition-colors ${
                     currentLang === lang
                       ? 'border-accent/60 bg-accent/15 text-accent'
-                      : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/80'
+                      : 'border-[var(--ui-border-soft)] text-[var(--ui-fg-muted)] hover:border-[var(--ui-border-strong)] hover:text-[var(--ui-fg)]'
                   }`}
                 >
                   {lang === 'zh' ? t('settings.langZh') : t('settings.langEn')}
@@ -161,7 +161,7 @@ export function SettingsDialog() {
           {/* Smart Routing Preferences */}
           <SectionBlock title={t('settings.routingTitle')}>
             <ScenarioDefaults />
-            <div className="mt-4 border-t border-white/8 pt-4">
+            <div className="mt-4 border-t border-[var(--ui-border-soft)] pt-4">
               <ModelPreferences />
             </div>
           </SectionBlock>

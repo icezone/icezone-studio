@@ -132,7 +132,7 @@ export function AddKeyForm({ onSubmit }: Props) {
       <button
         type="submit"
         disabled={submitting}
-        className="self-start rounded-lg bg-[var(--ui-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--ui-primary-pressed)] disabled:opacity-50"
+        className="self-start rounded-lg bg-[var(--ui-primary)] px-3 py-1.5 text-sm font-medium text-[var(--ui-primary-fg)] hover:bg-[var(--ui-primary-pressed)] disabled:opacity-50"
       >
         {submitting ? t('settings.addKey.adding') : t('settings.addKey.add')}
       </button>
