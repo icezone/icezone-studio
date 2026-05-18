@@ -423,7 +423,7 @@ input[type="number"] {
   transform: scale(1.3);
 }
 
-/* Dragging connection line — neutral via canvas-node-fg-muted (auto adapts to mode) */
+/* Dragging connection line — dashed neutral (becomes solid once edge is committed) */
 .react-flow {
   --xy-connectionline-stroke-width: 2.2;
   --xy-connectionline-stroke: var(--canvas-node-fg-muted);
@@ -431,6 +431,8 @@ input[type="number"] {
 .react-flow__connection-path {
   stroke-width: 2.2px !important;
   stroke: var(--canvas-node-fg-muted) !important;
+  stroke-dasharray: 6 4 !important;
+  stroke-linecap: round !important;
 }
 
 .node-preview-card {
