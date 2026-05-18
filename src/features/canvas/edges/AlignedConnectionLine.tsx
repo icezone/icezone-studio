@@ -42,7 +42,12 @@ export const AlignedConnectionLine = memo(function AlignedConnectionLine({
       d={path}
       fill="none"
       className="react-flow__connection-path"
-      style={{ stroke: 'rgba(255, 255, 255, 0.65)', strokeWidth: 2.6 }}
+      style={{
+        stroke: 'var(--canvas-node-fg-muted)',
+        strokeWidth: 2.2,
+        strokeDasharray: '6 4',
+        strokeLinecap: 'round',
+      }}
     />
   );
 });
