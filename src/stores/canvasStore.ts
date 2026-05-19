@@ -257,10 +257,26 @@ function normalizeNodes(rawNodes: CanvasNode[]): CanvasNode[] {
         }
       }
 
+      // Split-layout nodes: limit drag triggers to the visible preview/settings
+      // areas. Older drafts saved without this field still need the restriction.
+      const SPLIT_LAYOUT_TYPES: CanvasNodeType[] = [
+        CANVAS_NODE_TYPES.imageEdit,
+        CANVAS_NODE_TYPES.storyboardGen,
+        CANVAS_NODE_TYPES.videoAnalysis,
+        CANVAS_NODE_TYPES.videoGen,
+        CANVAS_NODE_TYPES.storyboardSplit,
+      ];
+      const dragHandle =
+        node.dragHandle ??
+        (SPLIT_LAYOUT_TYPES.includes(node.type as CanvasNodeType)
+          ? '.node-preview-area, .node-settings-panel'
+          : undefined);
+
       return {
         ...node,
         type: node.type as CanvasNodeType,
         data: mergedData,
+        ...(dragHandle ? { dragHandle } : {}),
       };
     })
     .filter((node): node is CanvasNode => Boolean(node));

@@ -71,6 +71,21 @@ export class CanvasNodeFactory implements NodeFactory {
       };
     }
 
+    // Split-layout nodes have a fixed node-container size that's bigger than the
+    // visible preview card when collapsed. Restrict drag-from-empty-area by
+    // limiting drag triggers to the actual visible parts (preview area when
+    // collapsed, plus the settings panel when expanded).
+    const SPLIT_LAYOUT_TYPES: CanvasNodeType[] = [
+      CANVAS_NODE_TYPES.imageEdit,
+      CANVAS_NODE_TYPES.storyboardGen,
+      CANVAS_NODE_TYPES.videoAnalysis,
+      CANVAS_NODE_TYPES.videoGen,
+      CANVAS_NODE_TYPES.storyboardSplit,
+    ];
+    if (SPLIT_LAYOUT_TYPES.includes(type)) {
+      node.dragHandle = '.node-preview-area, .node-settings-panel';
+    }
+
     return node;
   }
 }
