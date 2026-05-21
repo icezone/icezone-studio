@@ -10,7 +10,7 @@ import {
   useRef,
 } from 'react';
 import { Handle, Position, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -717,8 +717,21 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
                 {resolvedTitle}
               </span>
             </div>
-            <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
-              <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
+            <div className="node-preview-media relative" style={{ aspectRatio: '16/9' }}>
+              {data.imageUrl ? (
+                <img
+                  src={data.imageUrl}
+                  alt={resolvedTitle}
+                  className="h-full w-full object-cover"
+                  draggable={false}
+                />
+              ) : data.isGenerating ? (
+                <div className="flex h-full w-full items-center justify-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-[var(--canvas-node-fg-muted)]" />
+                </div>
+              ) : (
+                <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
+              )}
             </div>
           </div>
         </div>

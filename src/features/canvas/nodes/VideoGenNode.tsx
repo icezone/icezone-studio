@@ -9,7 +9,7 @@ import {
   useRef,
 } from 'react';
 import { Handle, Position, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
-import { Sparkles, RefreshCw, Download, ChevronDown, ChevronUp, ImagePlus, X } from 'lucide-react';
+import { Sparkles, RefreshCw, Download, ChevronDown, ChevronUp, ImagePlus, X, Loader2, Film } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -731,16 +731,29 @@ function VideoGenNodeComponent({
               {resolvedTitle}
             </span>
           </div>
-          <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
+          <div className="node-preview-media relative" style={{ aspectRatio: '16/9' }}>
             {data.videoUrl ? (
               <video
                 src={data.videoUrl}
-                className="h-full w-full object-cover"
+                poster={data.thumbnailUrl ?? undefined}
                 muted
+                playsInline
                 preload="metadata"
+                className="h-full w-full object-cover"
               />
+            ) : data.thumbnailUrl ? (
+              <img
+                src={data.thumbnailUrl}
+                alt={resolvedTitle}
+                className="h-full w-full object-cover"
+                draggable={false}
+              />
+            ) : data.isGenerating ? (
+              <div className="flex h-full w-full items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin text-[var(--canvas-node-fg-muted)]" />
+              </div>
             ) : (
-              <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
+              <Film className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
             )}
           </div>
         </div>

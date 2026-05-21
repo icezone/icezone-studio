@@ -10,7 +10,7 @@ import {
   useRef,
 } from 'react';
 import { Handle, Position, useUpdateNodeInternals, useViewport } from '@xyflow/react';
-import { Film, Images, Minus, Plus, Sparkles, Zap } from 'lucide-react';
+import { Film, Images, Minus, Plus, Sparkles, Zap, Loader2, LayoutTemplate } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -1507,8 +1507,19 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
                 {resolvedTitle}
               </span>
             </div>
-            <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>
-              {nodeData.frames && nodeData.frames.length > 0 ? (
+            <div className="node-preview-media relative" style={{ aspectRatio: '16/9' }}>
+              {nodeData.previewImageUrl || nodeData.imageUrl ? (
+                <img
+                  src={nodeData.previewImageUrl ?? nodeData.imageUrl ?? ''}
+                  alt={resolvedTitle}
+                  className="h-full w-full object-contain"
+                  draggable={false}
+                />
+              ) : nodeData.isGenerating ? (
+                <div className="flex h-full w-full items-center justify-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-[var(--canvas-node-fg-muted)]" />
+                </div>
+              ) : nodeData.frames && nodeData.frames.length > 0 ? (
                 <div className="flex h-full w-full gap-0.5 overflow-hidden">
                   {nodeData.frames.slice(0, 4).map((frame, i) => (
                     <div
@@ -1524,7 +1535,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
                   ))}
                 </div>
               ) : (
-                <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
+                <LayoutTemplate className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
               )}
             </div>
           </div>
