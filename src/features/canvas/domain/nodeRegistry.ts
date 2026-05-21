@@ -292,29 +292,6 @@ const videoGenNodeDefinition: CanvasNodeDefinition<import('./canvasNodes').Video
   }),
 };
 
-const videoResultNodeDefinition: CanvasNodeDefinition<import('./canvasNodes').VideoResultNodeData> = {
-  type: CANVAS_NODE_TYPES.videoResult,
-  menuLabelKey: '',
-  menuIcon: 'sparkles',
-  visibleInMenu: false,
-  capabilities: {
-    toolbar: false,
-    promptInput: false,
-  },
-  connectivity: {
-    sourceHandle: false,
-    targetHandle: true,
-    connectMenu: {
-      fromSource: false,
-      fromTarget: false,
-    },
-  },
-  createDefaultData: () => ({
-    displayName: DEFAULT_NODE_DISPLAY_NAME[CANVAS_NODE_TYPES.videoResult],
-    videoUrl: '',
-  }),
-};
-
 const novelInputNodeDefinition: CanvasNodeDefinition<NovelInputNodeData> = {
   type: CANVAS_NODE_TYPES.novelInput,
   menuLabelKey: 'node.menu.novelInput',
@@ -389,7 +366,6 @@ export const canvasNodeDefinitions: Record<CanvasNodeType, CanvasNodeDefinition>
   [CANVAS_NODE_TYPES.storyboardSplit]: storyboardSplitDefinition,
   [CANVAS_NODE_TYPES.storyboardGen]: storyboardGenNodeDefinition,
   [CANVAS_NODE_TYPES.videoGen]: videoGenNodeDefinition,
-  [CANVAS_NODE_TYPES.videoResult]: videoResultNodeDefinition,
   [CANVAS_NODE_TYPES.novelInput]: novelInputNodeDefinition,
   [CANVAS_NODE_TYPES.videoAnalysis]: videoAnalysisNodeDefinition,
 };

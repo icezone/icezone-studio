@@ -353,7 +353,7 @@ function VideoGenDemoNode({ pos, onPointerDown, selected }: {
         </button>
       </div>
 
-      {/* Video result */}
+      {/* Demo video */}
       <div style={{ flex: 1, position: 'relative', borderRadius: '0 0 10px 10px', overflow: 'hidden', background: '#000' }}>
         <video
           src="/demo.mp4"

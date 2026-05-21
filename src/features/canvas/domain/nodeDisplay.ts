@@ -17,7 +17,6 @@ export const DEFAULT_NODE_DISPLAY_NAME: Record<CanvasNodeType, string> = {
   [CANVAS_NODE_TYPES.storyboardSplit]: '切割结果',
   [CANVAS_NODE_TYPES.storyboardGen]: '分镜生成',
   [CANVAS_NODE_TYPES.videoGen]: 'AI 视频',
-  [CANVAS_NODE_TYPES.videoResult]: '视频结果',
   [CANVAS_NODE_TYPES.novelInput]: '小说/剧本输入',
   [CANVAS_NODE_TYPES.videoAnalysis]: '视频分析',
 };
@@ -32,7 +31,6 @@ const NODE_DISPLAY_NAME_I18N_KEY: Record<CanvasNodeType, string> = {
   [CANVAS_NODE_TYPES.storyboardSplit]: 'nodeDisplayName.storyboardSplit',
   [CANVAS_NODE_TYPES.storyboardGen]: 'nodeDisplayName.storyboardGen',
   [CANVAS_NODE_TYPES.videoGen]: 'nodeDisplayName.videoGen',
-  [CANVAS_NODE_TYPES.videoResult]: 'nodeDisplayName.videoResult',
   [CANVAS_NODE_TYPES.novelInput]: 'nodeDisplayName.novelInput',
   [CANVAS_NODE_TYPES.videoAnalysis]: 'nodeDisplayName.videoAnalysis',
 };

@@ -14,7 +14,6 @@ export const CANVAS_NODE_TYPES = {
   storyboardSplit: 'storyboardNode',
   storyboardGen: 'storyboardGenNode',
   videoGen: 'videoGenNode',
-  videoResult: 'videoResultNode',
   novelInput: 'novelInputNode',
   videoAnalysis: 'videoAnalysisNode',
 } as const;
@@ -261,20 +260,6 @@ export interface VideoAnalysisNodeData extends NodeDisplayData {
   reversePromptStyle?: ReversePromptStyle;
 }
 
-export interface VideoResultNodeData extends NodeDisplayData {
-  videoUrl: string;
-  thumbnailUrl?: string | null;
-  prompt?: string;
-  model?: string;
-  duration?: number;
-  aspectRatio?: string;
-  enableAudio?: boolean;
-  seed?: number | null;
-  extraParams?: Record<string, unknown>;
-  startFrameUrl?: string | null;
-  endFrameUrl?: string | null;
-}
-
 export type CanvasNodeData =
   | UploadImageNodeData
   | ExportImageNodeData
@@ -284,7 +269,6 @@ export type CanvasNodeData =
   | StoryboardSplitNodeData
   | StoryboardGenNodeData
   | VideoGenNodeData
-  | VideoResultNodeData
   | NovelInputNodeData
   | VideoAnalysisNodeData;
 

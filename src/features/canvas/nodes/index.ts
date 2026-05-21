@@ -10,7 +10,6 @@ import { TextAnnotationNode } from './TextAnnotationNode';
 import { UploadNode } from './UploadNode';
 import { VideoGenNode } from './VideoGenNode';
 import { VideoAnalysisNode } from './VideoAnalysisNode';
-import { VideoResultNode } from './VideoResultNode';
 
 export const nodeTypes: NodeTypes = {
   exportImageNode: ImageNode,
@@ -23,7 +22,6 @@ export const nodeTypes: NodeTypes = {
   uploadNode: UploadNode,
   videoAnalysisNode: VideoAnalysisNode,
   videoGenNode: VideoGenNode,
-  videoResultNode: VideoResultNode,
 };
 
-export { GroupNode, ImageEditNode, ImageNode, NovelInputNode, StoryboardGenNode, StoryboardNode, TextAnnotationNode, UploadNode, VideoAnalysisNode, VideoGenNode, VideoResultNode };
+export { GroupNode, ImageEditNode, ImageNode, NovelInputNode, StoryboardGenNode, StoryboardNode, TextAnnotationNode, UploadNode, VideoAnalysisNode, VideoGenNode };
