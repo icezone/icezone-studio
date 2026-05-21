@@ -968,6 +968,13 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
         }
       );
       addEdge(id, previewNodeId);
+      // Phase 3 double-write: mirror preview grid image to self.
+      updateNodeData(id, {
+        imageUrl: gridImageDataUrl,
+        previewImageUrl: gridImageDataUrl,
+        isGenerating: false,
+        generationStartedAt: null,
+      });
       setSelectedNode(null);
       setError(null);
       return;
@@ -1017,6 +1024,8 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
 
     // Connect the storyboard node to the new image node
     addEdge(id, newNodeId);
+    // Phase 3 double-write: mirror generating state to self so preview panel updates immediately.
+    updateNodeData(id, { isGenerating: true, generationStartedAt });
 
     setSelectedNode(null);
     setError(null);
@@ -1115,6 +1124,8 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
         generationErrorDetails: resolvedError.details ?? null,
         generationDebugContext,
       });
+      // Phase 3 double-write: mirror error state to self.
+      updateNodeData(id, { isGenerating: false, generationStartedAt: null, generationError: resolvedError.message });
     }
   }, [
     providerApiKey,
@@ -1218,6 +1229,12 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
             }
           );
           addEdge(id, newNodeId);
+          // Phase 3 double-write: mirror batch frame result to self (last frame wins for preview).
+          updateNodeData(id, {
+            imageUrl: result.result,
+            previewImageUrl: result.result,
+            isGenerating: false,
+          });
         }
       }
 
@@ -1259,6 +1276,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
     addEdge,
     id,
     t,
+    updateNodeData,
   ]);
 
   const handleRowChange = useCallback(
@@ -1518,6 +1536,10 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
               ) : nodeData.isGenerating ? (
                 <div className="flex h-full w-full items-center justify-center">
                   <Loader2 className="h-6 w-6 animate-spin text-[var(--canvas-node-fg-muted)]" />
+                </div>
+              ) : nodeData.generationError ? (
+                <div className="flex h-full w-full items-center justify-center px-2">
+                  <span className="text-[10px] text-red-400 text-center line-clamp-3">{nodeData.generationError}</span>
                 </div>
               ) : nodeData.frames && nodeData.frames.length > 0 ? (
                 <div className="flex h-full w-full gap-0.5 overflow-hidden">

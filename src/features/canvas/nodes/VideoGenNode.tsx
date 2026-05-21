@@ -252,6 +252,7 @@ function VideoGenNodeComponent({
             ? Date.now() - data.generationStartedAt
             : 0;
 
+          // videoGen already owns its result on its own data; no child exportImage to mirror.
           updateNodeData(id, {
             videoUrl: status.videoUrl,
             isGenerating: false,
@@ -751,6 +752,10 @@ function VideoGenNodeComponent({
             ) : data.isGenerating ? (
               <div className="flex h-full w-full items-center justify-center">
                 <Loader2 className="h-6 w-6 animate-spin text-[var(--canvas-node-fg-muted)]" />
+              </div>
+            ) : data.generationError || data.errorMessage ? (
+              <div className="flex h-full w-full items-center justify-center px-2">
+                <span className="text-[10px] text-red-400 text-center line-clamp-3">{data.generationError ?? data.errorMessage}</span>
               </div>
             ) : (
               <Film className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />

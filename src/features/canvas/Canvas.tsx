@@ -541,6 +541,20 @@ function CanvasInner() {
                 generationErrorDetails: null,
                 generationDebugContext: undefined,
               });
+              // Phase 3 double-write: mirror result to parent generator node so its own
+              // preview panel can display the image without needing the child exportImage.
+              {
+                const currentEdges = useCanvasStore.getState().edges;
+                const parentEdge = currentEdges.find((edge) => edge.target === pendingNode.id);
+                if (parentEdge) {
+                  updateNodeData(parentEdge.source, {
+                    imageUrl: imageWithMetadata,
+                    previewImageUrl: previewWithMetadata,
+                    isGenerating: false,
+                    generationStartedAt: null,
+                  });
+                }
+              }
               break;
             }
 
@@ -567,6 +581,19 @@ function CanvasInner() {
               generationError: errorMessage,
               generationErrorDetails: status.error ?? null,
             });
+            // Phase 3 double-write: mirror error state to parent generator node.
+            {
+              const currentEdges = useCanvasStore.getState().edges;
+              const parentEdge = currentEdges.find((edge) => edge.target === pendingNode.id);
+              if (parentEdge) {
+                updateNodeData(parentEdge.source, {
+                  isGenerating: false,
+                  generationStartedAt: null,
+                  generationError: errorMessage,
+                  generationErrorDetails: status.error ?? null,
+                });
+              }
+            }
             break;
           }
         } finally {

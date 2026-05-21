@@ -86,6 +86,7 @@ export interface ImageEditNodeData extends NodeImageData {
   isGenerating?: boolean;
   generationStartedAt?: number | null;
   generationDurationMs?: number;
+  generationError?: string | null;
   logicalModelId?: string;
 }
 
@@ -168,6 +169,7 @@ export interface StoryboardGenNodeData {
   isGenerating?: boolean;
   generationStartedAt?: number | null;
   generationDurationMs?: number;
+  generationError?: string | null;
   [key: string]: unknown;
 }
 
@@ -187,6 +189,7 @@ export interface VideoGenNodeData extends NodeDisplayData {
   isGenerating?: boolean;
   generationStartedAt?: number | null;
   generationDurationMs?: number;
+  generationError?: string | null;
   jobId?: string | null;
   errorMessage?: string | null;
 }

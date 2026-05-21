@@ -450,6 +450,8 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
       }
     );
     addEdge(id, newNodeId);
+    // Phase 3 double-write: mirror generating state to self so preview panel updates immediately.
+    updateNodeData(id, { isGenerating: true, generationStartedAt });
 
     try {
       await canvasAiGateway.setApiKey(selectedModel.providerId, providerApiKey);
@@ -544,6 +546,8 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
         generationErrorDetails: resolvedError.details ?? null,
         generationDebugContext,
       });
+      // Phase 3 double-write: mirror error state to self.
+      updateNodeData(id, { isGenerating: false, generationStartedAt: null, generationError: resolvedError.message });
     }
   }, [
     addNode,
@@ -728,6 +732,10 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
               ) : data.isGenerating ? (
                 <div className="flex h-full w-full items-center justify-center">
                   <Loader2 className="h-6 w-6 animate-spin text-[var(--canvas-node-fg-muted)]" />
+                </div>
+              ) : data.generationError ? (
+                <div className="flex h-full w-full items-center justify-center px-2">
+                  <span className="text-[10px] text-red-400 text-center line-clamp-3">{data.generationError}</span>
                 </div>
               ) : (
                 <Sparkles className="h-10 w-10 opacity-20 text-[var(--canvas-node-fg-muted)]" />
