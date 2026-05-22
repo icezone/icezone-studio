@@ -28,6 +28,7 @@ import {
   type StoryboardFrameItem,
   isStoryboardSplitNode,
 } from '@/features/canvas/domain/canvasNodes';
+import { migrateLegacyExportImageNodes } from './canvasStoreMigration';
 import {
   nodeHasSourceHandle,
   nodeHasTargetHandle,
@@ -695,8 +696,10 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   },
 
   setCanvasData: (nodes, edges, history) => {
-    const normalizedNodes = normalizeNodes(nodes);
-    const normalizedEdges = normalizeEdgesWithNodes(edges, normalizedNodes);
+    const { nodes: migratedNodes, edges: migratedEdges } =
+      migrateLegacyExportImageNodes(nodes, edges);
+    const normalizedNodes = normalizeNodes(migratedNodes);
+    const normalizedEdges = normalizeEdgesWithNodes(migratedEdges, normalizedNodes);
 
     set({
       nodes: normalizedNodes,
