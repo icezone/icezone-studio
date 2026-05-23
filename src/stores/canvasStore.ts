@@ -22,7 +22,6 @@ import {
   type CanvasNode,
   type CanvasNodeData,
   type CanvasNodeType,
-  type ExportImageNodeResultKind,
   type NodeToolType,
   type StoryboardExportOptions,
   type StoryboardFrameItem,
@@ -33,7 +32,6 @@ import {
   nodeHasSourceHandle,
   nodeHasTargetHandle,
 } from '@/features/canvas/domain/nodeRegistry';
-import { EXPORT_RESULT_DISPLAY_NAME } from '@/features/canvas/domain/nodeDisplay';
 import { nodeCatalog } from '@/features/canvas/application/nodeCatalog';
 import { canvasNodeFactory } from '@/features/canvas/application/canvasServices';
 import {
@@ -107,7 +105,6 @@ interface CanvasState {
     previewImageUrl?: string,
     options?: {
       defaultTitle?: string;
-      resultKind?: ExportImageNodeResultKind;
       aspectRatioStrategy?: 'provided' | 'derivedFromSource';
       sizeStrategy?: 'generated' | 'autoMinEdge' | 'matchSource';
       matchSourceNodeSize?: boolean;
@@ -345,8 +342,7 @@ function getNodeSize(node: CanvasNode): { width: number; height: number } {
 
 function isImageAutoResizableType(type: CanvasNodeType): boolean {
   return type === CANVAS_NODE_TYPES.upload
-    || type === CANVAS_NODE_TYPES.imageEdit
-    || type === CANVAS_NODE_TYPES.exportImage;
+    || type === CANVAS_NODE_TYPES.imageEdit;
 }
 
 function withManualSizeLock(node: CanvasNode): CanvasNode {
@@ -458,12 +454,7 @@ function maybeApplyImageAutoResize(node: CanvasNode, patch: Partial<CanvasNodeDa
   }
 
   const nextAspectRatio = patchData.aspectRatio ?? nodeData.aspectRatio ?? DEFAULT_ASPECT_RATIO;
-  const nextSize = node.type === CANVAS_NODE_TYPES.exportImage
-    ? resolveAutoImageNodeDimensions(nextAspectRatio, {
-      minWidth: EXPORT_RESULT_NODE_MIN_WIDTH,
-      minHeight: EXPORT_RESULT_NODE_MIN_HEIGHT,
-    })
-    : resolveAutoImageNodeDimensions(nextAspectRatio);
+  const nextSize = resolveAutoImageNodeDimensions(nextAspectRatio);
 
   return {
     ...node,
@@ -993,6 +984,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   },
 
   addDerivedExportNode: (sourceNodeId, imageUrl, aspectRatio, previewImageUrl, options) => {
+    // Phase 5: exportImage type is gone. Materialise the result as a plain upload node
+    // so it functions identically as a downstream image source.
     const state = get();
     const sourceNode = state.nodes.find((node) => node.id === sourceNodeId);
     const aspectRatioStrategy = options?.aspectRatioStrategy ?? 'provided';
@@ -1024,23 +1017,16 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       derivedSize.width,
       derivedSize.height
     );
-    const exportNodeData: Partial<CanvasNodeData> = {
+    const nodeData: Partial<CanvasNodeData> = {
       imageUrl,
       previewImageUrl: previewImageUrl ?? null,
       aspectRatio: resolvedAspectRatio,
     };
     if (options?.defaultTitle) {
-      (exportNodeData as { displayName?: string }).displayName = options.defaultTitle;
+      (nodeData as { displayName?: string }).displayName = options.defaultTitle;
     }
-    if (options?.resultKind) {
-      (exportNodeData as { resultKind?: ExportImageNodeResultKind }).resultKind = options.resultKind;
-      if (!options.defaultTitle) {
-        (exportNodeData as { displayName?: string }).displayName =
-          EXPORT_RESULT_DISPLAY_NAME[options.resultKind];
-      }
-    }
-    const node = canvasNodeFactory.createNode(CANVAS_NODE_TYPES.exportImage, position, {
-      ...exportNodeData,
+    const node = canvasNodeFactory.createNode(CANVAS_NODE_TYPES.upload, position, {
+      ...nodeData,
     });
     node.width = derivedSize.width;
     node.height = derivedSize.height;

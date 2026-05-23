@@ -8,7 +8,6 @@ import type {
 export const CANVAS_NODE_TYPES = {
   upload: 'uploadNode',
   imageEdit: 'imageNode',
-  exportImage: 'exportImageNode',
   textAnnotation: 'textAnnotationNode',
   group: 'groupNode',
   storyboardSplit: 'storyboardNode',
@@ -55,16 +54,6 @@ export interface NodeImageData extends NodeDisplayData {
 
 export interface UploadImageNodeData extends NodeImageData {
   sourceFileName?: string | null;
-}
-
-export type ExportImageNodeResultKind =
-  | 'generic'
-  | 'storyboardGenOutput'
-  | 'storyboardSplitExport'
-  | 'storyboardFrameEdit';
-
-export interface ExportImageNodeData extends NodeImageData {
-  resultKind?: ExportImageNodeResultKind;
 }
 
 export interface GroupNodeData extends NodeDisplayData {
@@ -265,7 +254,6 @@ export interface VideoAnalysisNodeData extends NodeDisplayData {
 
 export type CanvasNodeData =
   | UploadImageNodeData
-  | ExportImageNodeData
   | TextAnnotationNodeData
   | GroupNodeData
   | ImageEditNodeData
@@ -316,12 +304,6 @@ export function isImageEditNode(
   return node?.type === CANVAS_NODE_TYPES.imageEdit;
 }
 
-export function isExportImageNode(
-  node: CanvasNode | null | undefined
-): node is Node<ExportImageNodeData, typeof CANVAS_NODE_TYPES.exportImage> {
-  return node?.type === CANVAS_NODE_TYPES.exportImage;
-}
-
 export function isGroupNode(
   node: CanvasNode | null | undefined
 ): node is Node<GroupNodeData, typeof CANVAS_NODE_TYPES.group> {
@@ -369,7 +351,7 @@ export function nodeHasImage(node: CanvasNode | null | undefined): boolean {
     return false;
   }
 
-  if (isUploadNode(node) || isImageEditNode(node) || isExportImageNode(node)) {
+  if (isUploadNode(node) || isImageEditNode(node)) {
     return Boolean(node.data.imageUrl);
   }
 

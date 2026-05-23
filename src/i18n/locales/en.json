@@ -363,15 +363,11 @@
   "nodeDisplayName": {
     "upload": "Upload Image",
     "imageEdit": "AI Image",
-    "exportImage": "Result Image",
     "textAnnotation": "Text Annotation",
     "group": "Group",
     "storyboardSplit": "Split Result",
     "storyboardGen": "Storyboard Gen",
     "videoGen": "AI Video",
-    "storyboardGenOutput": "Storyboard Output",
-    "storyboardSplitExport": "Split Export",
-    "storyboardFrameEdit": "Frame Edit",
     "novelInput": "Novel/Script Input",
     "videoAnalysis": "Video Analysis"
   },

@@ -1,6 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- test fixtures need
+   structural-only stand-ins for CanvasNode/Edge data, not real interfaces. */
 import { describe, it, expect } from 'vitest';
 import { migrateLegacyExportImageNodes } from '@/stores/canvasStoreMigration';
 import type { CanvasNode, CanvasEdge } from '@/features/canvas/domain/canvasNodes';
+
+// 'exportImageNode' is the legacy type string that no longer appears in the
+// CanvasNodeType union (Phase 5 removed it). The migration explicitly accepts
+// raw strings, so the test fixtures cast through `as unknown as CanvasNode`.
 
 describe('migrateLegacyExportImageNodes', () => {
   it('folds an exportImage result back into its imageEdit parent', () => {
@@ -13,7 +19,7 @@ describe('migrateLegacyExportImageNodes', () => {
       },
       {
         id: 'res-1',
-        type: 'exportImageNode',
+        type: 'exportImageNode' as unknown as CanvasNode['type'],
         position: { x: 200, y: 0 },
         data: { imageUrl: 'https://example/r.png', resultKind: 'generic' } as any,
       },
@@ -33,7 +39,7 @@ describe('migrateLegacyExportImageNodes', () => {
     const nodes: CanvasNode[] = [
       { id: 'a', type: 'imageNode', position: { x: 0, y: 0 }, data: { imageUrl: null } as any },
       { id: 'b', type: 'imageNode', position: { x: 0, y: 100 }, data: { imageUrl: null } as any },
-      { id: 'res', type: 'exportImageNode', position: { x: 200, y: 0 }, data: { imageUrl: 'https://x/r.png' } as any },
+      { id: 'res', type: 'exportImageNode' as unknown as CanvasNode['type'], position: { x: 200, y: 0 }, data: { imageUrl: 'https://x/r.png' } as any },
     ];
     const edges: CanvasEdge[] = [
       { id: 'e1', source: 'a', target: 'res' } as any,
@@ -47,7 +53,7 @@ describe('migrateLegacyExportImageNodes', () => {
   it('leaves exportImage alone if parent is not a recognised generator type', () => {
     const nodes: CanvasNode[] = [
       { id: 'upload', type: 'uploadNode', position: { x: 0, y: 0 }, data: {} as any },
-      { id: 'res', type: 'exportImageNode', position: { x: 200, y: 0 }, data: { imageUrl: 'https://x.png' } as any },
+      { id: 'res', type: 'exportImageNode' as unknown as CanvasNode['type'], position: { x: 200, y: 0 }, data: { imageUrl: 'https://x.png' } as any },
     ];
     const edges: CanvasEdge[] = [
       { id: 'e1', source: 'upload', target: 'res' } as any,

@@ -3,12 +3,10 @@ import { useTranslation } from 'react-i18next';
 
 import {
   NODE_TOOL_TYPES,
-  isExportImageNode,
   isImageEditNode,
   isUploadNode,
   type NodeToolType,
 } from '@/features/canvas/domain/canvasNodes';
-import { EXPORT_RESULT_DISPLAY_NAME } from '@/features/canvas/domain/nodeDisplay';
 import {
   canvasEventBus,
   canvasToolProcessor,
@@ -66,7 +64,7 @@ export function NodeToolDialog() {
       return null;
     }
 
-    if (isUploadNode(sourceNode) || isImageEditNode(sourceNode) || isExportImageNode(sourceNode)) {
+    if (isUploadNode(sourceNode) || isImageEditNode(sourceNode)) {
       return sourceNode.data.imageUrl;
     }
 
@@ -192,7 +190,7 @@ export function NodeToolDialog() {
     if (toolType === NODE_TOOL_TYPES.annotate) {
       return t('toolDialog.annotateResultTitle');
     }
-    return EXPORT_RESULT_DISPLAY_NAME.generic;
+    return '结果图片';
   }, [t]);
 
   const handleApply = useCallback(async () => {
@@ -230,7 +228,6 @@ export function NodeToolDialog() {
           prepared.previewImageUrl,
           {
             defaultTitle: resolveResultNodeTitle(activeToolDialog.toolType),
-            resultKind: 'generic',
             aspectRatioStrategy: 'provided',
             sizeStrategy: 'autoMinEdge',
           }

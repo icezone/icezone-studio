@@ -1,6 +1,5 @@
 import {
   NODE_TOOL_TYPES,
-  isExportImageNode,
   isImageEditNode,
   isUploadNode,
   type CanvasNode,
@@ -9,7 +8,7 @@ import { stringifyAnnotationItems } from './annotation';
 import type { CanvasToolPlugin } from './types';
 
 function supportsImageSourceNode(node: CanvasNode): boolean {
-  return isUploadNode(node) || isImageEditNode(node) || isExportImageNode(node);
+  return isUploadNode(node) || isImageEditNode(node);
 }
 
 export const cropToolPlugin: CanvasToolPlugin = {

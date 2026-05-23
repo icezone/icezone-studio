@@ -363,15 +363,11 @@
   "nodeDisplayName": {
     "upload": "上传图片",
     "imageEdit": "AI 图片",
-    "exportImage": "结果图片",
     "textAnnotation": "文本注释",
     "group": "分组",
     "storyboardSplit": "切割结果",
     "storyboardGen": "分镜生成",
     "videoGen": "AI 视频",
-    "storyboardGenOutput": "分镜输出",
-    "storyboardSplitExport": "切割导出",
-    "storyboardFrameEdit": "分镜帧",
     "novelInput": "小说/剧本输入",
     "videoAnalysis": "视频分析"
   },

@@ -194,7 +194,13 @@ function resolveAllowedNodeTypes(handleType: HandleType): CanvasNodeType[] {
 }
 
 function canNodeTypeBeManualConnectionSource(type: CanvasNodeType): boolean {
-  return type === CANVAS_NODE_TYPES.upload || type === CANVAS_NODE_TYPES.exportImage;
+  // Phase 5: imageEdit/storyboardGen now own their generated result on self,
+  // so they can be drag-from sources (replacing the legacy exportImage role).
+  return (
+    type === CANVAS_NODE_TYPES.upload ||
+    type === CANVAS_NODE_TYPES.imageEdit ||
+    type === CANVAS_NODE_TYPES.storyboardGen
+  );
 }
 
 function canNodeBeManualConnectionSource(nodeId: string | null | undefined, nodes: CanvasNode[]): boolean {
@@ -441,15 +447,19 @@ function CanvasInner() {
         window.setTimeout(resolve, delayMs);
       });
 
-    const pendingExportNodes = nodes.filter((node) => {
-      if (node.type !== CANVAS_NODE_TYPES.exportImage) {
+    const pendingGenerationNodes = nodes.filter((node) => {
+      if (
+        node.type !== CANVAS_NODE_TYPES.imageEdit &&
+        node.type !== CANVAS_NODE_TYPES.storyboardGen &&
+        node.type !== CANVAS_NODE_TYPES.videoGen
+      ) {
         return false;
       }
       const data = node.data as Record<string, unknown>;
       return data.isGenerating === true && typeof data.generationJobId === 'string' && data.generationJobId.length > 0;
     });
 
-    for (const pendingNode of pendingExportNodes) {
+    for (const pendingNode of pendingGenerationNodes) {
       if (activeGenerationPollNodeIdsRef.current.has(pendingNode.id)) {
         continue;
       }
@@ -527,6 +537,7 @@ function CanvasInner() {
                 ? imageWithMetadata
                 : prepared.previewImageUrl;
 
+              // Phase 5: write directly to the generator node — no more exportImage child.
               updateNodeData(pendingNode.id, {
                 imageUrl: imageWithMetadata,
                 previewImageUrl: previewWithMetadata,
@@ -541,20 +552,6 @@ function CanvasInner() {
                 generationErrorDetails: null,
                 generationDebugContext: undefined,
               });
-              // Phase 3 double-write: mirror result to parent generator node so its own
-              // preview panel can display the image without needing the child exportImage.
-              {
-                const currentEdges = useCanvasStore.getState().edges;
-                const parentEdge = currentEdges.find((edge) => edge.target === pendingNode.id);
-                if (parentEdge) {
-                  updateNodeData(parentEdge.source, {
-                    imageUrl: imageWithMetadata,
-                    previewImageUrl: previewWithMetadata,
-                    isGenerating: false,
-                    generationStartedAt: null,
-                  });
-                }
-              }
               break;
             }
 
@@ -571,6 +568,7 @@ function CanvasInner() {
               });
               void showErrorDialog(errorMessage, t('common.error'), status.error ?? undefined, reportText);
             }
+            // Phase 5: write error directly to the generator node — no more exportImage child.
             updateNodeData(pendingNode.id, {
               isGenerating: false,
               generationStartedAt: null,
@@ -581,19 +579,6 @@ function CanvasInner() {
               generationError: errorMessage,
               generationErrorDetails: status.error ?? null,
             });
-            // Phase 3 double-write: mirror error state to parent generator node.
-            {
-              const currentEdges = useCanvasStore.getState().edges;
-              const parentEdge = currentEdges.find((edge) => edge.target === pendingNode.id);
-              if (parentEdge) {
-                updateNodeData(parentEdge.source, {
-                  isGenerating: false,
-                  generationStartedAt: null,
-                  generationError: errorMessage,
-                  generationErrorDetails: status.error ?? null,
-                });
-              }
-            }
             break;
           }
         } finally {

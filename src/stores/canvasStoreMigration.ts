@@ -1,6 +1,14 @@
 import type { CanvasNode, CanvasEdge } from '@/features/canvas/domain/canvasNodes';
 import { CANVAS_NODE_TYPES } from '@/features/canvas/domain/canvasNodes';
 
+/**
+ * The exportImage node type was removed in Phase 5 of the result-nodes merger.
+ * Drafts saved before that may still contain nodes with this type string —
+ * the migration detects them by literal name and folds their image data back
+ * into the upstream generator node.
+ */
+const LEGACY_EXPORT_IMAGE_TYPE = 'exportImageNode';
+
 const RECOGNISED_PARENT_TYPES = new Set<string>([
   CANVAS_NODE_TYPES.imageEdit,
   CANVAS_NODE_TYPES.storyboardGen,
@@ -23,7 +31,7 @@ export function migrateLegacyExportImageNodes(
   const dataPatches = new Map<string, Partial<CanvasNode['data']>>();
 
   for (const n of nodes) {
-    if (n.type !== CANVAS_NODE_TYPES.exportImage) continue;
+    if ((n.type as string) !== LEGACY_EXPORT_IMAGE_TYPE) continue;
     const incoming = incomingByTarget.get(n.id) ?? [];
     if (incoming.length !== 1) continue;
     const parent = nodesById.get(incoming[0].source);

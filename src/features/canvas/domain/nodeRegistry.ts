@@ -5,7 +5,6 @@ import {
   type ImageSize,
   type CanvasNodeData,
   type CanvasNodeType,
-  type ExportImageNodeData,
   type GroupNodeData,
   type ImageEditNodeData,
   type NovelInputNodeData,
@@ -102,33 +101,6 @@ const imageEditNodeDefinition: CanvasNodeDefinition<ImageEditNodeData> = {
     isGenerating: false,
     generationStartedAt: null,
     generationDurationMs: 60000,
-  }),
-};
-
-const exportImageNodeDefinition: CanvasNodeDefinition<ExportImageNodeData> = {
-  type: CANVAS_NODE_TYPES.exportImage,
-  menuLabelKey: 'node.menu.uploadImage',
-  menuIcon: 'upload',
-  visibleInMenu: false,
-  capabilities: {
-    toolbar: true,
-    promptInput: false,
-  },
-  connectivity: {
-    sourceHandle: true,
-    targetHandle: true,
-    connectMenu: {
-      fromSource: false,
-      fromTarget: false,
-    },
-  },
-  createDefaultData: () => ({
-    displayName: DEFAULT_NODE_DISPLAY_NAME[CANVAS_NODE_TYPES.exportImage],
-    imageUrl: null,
-    previewImageUrl: null,
-    aspectRatio: DEFAULT_ASPECT_RATIO,
-    isSizeManuallyAdjusted: false,
-    resultKind: 'generic',
   }),
 };
 
@@ -360,7 +332,6 @@ const videoAnalysisNodeDefinition: CanvasNodeDefinition<VideoAnalysisNodeData> =
 export const canvasNodeDefinitions: Record<CanvasNodeType, CanvasNodeDefinition> = {
   [CANVAS_NODE_TYPES.upload]: uploadNodeDefinition,
   [CANVAS_NODE_TYPES.imageEdit]: imageEditNodeDefinition,
-  [CANVAS_NODE_TYPES.exportImage]: exportImageNodeDefinition,
   [CANVAS_NODE_TYPES.textAnnotation]: textAnnotationNodeDefinition,
   [CANVAS_NODE_TYPES.group]: groupNodeDefinition,
   [CANVAS_NODE_TYPES.storyboardSplit]: storyboardSplitDefinition,

@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 
 import {
   NODE_TOOL_TYPES,
-  isExportImageNode,
   isGroupNode,
   isImageEditNode,
   isStoryboardGenNode,
@@ -77,23 +76,24 @@ export const NodeActionToolbar = memo(({ node }: NodeActionToolbarProps) => {
   const copyErrorFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const downloadMenuCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const imageSource = useMemo(() => {
-    if (isUploadNode(node) || isImageEditNode(node) || isExportImageNode(node)) {
+    if (isUploadNode(node) || isImageEditNode(node) || isStoryboardGenNode(node)) {
       return node.data.imageUrl || node.data.previewImageUrl || null;
     }
     return null;
   }, [node]);
   const canHandleImage = Boolean(imageSource);
+  const carriesGenerationError = isImageEditNode(node) || isStoryboardGenNode(node);
   const generationError =
-    isExportImageNode(node)
+    carriesGenerationError
     && typeof (node.data as { generationError?: unknown }).generationError === 'string'
       ? ((node.data as { generationError?: string }).generationError ?? '').trim()
       : '';
   const generationErrorDetails =
-    isExportImageNode(node)
+    carriesGenerationError
     && typeof (node.data as { generationErrorDetails?: unknown }).generationErrorDetails === 'string'
       ? ((node.data as { generationErrorDetails?: string }).generationErrorDetails ?? '').trim()
       : '';
-  const canCopyGenerationError = isExportImageNode(node) && generationError.length > 0;
+  const canCopyGenerationError = carriesGenerationError && generationError.length > 0;
   const generationErrorReport = useMemo(
     () =>
       buildGenerationErrorReport({

@@ -97,24 +97,14 @@ export const DisconnectableEdge = memo(function DisconnectableEdge(props: EdgePr
 
   const isProcessingEdge = useMemo(() => {
     const sourceNode = nodes.find((node) => node.id === source);
-    const targetNode = nodes.find((node) => node.id === target);
-
-    if (!sourceNode || !targetNode || targetNode.type !== CANVAS_NODE_TYPES.exportImage) {
-      return false;
-    }
-
-    const isSupportedSource =
+    if (!sourceNode) return false;
+    const eligible =
+      sourceNode.type === CANVAS_NODE_TYPES.imageEdit ||
       sourceNode.type === CANVAS_NODE_TYPES.storyboardGen ||
-      sourceNode.type === CANVAS_NODE_TYPES.imageEdit;
-    if (!isSupportedSource) {
-      return false;
-    }
-
-    const isTargetGenerating =
-      (targetNode.data as { isGenerating?: boolean } | undefined)?.isGenerating === true;
-
-    return isTargetGenerating;
-  }, [nodes, source, target]);
+      sourceNode.type === CANVAS_NODE_TYPES.videoGen;
+    if (!eligible) return false;
+    return (sourceNode.data as { isGenerating?: boolean } | undefined)?.isGenerating === true;
+  }, [nodes, source]);
 
   const processingStroke = 'rgb(var(--accent-rgb) / 0.94)';
   const processingDashStroke = 'rgb(var(--accent-rgb) / 1)';

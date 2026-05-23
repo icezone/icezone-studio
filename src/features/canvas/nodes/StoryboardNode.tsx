@@ -36,11 +36,10 @@ import type {
 } from '@/features/canvas/domain/canvasNodes';
 import {
   CANVAS_NODE_TYPES,
-  isExportImageNode,
   isImageEditNode,
   isUploadNode,
 } from '@/features/canvas/domain/canvasNodes';
-import { EXPORT_RESULT_DISPLAY_NAME, resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
+import { resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
 import {
   canvasToDataUrl,
   loadImageElement,
@@ -527,7 +526,7 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
       if (!sourceNode) {
         continue;
       }
-      if (!isUploadNode(sourceNode) && !isImageEditNode(sourceNode) && !isExportImageNode(sourceNode)) {
+      if (!isUploadNode(sourceNode) && !isImageEditNode(sourceNode)) {
         continue;
       }
       const imageUrl = sourceNode.data.imageUrl;
@@ -706,7 +705,7 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
         const frameIndex = orderedFrames.findIndex((item) => item.id === frame.id);
         const frameTitle = frameIndex >= 0
           ? `分镜 ${frameIndex + 1}`
-          : EXPORT_RESULT_DISPLAY_NAME.storyboardFrameEdit;
+          : '分镜帧';
 
         const prepared = await prepareNodeImage(sourceImage);
         const createdNodeId = addDerivedExportNode(
@@ -716,7 +715,6 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
           prepared.previewImageUrl,
           {
             defaultTitle: frameTitle,
-            resultKind: 'storyboardFrameEdit',
           }
         );
 
@@ -877,8 +875,7 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
         aspectRatio,
         finalPreviewPath,
         {
-          defaultTitle: EXPORT_RESULT_DISPLAY_NAME.storyboardSplitExport,
-          resultKind: 'storyboardSplitExport',
+          defaultTitle: '切割导出',
         }
       );
       console.info(`${EXPORT_TRACE_PREFIX} derived-node-created`, {

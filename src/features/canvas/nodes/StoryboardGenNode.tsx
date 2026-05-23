@@ -17,14 +17,12 @@ import {
   AUTO_REQUEST_ASPECT_RATIO,
   CANVAS_NODE_TYPES,
   DEFAULT_ASPECT_RATIO,
-  EXPORT_RESULT_NODE_DEFAULT_WIDTH,
-  EXPORT_RESULT_NODE_LAYOUT_HEIGHT,
   createDefaultStoryboardGenFrame,
   type ImageSize,
   type StoryboardRatioControlMode,
   type StoryboardGenNodeData,
 } from '@/features/canvas/domain/canvasNodes';
-import { EXPORT_RESULT_DISPLAY_NAME, resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
+import { resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
 import { useCanvasStore } from '@/stores/canvasStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import {
@@ -553,9 +551,6 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
   const nodes = useCanvasStore((state) => state.nodes);
   const edges = useCanvasStore((state) => state.edges);
   const updateNodeData = useCanvasStore((state) => state.updateNodeData);
-  const addNode = useCanvasStore((state) => state.addNode);
-  const addEdge = useCanvasStore((state) => state.addEdge);
-  const findNodePosition = useCanvasStore((state) => state.findNodePosition);
   const apiKeys = useSettingsStore((state) => state.apiKeys);
   const grsaiNanoBananaProModel = useSettingsStore((state) => state.grsaiNanoBananaProModel);
   const storyboardGenKeepStyleConsistent = useSettingsStore(
@@ -948,30 +943,12 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
         safeCols,
         selectedResolution.value
       );
-      const newNodePosition = findNodePosition(
-        id,
-        EXPORT_RESULT_NODE_DEFAULT_WIDTH,
-        EXPORT_RESULT_NODE_LAYOUT_HEIGHT
-      );
-      const previewNodeId = addNode(
-        CANVAS_NODE_TYPES.exportImage,
-        newNodePosition,
-        {
-          displayName: t('node.storyboardGen.gridPreviewTitle'),
-          resultKind: 'storyboardGenOutput',
-          imageUrl: gridImageDataUrl,
-          previewImageUrl: gridImageDataUrl,
-          aspectRatio: resolvedRequestAspectRatio,
-          isGenerating: false,
-          generationStartedAt: null,
-          requestAspectRatio: resolvedRequestAspectRatio,
-        }
-      );
-      addEdge(id, previewNodeId);
-      // Phase 3 double-write: mirror preview grid image to self.
+      // Phase 5: result lives on self. No child exportImage node is created.
       updateNodeData(id, {
         imageUrl: gridImageDataUrl,
         previewImageUrl: gridImageDataUrl,
+        aspectRatio: resolvedRequestAspectRatio,
+        requestAspectRatio: resolvedRequestAspectRatio,
         isGenerating: false,
         generationStartedAt: null,
       });
@@ -1000,32 +977,15 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
     const runtimeDiagnostics = await getRuntimeDiagnostics();
 
     // Create new image node with generating state immediately
-    // Use auto-positioning to avoid collisions with existing nodes
-    const newNodePosition = findNodePosition(
-      id,
-      EXPORT_RESULT_NODE_DEFAULT_WIDTH,
-      EXPORT_RESULT_NODE_LAYOUT_HEIGHT
-    );
-    const newNodeId = addNode(
-      CANVAS_NODE_TYPES.exportImage,
-      newNodePosition,
-      {
-        isGenerating: true,
-        generationStartedAt,
-        generationDurationMs,
-        displayName: EXPORT_RESULT_DISPLAY_NAME.storyboardGenOutput,
-        resultKind: 'storyboardGenOutput',
-        prompt: '',
-        model: selectedModel.id,
-        size: selectedResolution.value as ImageSize,
-        requestAspectRatio: mappedOverallRequestAspectRatio,
-      }
-    );
-
-    // Connect the storyboard node to the new image node
-    addEdge(id, newNodeId);
-    // Phase 3 double-write: mirror generating state to self so preview panel updates immediately.
-    updateNodeData(id, { isGenerating: true, generationStartedAt });
+    // Phase 5: result lives on self. No child exportImage node is created.
+    updateNodeData(id, {
+      isGenerating: true,
+      generationStartedAt,
+      generationDurationMs,
+      requestAspectRatio: mappedOverallRequestAspectRatio,
+      generationError: null,
+      generationErrorDetails: null,
+    });
 
     setSelectedNode(null);
     setError(null);
@@ -1075,7 +1035,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
         osBuild: runtimeDiagnostics.osBuild,
         userAgent: runtimeDiagnostics.userAgent,
       };
-      updateNodeData(newNodeId, {
+      updateNodeData(id, {
         generationJobId: jobId,
         generationSourceType: 'storyboardGen',
         generationProviderId: selectedModel.providerId,
@@ -1113,7 +1073,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
       setError(resolvedError.message);
       void showErrorDialog(resolvedError.message, '错误', resolvedError.details, reportText);
       // Clear generating state and mark as failed
-      updateNodeData(newNodeId, {
+      updateNodeData(id, {
         isGenerating: false,
         generationStartedAt: null,
         generationJobId: null,
@@ -1124,8 +1084,6 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
         generationErrorDetails: resolvedError.details ?? null,
         generationDebugContext,
       });
-      // Phase 3 double-write: mirror error state to self.
-      updateNodeData(id, { isGenerating: false, generationStartedAt: null, generationError: resolvedError.message });
     }
   }, [
     providerApiKey,
@@ -1140,11 +1098,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
     setSelectedNode,
     selectedAspectRatio.value,
     selectedResolution.value,
-    addNode,
-    addEdge,
     buildPrompt,
-    selectedModel.id,
-    findNodePosition,
     updateNodeData,
     mappedOverallRequestAspectRatio,
     resolveEffectiveRequestAspectRatio,
@@ -1212,27 +1166,11 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
       for (const result of pollResults) {
         if (result.status === 'succeeded' && result.result) {
           succeededCount++;
-          const newNodePosition = findNodePosition(
-            id,
-            EXPORT_RESULT_NODE_DEFAULT_WIDTH,
-            EXPORT_RESULT_NODE_LAYOUT_HEIGHT
-          );
-          const newNodeId = addNode(
-            CANVAS_NODE_TYPES.exportImage,
-            newNodePosition,
-            {
-              displayName: `${EXPORT_RESULT_DISPLAY_NAME.storyboardGenOutput} (${result.frameId})`,
-              resultKind: 'storyboardGenOutput',
-              imageUrl: result.result,
-              previewImageUrl: result.result,
-              aspectRatio: resolvedRequestAspectRatio,
-            }
-          );
-          addEdge(id, newNodeId);
-          // Phase 3 double-write: mirror batch frame result to self (last frame wins for preview).
+          // Phase 5: result lives on self (last frame wins for preview).
           updateNodeData(id, {
             imageUrl: result.result,
             previewImageUrl: result.result,
+            aspectRatio: resolvedRequestAspectRatio,
             isGenerating: false,
           });
         }
@@ -1271,9 +1209,6 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
     selectedResolution.value,
     effectiveExtraParams,
     resolveEffectiveRequestAspectRatio,
-    findNodePosition,
-    addNode,
-    addEdge,
     id,
     t,
     updateNodeData,

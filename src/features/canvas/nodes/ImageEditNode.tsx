@@ -16,8 +16,6 @@ import { useTranslation } from 'react-i18next';
 import {
   AUTO_REQUEST_ASPECT_RATIO,
   CANVAS_NODE_TYPES,
-  EXPORT_RESULT_NODE_DEFAULT_WIDTH,
-  EXPORT_RESULT_NODE_LAYOUT_HEIGHT,
   type ImageEditNodeData,
   type ImageSize,
 } from '@/features/canvas/domain/canvasNodes';
@@ -218,15 +216,6 @@ function pickClosestAspectRatio(
   return bestValue;
 }
 
-function buildAiResultNodeTitle(prompt: string, fallbackTitle: string): string {
-  const normalizedPrompt = prompt.trim();
-  if (!normalizedPrompt) {
-    return fallbackTitle;
-  }
-
-  return normalizedPrompt;
-}
-
 export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageEditNodeProps) => {
   const { t } = useTranslation();
   const updateNodeInternals = useUpdateNodeInternals();
@@ -259,9 +248,6 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
   const edges = useCanvasStore((state) => state.edges);
   const setSelectedNode = useCanvasStore((state) => state.setSelectedNode);
   const updateNodeData = useCanvasStore((state) => state.updateNodeData);
-  const addNode = useCanvasStore((state) => state.addNode);
-  const findNodePosition = useCanvasStore((state) => state.findNodePosition);
-  const addEdge = useCanvasStore((state) => state.addEdge);
   const apiKeys = useSettingsStore((state) => state.apiKeys);
   const grsaiNanoBananaProModel = useSettingsStore((state) => state.grsaiNanoBananaProModel);
   const incomingImages = useMemo(
@@ -429,29 +415,17 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
 
     const generationDurationMs = selectedModel.expectedDurationMs ?? 60000;
     const generationStartedAt = Date.now();
-    const resultNodeTitle = buildAiResultNodeTitle(prompt, t('node.imageEdit.resultTitle'));
     const runtimeDiagnostics = await getRuntimeDiagnostics();
     setError(null);
 
-    const newNodePosition = findNodePosition(
-      id,
-      EXPORT_RESULT_NODE_DEFAULT_WIDTH,
-      EXPORT_RESULT_NODE_LAYOUT_HEIGHT
-    );
-    const newNodeId = addNode(
-      CANVAS_NODE_TYPES.exportImage,
-      newNodePosition,
-      {
-        isGenerating: true,
-        generationStartedAt,
-        generationDurationMs,
-        resultKind: 'generic',
-        displayName: resultNodeTitle,
-      }
-    );
-    addEdge(id, newNodeId);
-    // Phase 3 double-write: mirror generating state to self so preview panel updates immediately.
-    updateNodeData(id, { isGenerating: true, generationStartedAt });
+    // Phase 5: result lives on self. No child exportImage node is created.
+    updateNodeData(id, {
+      isGenerating: true,
+      generationStartedAt,
+      generationDurationMs,
+      generationError: null,
+      generationErrorDetails: null,
+    });
 
     try {
       await canvasAiGateway.setApiKey(selectedModel.providerId, providerApiKey);
@@ -499,7 +473,7 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
         osBuild: runtimeDiagnostics.osBuild,
         userAgent: runtimeDiagnostics.userAgent,
       };
-      updateNodeData(newNodeId, {
+      updateNodeData(id, {
         generationJobId: jobId,
         generationSourceType: 'imageEdit',
         generationProviderId: selectedModel.providerId,
@@ -536,7 +510,7 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
         resolvedError.details,
         reportText
       );
-      updateNodeData(newNodeId, {
+      updateNodeData(id, {
         isGenerating: false,
         generationStartedAt: null,
         generationJobId: null,
@@ -546,14 +520,9 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
         generationErrorDetails: resolvedError.details ?? null,
         generationDebugContext,
       });
-      // Phase 3 double-write: mirror error state to self.
-      updateNodeData(id, { isGenerating: false, generationStartedAt: null, generationError: resolvedError.message });
     }
   }, [
-    addNode,
-    addEdge,
     providerApiKey,
-    findNodePosition,
     promptDraft,
     effectiveExtraParams,
     id,
