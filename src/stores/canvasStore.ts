@@ -32,6 +32,7 @@ import {
   nodeHasSourceHandle,
   nodeHasTargetHandle,
 } from '@/features/canvas/domain/nodeRegistry';
+import { isValidConnectionByDataType } from '@/features/canvas/domain/connectionValidator';
 import { nodeCatalog } from '@/features/canvas/application/nodeCatalog';
 import { canvasNodeFactory } from '@/features/canvas/application/canvasServices';
 import {
@@ -780,7 +781,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     if (!sourceNode || !targetNode) {
       return null;
     }
-    if (!nodeHasSourceHandle(sourceNode.type) || !nodeHasTargetHandle(targetNode.type)) {
+    if (!isValidConnectionByDataType(sourceNode.type, targetNode.type)) {
       return null;
     }
 

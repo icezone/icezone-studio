@@ -49,6 +49,7 @@ import {
   nodeHasSourceHandle,
   nodeHasTargetHandle,
 } from '@/features/canvas/domain/nodeRegistry';
+import { isValidConnectionByDataType } from '@/features/canvas/domain/connectionValidator';
 import { embedStoryboardImageMetadata } from '@/commands/image';
 import { listModelProviders } from '@/features/canvas/models';
 import { nodeTypes } from './nodes';
@@ -193,23 +194,8 @@ function resolveAllowedNodeTypes(handleType: HandleType): CanvasNodeType[] {
   return getConnectMenuNodeTypes(handleType);
 }
 
-function canNodeTypeBeManualConnectionSource(type: CanvasNodeType): boolean {
-  // Phase 5: imageEdit/storyboardGen now own their generated result on self,
-  // so they can be drag-from sources (replacing the legacy exportImage role).
-  return (
-    type === CANVAS_NODE_TYPES.upload ||
-    type === CANVAS_NODE_TYPES.imageEdit ||
-    type === CANVAS_NODE_TYPES.storyboardGen
-  );
-}
-
-function canNodeBeManualConnectionSource(nodeId: string | null | undefined, nodes: CanvasNode[]): boolean {
-  if (!nodeId) {
-    return false;
-  }
-  const node = nodes.find((item) => item.id === nodeId);
-  return node ? canNodeTypeBeManualConnectionSource(node.type) : false;
-}
+// Phase 6: connection validity is now data-type aware (see connectionValidator).
+// Any node with sourceHandle:true can start a drag — semantic checks happen on drop.
 
 function getClientPosition(event: MouseEvent | TouchEvent): { x: number; y: number } | null {
   if ('clientX' in event && 'clientY' in event) {
@@ -683,15 +669,26 @@ function CanvasInner() {
     event.stopPropagation();
   }, []);
 
+  const isValidConnection = useCallback(
+    (c: Connection | { source: string | null; target: string | null }) => {
+      if (!c.source || !c.target || c.source === c.target) return false;
+      const src = nodes.find((n) => n.id === c.source);
+      const tgt = nodes.find((n) => n.id === c.target);
+      if (!src || !tgt) return false;
+      return isValidConnectionByDataType(src.type, tgt.type);
+    },
+    [nodes]
+  );
+
   const handleConnect = useCallback(
     (connection: Connection) => {
-      if (!canNodeBeManualConnectionSource(connection.source, nodes)) {
+      if (!isValidConnection(connection)) {
         return;
       }
       connectNodes(connection);
       scheduleCanvasPersist(0);
     },
-    [connectNodes, nodes, scheduleCanvasPersist]
+    [connectNodes, isValidConnection, scheduleCanvasPersist]
   );
 
   const handleMoveEnd = useCallback(
@@ -1254,12 +1251,12 @@ function CanvasInner() {
         return;
       }
 
-      if (
-        params.handleType === 'source'
-        && !canNodeBeManualConnectionSource(params.nodeId, nodes)
-      ) {
-        setPendingConnectStart(null);
-        return;
+      if (params.handleType === 'source') {
+        const node = nodes.find((n) => n.id === params.nodeId);
+        if (!node || !nodeHasSourceHandle(node.type)) {
+          setPendingConnectStart(null);
+          return;
+        }
       }
 
       const containerRect = wrapperRef.current?.getBoundingClientRect();
@@ -1536,9 +1533,7 @@ function CanvasInner() {
         if (
           sourceNode &&
           targetNode &&
-          canNodeTypeBeManualConnectionSource(sourceNode.type) &&
-          nodeHasSourceHandle(sourceNode.type) &&
-          nodeHasTargetHandle(targetNode.type)
+          isValidConnectionByDataType(sourceNode.type, targetNode.type)
         ) {
           connectNodes({
             source: sourceNode.id,
@@ -1866,6 +1861,7 @@ function CanvasInner() {
         onConnect={handleConnect}
         onConnectStart={handleConnectStart}
         onConnectEnd={handleConnectEnd}
+        isValidConnection={isValidConnection}
         onNodeDragStart={handleNodeDragStart}
         onNodeDrag={handleNodeDrag}
         onNodeDragStop={handleNodeDragStop}

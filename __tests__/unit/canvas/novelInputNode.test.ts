@@ -42,6 +42,8 @@ describe('NovelInputNode registration', () => {
     expect(def.connectivity).toEqual({
       sourceHandle: true,
       targetHandle: false,
+      outputDataType: 'text',
+      inputDataTypes: [],
       connectMenu: {
         fromSource: true,
         fromTarget: false,

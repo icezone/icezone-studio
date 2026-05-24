@@ -24,9 +24,16 @@ export interface CanvasNodeCapabilities {
   promptInput: boolean;
 }
 
+/** Data type produced by or accepted by a node's handle. */
+export type CanvasDataType = 'image' | 'image-set' | 'video' | 'text';
+
 export interface CanvasNodeConnectivity {
   sourceHandle: boolean;
   targetHandle: boolean;
+  /** What this node's source handle produces (null = no output). */
+  outputDataType: CanvasDataType | null;
+  /** Data types accepted by this node's target handle. Empty = data source only. */
+  inputDataTypes: CanvasDataType[];
   connectMenu: {
     fromSource: boolean;
     fromTarget: boolean;
@@ -55,6 +62,8 @@ const uploadNodeDefinition: CanvasNodeDefinition<UploadImageNodeData> = {
   connectivity: {
     sourceHandle: true,
     targetHandle: false,
+    outputDataType: 'image',
+    inputDataTypes: [],
     connectMenu: {
       fromSource: false,
       fromTarget: true,
@@ -82,6 +91,8 @@ const imageEditNodeDefinition: CanvasNodeDefinition<ImageEditNodeData> = {
   connectivity: {
     sourceHandle: true,
     targetHandle: true,
+    outputDataType: 'image',
+    inputDataTypes: ['image'],
     connectMenu: {
       fromSource: true,
       fromTarget: false,
@@ -116,6 +127,8 @@ const groupNodeDefinition: CanvasNodeDefinition<GroupNodeData> = {
   connectivity: {
     sourceHandle: false,
     targetHandle: false,
+    outputDataType: null,
+    inputDataTypes: [],
     connectMenu: {
       fromSource: false,
       fromTarget: false,
@@ -139,6 +152,8 @@ const textAnnotationNodeDefinition: CanvasNodeDefinition<TextAnnotationNodeData>
   connectivity: {
     sourceHandle: false,
     targetHandle: false,
+    outputDataType: null,
+    inputDataTypes: [],
     connectMenu: {
       fromSource: false,
       fromTarget: false,
@@ -162,6 +177,8 @@ const storyboardSplitDefinition: CanvasNodeDefinition<StoryboardSplitNodeData> =
   connectivity: {
     sourceHandle: true,
     targetHandle: true,
+    outputDataType: 'image-set',
+    inputDataTypes: ['image'],
     connectMenu: {
       fromSource: false,
       fromTarget: false,
@@ -201,6 +218,8 @@ const storyboardGenNodeDefinition: CanvasNodeDefinition<StoryboardGenNodeData> =
   connectivity: {
     sourceHandle: true,
     targetHandle: true,
+    outputDataType: 'image-set',
+    inputDataTypes: ['text', 'image'],
     connectMenu: {
       fromSource: true,
       fromTarget: false,
@@ -237,6 +256,8 @@ const videoGenNodeDefinition: CanvasNodeDefinition<import('./canvasNodes').Video
   connectivity: {
     sourceHandle: true,
     targetHandle: true,
+    outputDataType: 'video',
+    inputDataTypes: ['image', 'text'],
     connectMenu: {
       fromSource: true,
       fromTarget: false,
@@ -276,6 +297,8 @@ const novelInputNodeDefinition: CanvasNodeDefinition<NovelInputNodeData> = {
   connectivity: {
     sourceHandle: true,
     targetHandle: false,
+    outputDataType: 'text',
+    inputDataTypes: [],
     connectMenu: {
       fromSource: true,
       fromTarget: false,
@@ -307,6 +330,8 @@ const videoAnalysisNodeDefinition: CanvasNodeDefinition<VideoAnalysisNodeData> =
   connectivity: {
     sourceHandle: true,
     targetHandle: true,
+    outputDataType: 'image-set',
+    inputDataTypes: ['video'],
     connectMenu: {
       fromSource: true,
       fromTarget: true,
