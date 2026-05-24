@@ -3,16 +3,15 @@ import type { XYPosition } from '@xyflow/react';
 import { CANVAS_NODE_TYPES, type CanvasNode, type CanvasNodeData, type CanvasNodeType } from '../domain/canvasNodes';
 import type { IdGenerator, NodeCatalog, NodeFactory } from './ports';
 
+// Width defaults — height is intentionally NOT set so React Flow measures the
+// container from content. This means collapsed split-layout nodes only occupy
+// the preview card's natural height (~150px) instead of a fixed 420px box that
+// would block other nodes/canvas pan in the empty area below.
 const IMAGE_EDIT_NODE_DEFAULT_WIDTH = 560;
-const IMAGE_EDIT_NODE_DEFAULT_HEIGHT = 420;
 const STORYBOARD_GEN_NODE_DEFAULT_WIDTH = 600;
-const STORYBOARD_GEN_NODE_DEFAULT_HEIGHT = 480;
 const VIDEO_GEN_NODE_DEFAULT_WIDTH = 560;
-const VIDEO_GEN_NODE_DEFAULT_HEIGHT = 420;
 const VIDEO_ANALYSIS_NODE_DEFAULT_WIDTH = 560;
-const VIDEO_ANALYSIS_NODE_DEFAULT_HEIGHT = 420;
 const NOVEL_INPUT_NODE_DEFAULT_WIDTH = 560;
-const NOVEL_INPUT_NODE_DEFAULT_HEIGHT = 420;
 
 export class CanvasNodeFactory implements NodeFactory {
   constructor(
@@ -38,37 +37,19 @@ export class CanvasNodeFactory implements NodeFactory {
       data: nodeData,
     };
 
-    // Set initial dimensions for nodes that need specific sizes
+    // Set initial WIDTH for nodes that need specific sizes — height is left
+    // unset so React Flow measures it from content (preview-card when
+    // collapsed, preview + settings panel when expanded).
     if (type === CANVAS_NODE_TYPES.imageEdit) {
-      node.style = {
-        ...node.style,
-        width: IMAGE_EDIT_NODE_DEFAULT_WIDTH,
-        height: IMAGE_EDIT_NODE_DEFAULT_HEIGHT,
-      };
+      node.style = { ...node.style, width: IMAGE_EDIT_NODE_DEFAULT_WIDTH };
     } else if (type === CANVAS_NODE_TYPES.storyboardGen) {
-      node.style = {
-        ...node.style,
-        width: STORYBOARD_GEN_NODE_DEFAULT_WIDTH,
-        height: STORYBOARD_GEN_NODE_DEFAULT_HEIGHT,
-      };
+      node.style = { ...node.style, width: STORYBOARD_GEN_NODE_DEFAULT_WIDTH };
     } else if (type === CANVAS_NODE_TYPES.videoAnalysis) {
-      node.style = {
-        ...node.style,
-        width: VIDEO_ANALYSIS_NODE_DEFAULT_WIDTH,
-        height: VIDEO_ANALYSIS_NODE_DEFAULT_HEIGHT,
-      };
+      node.style = { ...node.style, width: VIDEO_ANALYSIS_NODE_DEFAULT_WIDTH };
     } else if (type === CANVAS_NODE_TYPES.videoGen) {
-      node.style = {
-        ...node.style,
-        width: VIDEO_GEN_NODE_DEFAULT_WIDTH,
-        height: VIDEO_GEN_NODE_DEFAULT_HEIGHT,
-      };
+      node.style = { ...node.style, width: VIDEO_GEN_NODE_DEFAULT_WIDTH };
     } else if (type === CANVAS_NODE_TYPES.novelInput) {
-      node.style = {
-        ...node.style,
-        width: NOVEL_INPUT_NODE_DEFAULT_WIDTH,
-        height: NOVEL_INPUT_NODE_DEFAULT_HEIGHT,
-      };
+      node.style = { ...node.style, width: NOVEL_INPUT_NODE_DEFAULT_WIDTH };
     }
 
     // Split-layout nodes have a fixed node-container size that's bigger than the

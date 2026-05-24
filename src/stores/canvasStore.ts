@@ -265,18 +265,29 @@ function normalizeNodes(rawNodes: CanvasNode[]): CanvasNode[] {
         CANVAS_NODE_TYPES.videoGen,
         CANVAS_NODE_TYPES.storyboardSplit,
       ];
+      const isSplitLayout = SPLIT_LAYOUT_TYPES.includes(node.type as CanvasNodeType);
       const dragHandle =
         node.dragHandle ??
-        (SPLIT_LAYOUT_TYPES.includes(node.type as CanvasNodeType)
-          ? '.node-preview-area, .node-settings-panel'
-          : undefined);
+        (isSplitLayout ? '.node-preview-area, .node-settings-panel' : undefined);
 
-      return {
+      // Split-layout nodes: drop legacy stored height so React Flow auto-measures
+      // from content (collapsed = preview card height; expanded = preview + panel).
+      // Without this, drafts saved before the fix carry a hardcoded 420px box that
+      // covers the empty area below the visible preview, blocking other nodes /
+      // canvas pan.
+      let nextNode: CanvasNode = {
         ...node,
         type: node.type as CanvasNodeType,
         data: mergedData,
         ...(dragHandle ? { dragHandle } : {}),
       };
+      if (isSplitLayout) {
+        const { height: _droppedHeight, ...restNode } = nextNode as CanvasNode & { height?: number };
+        const restStyle = nextNode.style ? { ...nextNode.style } : undefined;
+        if (restStyle && 'height' in restStyle) delete (restStyle as Record<string, unknown>).height;
+        nextNode = restStyle ? { ...restNode, style: restStyle } : restNode;
+      }
+      return nextNode;
     })
     .filter((node): node is CanvasNode => Boolean(node));
 }
