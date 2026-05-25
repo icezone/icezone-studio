@@ -77,6 +77,7 @@ import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canv
 
 import { FrameReferenceEditor } from '@/features/canvas/ui/FrameReferenceEditor';
 import { useNodeExpanded } from './shared/useNodeExpanded';
+import { NodeTypeBadge } from '@/features/canvas/ui/NodeTypeBadge';
 import { FrameControlEditor } from '@/features/canvas/ui/FrameControlEditor';
 import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker';
 import type { StoryboardFrameMode } from '@/features/canvas/domain/canvasNodes';
@@ -1456,6 +1457,7 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
           >
             <div className="node-preview-header">
               <Sparkles className="h-3.5 w-3.5" />
+              <NodeTypeBadge type={CANVAS_NODE_TYPES.storyboardGen} />
               <span className="truncate text-[12px] font-semibold leading-none text-[var(--canvas-node-fg)]">
                 {resolvedTitle}
               </span>

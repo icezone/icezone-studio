@@ -7,6 +7,7 @@ import {
   useRef,
 } from 'react';
 import { useNodeExpanded } from './shared/useNodeExpanded';
+import { NodeTypeBadge } from '@/features/canvas/ui/NodeTypeBadge';
 import { createPortal } from 'react-dom';
 import {
   Handle,
@@ -1032,6 +1033,7 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
           >
             <div className="node-preview-header">
               <SplitResultIcon className="h-3.5 w-3.5" />
+              <NodeTypeBadge type={CANVAS_NODE_TYPES.storyboardSplit} />
               <span>{resolvedTitle}</span>
             </div>
             <div className="node-preview-media" style={{ aspectRatio: '16/9' }}>

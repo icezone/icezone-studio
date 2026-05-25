@@ -71,6 +71,7 @@ import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker'
 import { LogicalModelPicker } from '@/features/canvas/ui/LogicalModelPicker'
 import { mapToCanvasModelId } from '@/config/logical-models';
 import { useNodeExpanded } from './shared/useNodeExpanded';
+import { NodeTypeBadge } from '@/features/canvas/ui/NodeTypeBadge';
 
 type ImageEditNodeProps = NodeProps & {
   id: string;
@@ -701,6 +702,7 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
           >
             <div className="node-preview-header">
               <Sparkles className="h-3.5 w-3.5 shrink-0 text-[var(--canvas-node-fg-muted)]" />
+              <NodeTypeBadge type={CANVAS_NODE_TYPES.imageEdit} />
               <span className="truncate text-[12px] font-semibold leading-none text-[var(--canvas-node-fg)]">
                 {resolvedTitle}
               </span>

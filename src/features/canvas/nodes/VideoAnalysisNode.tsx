@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNodeExpanded } from './shared/useNodeExpanded';
+import { NodeTypeBadge } from '@/features/canvas/ui/NodeTypeBadge';
 import { Handle, Position, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
 import { Film, Search, Loader2, CheckSquare, Square, Upload, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -354,6 +355,7 @@ function VideoAnalysisNodeComponent({
           >
             <div className="node-preview-header">
               <Film className="h-3.5 w-3.5 shrink-0 text-[var(--canvas-node-fg-muted)]" />
+              <NodeTypeBadge type={CANVAS_NODE_TYPES.videoAnalysis} />
               <span className="truncate text-[12px] font-semibold leading-none text-[var(--canvas-node-fg)]">
                 {resolvedTitle}
               </span>

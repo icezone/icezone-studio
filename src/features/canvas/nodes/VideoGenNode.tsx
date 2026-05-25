@@ -19,6 +19,7 @@ import {
 import { resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
 import { NodeHeader } from '@/features/canvas/ui/NodeHeader';
 import { useNodeExpanded } from './shared/useNodeExpanded';
+import { NodeTypeBadge } from '@/features/canvas/ui/NodeTypeBadge';
 
 import {
   canvasVideoAiGateway,
@@ -728,6 +729,7 @@ function VideoGenNodeComponent({
         >
           <div className="node-preview-header">
             <Sparkles className="h-3.5 w-3.5 shrink-0 text-[var(--canvas-node-fg-muted)]" />
+            <NodeTypeBadge type={CANVAS_NODE_TYPES.videoGen} />
             <span className="truncate text-[12px] font-semibold leading-none text-[var(--canvas-node-fg)]">
               {resolvedTitle}
             </span>
