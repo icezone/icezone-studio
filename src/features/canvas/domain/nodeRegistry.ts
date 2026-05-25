@@ -92,7 +92,7 @@ const imageEditNodeDefinition: CanvasNodeDefinition<ImageEditNodeData> = {
     sourceHandle: true,
     targetHandle: true,
     outputDataType: 'image',
-    inputDataTypes: ['image'],
+    inputDataTypes: ['image', 'text'],
     connectMenu: {
       fromSource: true,
       fromTarget: false,
@@ -169,7 +169,7 @@ const storyboardSplitDefinition: CanvasNodeDefinition<StoryboardSplitNodeData> =
   type: CANVAS_NODE_TYPES.storyboardSplit,
   menuLabelKey: 'node.menu.storyboard',
   menuIcon: 'layout',
-  visibleInMenu: false,
+  visibleInMenu: true,
   capabilities: {
     toolbar: false,
     promptInput: false,

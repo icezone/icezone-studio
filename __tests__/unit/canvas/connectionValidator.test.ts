@@ -15,8 +15,8 @@ describe('isValidConnectionByDataType', () => {
     expect(isValidConnectionByDataType(CANVAS_NODE_TYPES.videoGen, CANVAS_NODE_TYPES.imageEdit)).toBe(false);
   });
 
-  it('rejects novelInput (text) -> imageEdit (image only)', () => {
-    expect(isValidConnectionByDataType(CANVAS_NODE_TYPES.novelInput, CANVAS_NODE_TYPES.imageEdit)).toBe(false);
+  it('allows novelInput (text) -> imageEdit (text+image)', () => {
+    expect(isValidConnectionByDataType(CANVAS_NODE_TYPES.novelInput, CANVAS_NODE_TYPES.imageEdit)).toBe(true);
   });
 
   it('allows novelInput (text) -> storyboardGen (text|image)', () => {
@@ -33,5 +33,13 @@ describe('isValidConnectionByDataType', () => {
 
   it('rejects connection from textAnnotation (no output)', () => {
     expect(isValidConnectionByDataType(CANVAS_NODE_TYPES.textAnnotation, CANVAS_NODE_TYPES.imageEdit)).toBe(false);
+  });
+
+  it('allows videoAnalysis (image-set) -> videoGen (image|text) [widening closes the video re-gen loop]', () => {
+    expect(isValidConnectionByDataType(CANVAS_NODE_TYPES.videoAnalysis, CANVAS_NODE_TYPES.videoGen)).toBe(true);
+  });
+
+  it('still allows imageEdit (image) -> imageEdit (chaining)', () => {
+    expect(isValidConnectionByDataType(CANVAS_NODE_TYPES.imageEdit, CANVAS_NODE_TYPES.imageEdit)).toBe(true);
   });
 });

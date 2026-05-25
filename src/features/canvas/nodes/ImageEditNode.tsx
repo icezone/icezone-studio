@@ -650,6 +650,21 @@ export const ImageEditNode = memo(({ id, data, selected, width, height }: ImageE
     if (selectedNodeId !== id) collapse();
   }, [selectedNodeId, id, collapse]);
 
+  // Auto-seed prompt from upstream novelInput (text) if user hasn't typed anything yet.
+  useEffect(() => {
+    if (data.prompt && data.prompt.trim().length > 0) return; // user-set prompt wins
+    const upstreamTextNode = nodes.find((n) => {
+      const isUpstream = edges.some((e) => e.source === n.id && e.target === id);
+      return isUpstream && n.type === CANVAS_NODE_TYPES.novelInput;
+    });
+    if (!upstreamTextNode) return;
+    const novelData = upstreamTextNode.data as { scenes?: Array<{ description?: string }> };
+    const firstSceneText = novelData.scenes?.[0]?.description?.trim();
+    if (firstSceneText) {
+      updateNodeData(id, { prompt: firstSceneText });
+    }
+  }, [id, nodes, edges, data.prompt, updateNodeData]);
+
   return (
     <div
       ref={rootRef}

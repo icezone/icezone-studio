@@ -22,7 +22,7 @@ and is wired into React Flow via the `isValidConnection` prop on
 | Node | `outputDataType` | `inputDataTypes` |
 |---|---|---|
 | `upload` 上传图片 | `'image'` | `[]` |
-| `imageEdit` AI 图片 | `'image'` | `['image']` |
+| `imageEdit` AI 图片 | `'image'` | `['image', 'text']` |
 | `storyboardSplit` 切割结果 | `'image-set'` | `['image']` |
 | `storyboardGen` 分镜生成 | `'image-set'` | `['text', 'image']` |
 | `videoGen` AI 视频 | `'video'` | `['image', 'text']` |
@@ -42,15 +42,16 @@ and is wired into React Flow via the `isValidConnection` prop on
 | **storyboardSplit** (image-set) | ✓ (widening) | — | ✓ (widening) | ✓ (widening) | ✗ |
 | **storyboardGen** (image-set) | ✓ (widening) | ✓ (widening) | — | ✓ (widening) | ✗ |
 | **videoAnalysis** (image-set) | ✓ (widening) | ✓ (widening) | ✓ (widening) | ✓ (widening) | — |
-| **novelInput** (text) | ✗ | ✗ | ✓ | ✓ | ✗ |
+| **novelInput** (text) | ✓ | ✗ | ✓ | ✓ | ✗ |
 | **videoGen** (video) | ✗ | ✗ | ✗ | ✗ | ✓ |
 
 ## Design Notes
 
 - **image → image flow**: chaining edits (upload → imageEdit → another imageEdit → …)
   is the core image workflow.
-- **text → generator**: `novelInput`'s scene text feeds `storyboardGen` scenes
-  or `videoGen` prompts. It can not feed `imageEdit` (which is image-only).
+- **text → generator**: `novelInput`'s scene text feeds `storyboardGen` scenes,
+  `videoGen` prompts, or `imageEdit` (seeds the prompt from `scenes[0].description`
+  when the prompt field is empty).
 - **video → analyzer only**: video is a terminal data type that can only
   re-enter the graph via `videoAnalysis` (which extracts frames + reverse
   prompts, restarting the chain as `'image-set'`).
