@@ -30,3 +30,33 @@ export function isValidConnectionByDataType(
 
   return acceptedIn.includes(out);
 }
+
+/**
+ * Candidate node types to surface in the connect-end menu, derived
+ * purely from data-type compatibility with the dragged-from anchor.
+ *
+ * - `handleType === 'source'`: the user dragged from `anchorNodeType`'s
+ *   source handle and is picking a downstream target — candidates must
+ *   accept the anchor's `outputDataType`.
+ * - `handleType === 'target'`: the user dragged from `anchorNodeType`'s
+ *   target handle and is picking an upstream source — candidates must
+ *   produce a type the anchor accepts.
+ */
+export function getConnectMenuNodeTypes(
+  handleType: 'source' | 'target',
+  anchorNodeType: CanvasNodeType
+): CanvasNodeType[] {
+  if (handleType === 'source') {
+    return Object.values(canvasNodeDefinitions)
+      .filter((definition) =>
+        isValidConnectionByDataType(anchorNodeType, definition.type)
+      )
+      .map((definition) => definition.type);
+  }
+
+  return Object.values(canvasNodeDefinitions)
+    .filter((definition) =>
+      isValidConnectionByDataType(definition.type, anchorNodeType)
+    )
+    .map((definition) => definition.type);
+}
