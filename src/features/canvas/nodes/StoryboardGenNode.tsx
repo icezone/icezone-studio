@@ -99,10 +99,6 @@ type StoryboardGenNodeProps = {
   height?: number;
 };
 
-const AUTO_ASPECT_RATIO_OPTION: AspectRatioChoice = {
-  value: AUTO_REQUEST_ASPECT_RATIO,
-  label: '自动',
-};
 const PICKER_FALLBACK_ANCHOR: PickerAnchor = { left: 8, top: 8 };
 
 const STORYBOARD_NODE_HORIZONTAL_PADDING_PX = 24;
@@ -122,14 +118,10 @@ const GRID_CONTROL_BUTTON_CLASS = 'flex h-3 w-3 items-center justify-center roun
 const GRID_CONTROL_ICON_CLASS = 'h-1.5 w-1.5';
 const GRID_CONTROL_VALUE_CLASS = 'min-w-[14px] text-center text-[9px] font-semibold text-[var(--canvas-node-fg)]';
 const GRID_SUMMARY_CLASS = 'flex h-5 items-center rounded-full border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-1.5 text-[9px] text-[var(--canvas-node-fg-muted)]';
-const FRAME_GRID_GAP_PX = 2;
 const CONTROL_ROW_HEIGHT_PX = 20;
 const CONTROL_ROW_MARGIN_BOTTOM_PX = 10;
-const FRAME_GRID_MARGIN_BOTTOM_PX = 8;
 const PARAM_ROW_HEIGHT_PX = 20;
 const NODE_VERTICAL_PADDING_PX = 24;
-const FRAME_CELL_MIN_WIDTH_PX = 24;
-const FRAME_CELL_MIN_HEIGHT_PX = 16;
 const GRID_LINE_THICKNESS_PERCENT = 0.4;
 const RATIO_CONTROL_MODE_BUTTON_CLASS =
   'flex h-5 items-center rounded-full border px-1.5 text-[9px] transition-colors';
