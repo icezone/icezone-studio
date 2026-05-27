@@ -68,7 +68,6 @@ import {
 import { GRSAI_NANO_BANANA_PRO_MODEL_ID } from '@/features/canvas/models/image/grsai/nanoBananaPro';
 import { FAL_NANO_BANANA_2_MODEL_ID } from '@/features/canvas/models/image/fal/nanoBanana2';
 import { KIE_NANO_BANANA_2_MODEL_ID } from '@/features/canvas/models/image/kie/nanoBanana2';
-import { ModelParamsControls } from '@/features/canvas/ui/ModelParamsControls';
 import { CanvasNodeImage } from '@/features/canvas/ui/CanvasNodeImage';
 import {
   UiButton,
@@ -79,15 +78,13 @@ import { FrameReferenceEditor } from '@/features/canvas/ui/FrameReferenceEditor'
 import { useNodeExpanded } from './shared/useNodeExpanded';
 import { useStoryboardGenForm } from './storyboardGen/useStoryboardGenForm';
 import type { PickerAnchor, AspectRatioChoice } from './storyboardGen/useStoryboardGenForm';
+import { StoryboardGenSettings } from './storyboardGen/StoryboardGenSettings';
 import { NodeTypeBadge } from '@/features/canvas/ui/NodeTypeBadge';
 import { FrameControlEditor } from '@/features/canvas/ui/FrameControlEditor';
 import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker';
 import type { StoryboardFrameMode } from '@/features/canvas/domain/canvasNodes';
 import {
-  NODE_CONTROL_CHIP_CLASS,
   NODE_CONTROL_ICON_CLASS,
-  NODE_CONTROL_MODEL_CHIP_CLASS,
-  NODE_CONTROL_PARAMS_CHIP_CLASS,
   NODE_CONTROL_PRIMARY_BUTTON_CLASS,
 } from '@/features/canvas/ui/nodeControlStyles';
 
@@ -1620,17 +1617,17 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
           <div
             className="relative w-full mt-auto flex shrink-0 items-center justify-between"
           >
-            <ModelParamsControls
+            <StoryboardGenSettings
               imageModels={imageModels}
               selectedModel={selectedModel}
+              onModelChange={(modelId) => updateNodeData(id, { model: modelId })}
               resolutionOptions={resolutionOptions}
               selectedResolution={selectedResolution}
-              selectedAspectRatio={selectedAspectRatio}
-              aspectRatioOptions={aspectRatioOptions}
-              onModelChange={(modelId) => updateNodeData(id, { model: modelId })}
               onResolutionChange={(resolution) =>
                 updateNodeData(id, { size: resolution as ImageSize })
               }
+              aspectRatioOptions={aspectRatioOptions}
+              selectedAspectRatio={selectedAspectRatio}
               onAspectRatioChange={(aspectRatio) =>
                 updateNodeData(id, { requestAspectRatio: aspectRatio })
               }
@@ -1653,14 +1650,6 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
                   },
                 })
               }
-              triggerSize="sm"
-              chipClassName={NODE_CONTROL_CHIP_CLASS}
-              modelChipClassName={NODE_CONTROL_MODEL_CHIP_CLASS}
-              paramsChipClassName={NODE_CONTROL_PARAMS_CHIP_CLASS}
-              modelPanelAlign="center"
-              paramsPanelAlign="center"
-              modelPanelClassName="inline-block min-w-[300px] max-w-[calc(100vw-32px)] p-2"
-              paramsPanelClassName="w-[420px] p-3"
             />
 
             <div className="flex shrink-0 items-center gap-1">
