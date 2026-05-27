@@ -77,6 +77,8 @@ import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canv
 
 import { FrameReferenceEditor } from '@/features/canvas/ui/FrameReferenceEditor';
 import { useNodeExpanded } from './shared/useNodeExpanded';
+import { useStoryboardGenForm } from './storyboardGen/useStoryboardGenForm';
+import type { PickerAnchor, AspectRatioChoice } from './storyboardGen/useStoryboardGenForm';
 import { NodeTypeBadge } from '@/features/canvas/ui/NodeTypeBadge';
 import { FrameControlEditor } from '@/features/canvas/ui/FrameControlEditor';
 import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker';
@@ -96,16 +98,6 @@ type StoryboardGenNodeProps = {
   width?: number;
   height?: number;
 };
-
-interface AspectRatioChoice {
-  value: string;
-  label: string;
-}
-
-interface PickerAnchor {
-  left: number;
-  top: number;
-}
 
 const AUTO_ASPECT_RATIO_OPTION: AspectRatioChoice = {
   value: AUTO_REQUEST_ASPECT_RATIO,
@@ -572,153 +564,36 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
   const showStoryboardGenAdvancedRatioControls = useSettingsStore(
     (state) => state.showStoryboardGenAdvancedRatioControls
   );
-  const [error, setError] = useState<string | null>(null);
-  const [batchProgress, setBatchProgress] = useState<BatchProgress | null>(null);
-  const isBatchGenerating = batchProgress !== null && batchProgress.completed < batchProgress.total;
-  const rootRef = useRef<HTMLDivElement>(null);
-  const activeFrameTextareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const [activeReferenceEditorFrameIndex, setActiveReferenceEditorFrameIndex] = useState<number | null>(null);
-  const [activeFrameControlEditorFrameIndex, setActiveFrameControlEditorFrameIndex] = useState<number | null>(null);
-  const [showImagePicker, setShowImagePicker] = useState(false);
-  const [pickerFrameIndex, setPickerFrameIndex] = useState<number | null>(null);
-  const [pickerCursor, setPickerCursor] = useState<number | null>(null);
-  const [pickerActiveIndex, setPickerActiveIndex] = useState(0);
-  const [pickerAnchor, setPickerAnchor] = useState<PickerAnchor>(PICKER_FALLBACK_ANCHOR);
-  const lastPointerAnchorRef = useRef<{ frameIndex: number; anchor: PickerAnchor } | null>(null);
-  const frameTextareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
-  const frameHighlightRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const nodeData = data as StoryboardGenNodeData;
-  const [frameDescriptionDrafts, setFrameDescriptionDrafts] = useState<Record<string, string>>(() =>
-    buildFrameDescriptionDrafts(nodeData.frames)
-  );
-  const frameDescriptionDraftsRef = useRef(frameDescriptionDrafts);
-  const resolvedTitle = useMemo(
-    () => resolveNodeDisplayName(CANVAS_NODE_TYPES.storyboardGen, nodeData, t),
-    [nodeData, t]
-  );
 
-  const incomingImages = useMemo(
-    () => graphImageResolver.collectInputImages(id, nodes, edges),
-    [id, nodes, edges]
-  );
-  const incomingImageItems = useMemo(
-    () =>
-      incomingImages.map((imageUrl, index) => ({
-        imageUrl,
-        displayUrl: resolveImageDisplayUrl(imageUrl),
-        label: `图${index + 1}`,
-      })),
-    [incomingImages]
-  );
-  const incomingImageViewerList = useMemo(
-    () => incomingImageItems.map((item) => resolveImageDisplayUrl(item.imageUrl)),
-    [incomingImageItems]
-  );
+  const form = useStoryboardGenForm({ id, data, selected });
+  const {
+    error, setError, batchProgress, setBatchProgress,
+    rootRef, activeFrameTextareaRef, frameTextareaRefs, frameHighlightRefs, lastPointerAnchorRef,
+    activeReferenceEditorFrameIndex, setActiveReferenceEditorFrameIndex,
+    activeFrameControlEditorFrameIndex, setActiveFrameControlEditorFrameIndex,
+    showImagePicker, setShowImagePicker,
+    pickerFrameIndex, setPickerFrameIndex,
+    pickerCursor, setPickerCursor,
+    pickerActiveIndex, setPickerActiveIndex,
+    pickerAnchor, setPickerAnchor,
+    frameDescriptionDrafts, setFrameDescriptionDrafts, frameDescriptionDraftsRef,
+    resolvedTitle, incomingImages, incomingImageItems, incomingImageViewerList,
+    imageModels, selectedModel, effectiveExtraParams,
+    resolutionOptions, selectedResolution,
+    aspectRatioOptions, selectedAspectRatio,
+    controlAspectRatioValue, resolvedAspectRatios,
+    baseFrameLayout, supportedAspectRatioValues, mappedOverallRequestAspectRatio,
+    totalFrames,
+  } = form;
 
-  const imageModels = useMemo(() => listImageModels(), []);
-
-  const selectedModel = useMemo(() => {
-    const modelId = nodeData.model ?? DEFAULT_IMAGE_MODEL_ID;
-    return getImageModel(modelId);
-  }, [nodeData.model]);
+  const isBatchGenerating = batchProgress !== null && batchProgress.completed < batchProgress.total;
   const providerApiKey = apiKeys[selectedModel.providerId] ?? '';
-  const effectiveExtraParams = useMemo(
-    () => ({
-      ...(nodeData.extraParams ?? {}),
-      ...(selectedModel.id === GRSAI_NANO_BANANA_PRO_MODEL_ID
-        ? { grsai_pro_model: grsaiNanoBananaProModel }
-        : {}),
-    }),
-    [grsaiNanoBananaProModel, nodeData.extraParams, selectedModel.id]
-  );
-  const resolutionOptions = useMemo(
-    () => resolveImageModelResolutions(selectedModel, { extraParams: effectiveExtraParams }),
-    [effectiveExtraParams, selectedModel]
-  );
-
-  const selectedResolution = useMemo((): AspectRatioChoice => {
-    return resolveImageModelResolution(selectedModel, nodeData.size, {
-      extraParams: effectiveExtraParams,
-    });
-  }, [effectiveExtraParams, nodeData.size, selectedModel]);
-
-  const aspectRatioOptions = useMemo<AspectRatioChoice[]>(
-    () => [AUTO_ASPECT_RATIO_OPTION, ...selectedModel.aspectRatios],
-    [selectedModel.aspectRatios]
-  );
-
-  const selectedAspectRatio = useMemo((): AspectRatioChoice => {
-    const nodeAspectRatio = nodeData.requestAspectRatio;
-    const found = nodeAspectRatio ? aspectRatioOptions.find((item) => item.value === nodeAspectRatio) : undefined;
-    return found ?? AUTO_ASPECT_RATIO_OPTION;
-  }, [aspectRatioOptions, nodeData.requestAspectRatio]);
-
   const ratioControlMode: StoryboardRatioControlMode = showStoryboardGenAdvancedRatioControls
     ? (nodeData.ratioControlMode === 'overall' ? 'overall' : 'cell')
     : 'cell';
-  const controlAspectRatioValue = useMemo(() => {
-    if (selectedAspectRatio.value === AUTO_REQUEST_ASPECT_RATIO) {
-      return nodeData.aspectRatio || DEFAULT_ASPECT_RATIO;
-    }
-    return selectedAspectRatio.value || DEFAULT_ASPECT_RATIO;
-  }, [nodeData.aspectRatio, selectedAspectRatio.value]);
-  const resolvedAspectRatios = useMemo(
-    () => resolveStoryboardAspectRatios(
-      ratioControlMode,
-      parseAspectRatio(controlAspectRatioValue),
-      nodeData.gridRows,
-      nodeData.gridCols
-    ),
-    [controlAspectRatioValue, nodeData.gridCols, nodeData.gridRows, ratioControlMode]
-  );
   const frameAspectRatioValue = resolvedAspectRatios.cellAspectRatio;
-
-  const baseFrameLayout = useMemo(() => {
-    const aspectRatio = Math.max(0.1, parseAspectRatio(frameAspectRatioValue));
-    let cellWidth = STORYBOARD_GRID_BASE_CELL_HEIGHT_PX * aspectRatio;
-    let gridWidth = nodeData.gridCols * cellWidth + Math.max(0, nodeData.gridCols - 1) * STORYBOARD_GRID_GAP_PX;
-
-    if (gridWidth > STORYBOARD_GRID_MAX_WIDTH_PX) {
-      const scale = STORYBOARD_GRID_MAX_WIDTH_PX / gridWidth;
-      cellWidth *= scale;
-      gridWidth =
-        nodeData.gridCols * cellWidth + Math.max(0, nodeData.gridCols - 1) * STORYBOARD_GRID_GAP_PX;
-    }
-
-    const roundedCellWidth = Math.max(FRAME_CELL_MIN_WIDTH_PX, Math.round(cellWidth));
-    const roundedCellHeight = Math.max(FRAME_CELL_MIN_HEIGHT_PX, Math.round(roundedCellWidth / aspectRatio));
-    const roundedGridWidth =
-      nodeData.gridCols * roundedCellWidth + Math.max(0, nodeData.gridCols - 1) * STORYBOARD_GRID_GAP_PX;
-    const roundedGridHeight =
-      nodeData.gridRows * roundedCellHeight + Math.max(0, nodeData.gridRows - 1) * FRAME_GRID_GAP_PX;
-    const nodeInnerWidth = Math.max(
-      STORYBOARD_CONTROL_ROW_WIDTH_PX,
-      STORYBOARD_PARAMS_ROW_WIDTH_PX,
-      roundedGridWidth
-    );
-    const nodeWidth = Math.max(
-      STORYBOARD_GEN_NODE_MIN_WIDTH_PX,
-      Math.round(nodeInnerWidth + STORYBOARD_NODE_HORIZONTAL_PADDING_PX)
-    );
-    const nodeHeight = Math.max(
-      STORYBOARD_GEN_NODE_MIN_HEIGHT_PX,
-      Math.round(
-        NODE_VERTICAL_PADDING_PX +
-        CONTROL_ROW_HEIGHT_PX +
-        CONTROL_ROW_MARGIN_BOTTOM_PX +
-        roundedGridHeight +
-        FRAME_GRID_MARGIN_BOTTOM_PX +
-        PARAM_ROW_HEIGHT_PX
-      )
-    );
-
-    return {
-      nodeWidth,
-      nodeHeight,
-    };
-  }, [frameAspectRatioValue, nodeData.gridCols, nodeData.gridRows]);
-
   const requestResolution = selectedModel.resolveRequest({
     referenceImageCount: incomingImages.length,
   });
@@ -726,23 +601,6 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
     selectedModel.id === FAL_NANO_BANANA_2_MODEL_ID ||
     selectedModel.id === KIE_NANO_BANANA_2_MODEL_ID;
   const webSearchEnabled = Boolean(nodeData.extraParams?.enable_web_search);
-  const supportedAspectRatioValues = useMemo(
-    () => selectedModel.aspectRatios.map((item) => item.value),
-    [selectedModel.aspectRatios]
-  );
-  const mappedOverallRequestAspectRatio = useMemo(
-    () =>
-      pickClosestAspectRatio(
-        resolvedAspectRatios.overallRatioValue,
-        supportedAspectRatioValues
-      ),
-    [resolvedAspectRatios.overallRatioValue, supportedAspectRatioValues]
-  );
-
-  const totalFrames = useMemo(
-    () => (nodeData.gridRows ?? 1) * (nodeData.gridCols ?? 1),
-    [nodeData.gridRows, nodeData.gridCols]
-  );
   const resolvedNodeWidth = Math.max(
     baseFrameLayout.nodeWidth,
     Math.round(width ?? baseFrameLayout.nodeWidth)
@@ -762,17 +620,6 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
   useEffect(() => {
     updateNodeInternals(id);
   }, [expanded, id, updateNodeInternals]);
-
-  useEffect(() => {
-    frameDescriptionDraftsRef.current = frameDescriptionDrafts;
-  }, [frameDescriptionDrafts]);
-
-  useEffect(() => {
-    const nextDrafts = buildFrameDescriptionDrafts(nodeData.frames);
-    setFrameDescriptionDrafts((previous) =>
-      areFrameDescriptionDraftsEqual(previous, nextDrafts) ? previous : nextDrafts
-    );
-  }, [nodeData.frames]);
 
   useEffect(() => {
     updateNodeInternals(id);
@@ -799,18 +646,6 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
     selectedAspectRatio.value,
     updateNodeData,
   ]);
-
-  useEffect(() => {
-    if (incomingImages.length === 0) {
-      setShowImagePicker(false);
-      setPickerFrameIndex(null);
-      setPickerCursor(null);
-      setPickerActiveIndex(0);
-      return;
-    }
-
-    setPickerActiveIndex((previous) => Math.min(previous, incomingImages.length - 1));
-  }, [incomingImages.length]);
 
   useEffect(() => {
     const handleOutsidePointerDown = (event: PointerEvent) => {
