@@ -1,6 +1,5 @@
 import {
   type KeyboardEvent as ReactKeyboardEvent,
-  type MouseEvent as ReactMouseEvent,
   type ReactNode,
   memo,
   useMemo,
@@ -10,7 +9,7 @@ import {
   useRef,
 } from 'react';
 import { Handle, Position, useUpdateNodeInternals, useViewport } from '@xyflow/react';
-import { Film, Images, Minus, Plus, Sparkles, Zap, Loader2, LayoutTemplate } from 'lucide-react';
+import { Film, Images, Minus, Plus, Sparkles, Loader2, LayoutTemplate } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -69,9 +68,7 @@ import { GRSAI_NANO_BANANA_PRO_MODEL_ID } from '@/features/canvas/models/image/g
 import { FAL_NANO_BANANA_2_MODEL_ID } from '@/features/canvas/models/image/fal/nanoBanana2';
 import { KIE_NANO_BANANA_2_MODEL_ID } from '@/features/canvas/models/image/kie/nanoBanana2';
 import { CanvasNodeImage } from '@/features/canvas/ui/CanvasNodeImage';
-import {
-  UiButton,
-} from '@/components/ui';
+import { StoryboardGenBatchControls } from './storyboardGen/StoryboardGenBatchControls';
 import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canvas/ui/NodeHeader';
 
 import { FrameReferenceEditor } from '@/features/canvas/ui/FrameReferenceEditor';
@@ -83,10 +80,6 @@ import { NodeTypeBadge } from '@/features/canvas/ui/NodeTypeBadge';
 import { FrameControlEditor } from '@/features/canvas/ui/FrameControlEditor';
 import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker';
 import type { StoryboardFrameMode } from '@/features/canvas/domain/canvasNodes';
-import {
-  NODE_CONTROL_ICON_CLASS,
-  NODE_CONTROL_PRIMARY_BUTTON_CLASS,
-} from '@/features/canvas/ui/nodeControlStyles';
 
 type StoryboardGenNodeProps = {
   id: string;
@@ -1652,36 +1645,13 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
               }
             />
 
-            <div className="flex shrink-0 items-center gap-1">
-              <UiButton
-                onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
-                  event.stopPropagation();
-                  const previewGridOnly =
-                    enableStoryboardGenGridPreviewShortcut && event.ctrlKey && event.altKey && event.shiftKey;
-                  void handleGenerate(previewGridOnly);
-                }}
-                variant="primary"
-                size="sm"
-                className={`!min-w-0 shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
-              >
-                <Sparkles className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
-                {t('canvas.generate')}
-              </UiButton>
-
-              <UiButton
-                onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
-                  event.stopPropagation();
-                  void handleBatchGenerate();
-                }}
-                variant="primary"
-                size="sm"
-                disabled={isBatchGenerating}
-                className={`!min-w-0 shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
-              >
-                <Zap className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
-                {t('node.storyboardGen.batchGenerate', { count: totalFrames })}
-              </UiButton>
-            </div>
+            <StoryboardGenBatchControls
+              totalFrames={totalFrames}
+              isBatchGenerating={isBatchGenerating}
+              enablePreviewShortcut={enableStoryboardGenGridPreviewShortcut}
+              onGenerate={(previewGridOnly) => { void handleGenerate(previewGridOnly); }}
+              onBatchGenerate={() => { void handleBatchGenerate(); }}
+            />
           </div>
 
           {/* Batch progress bar */}
