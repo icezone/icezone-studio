@@ -7,6 +7,7 @@ import {
   useRef,
 } from 'react';
 import { useNodeExpanded } from './shared/useNodeExpanded';
+import { useStoryboardSort } from './storyboard/useStoryboardSort';
 import { NodeTypeBadge } from '@/features/canvas/ui/NodeTypeBadge';
 import { createPortal } from 'react-dom';
 import {
@@ -455,8 +456,6 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
   const currentProjectName = useProjectStore((state) => state.currentProject?.name);
   const downloadPresetPaths = useSettingsStore((state) => state.downloadPresetPaths);
 
-  const [draggedFrameId, setDraggedFrameId] = useState<string | null>(null);
-  const [dropTargetFrameId, setDropTargetFrameId] = useState<string | null>(null);
   const [pickerState, setPickerState] = useState<{ frameId: string; x: number; y: number } | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isPackingSingleImages, setIsPackingSingleImages] = useState(false);
@@ -641,59 +640,19 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
     [exportOptions, id, updateNodeData]
   );
 
-  const handleSortStart = useCallback((frameId: string) => {
-    setDraggedFrameId(frameId);
-    setDropTargetFrameId(frameId);
+  const onSortDragStart = useCallback(() => {
     setPickerState(null);
   }, []);
 
-  const handleSortHover = useCallback(
-    (frameId: string) => {
-      if (!draggedFrameId) {
-        return;
-      }
-      setDropTargetFrameId(frameId);
+  const onReorder = useCallback(
+    (draggedId: string, dropTargetId: string) => {
+      reorderStoryboardFrame(id, draggedId, dropTargetId);
     },
-    [draggedFrameId]
+    [id, reorderStoryboardFrame]
   );
 
-  const finalizeSort = useCallback(() => {
-    if (!draggedFrameId) {
-      return;
-    }
-
-    if (dropTargetFrameId && dropTargetFrameId !== draggedFrameId) {
-      reorderStoryboardFrame(id, draggedFrameId, dropTargetFrameId);
-    }
-
-    setDraggedFrameId(null);
-    setDropTargetFrameId(null);
-  }, [draggedFrameId, dropTargetFrameId, id, reorderStoryboardFrame]);
-
-  useEffect(() => {
-    if (!draggedFrameId) {
-      return;
-    }
-
-    const handlePointerUp = () => {
-      finalizeSort();
-    };
-
-    const previousUserSelect = document.body.style.userSelect;
-    const previousCursor = document.body.style.cursor;
-    document.body.style.userSelect = 'none';
-    document.body.style.cursor = 'grabbing';
-
-    window.addEventListener('pointerup', handlePointerUp);
-    window.addEventListener('pointercancel', handlePointerUp);
-
-    return () => {
-      document.body.style.userSelect = previousUserSelect;
-      document.body.style.cursor = previousCursor;
-      window.removeEventListener('pointerup', handlePointerUp);
-      window.removeEventListener('pointercancel', handlePointerUp);
-    };
-  }, [draggedFrameId, finalizeSort]);
+  const { draggedFrameId, dropTargetFrameId, handleSortStart, handleSortHover } =
+    useStoryboardSort({ onReorder, onDragStart: onSortDragStart });
 
   const handleEditFrame = useCallback(
     async (frame: StoryboardFrameItem) => {
