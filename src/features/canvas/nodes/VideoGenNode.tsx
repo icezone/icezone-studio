@@ -6,7 +6,7 @@ import {
   useEffect,
 } from 'react';
 import { Handle, Position, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
-import { Sparkles, RefreshCw, Download, ChevronDown, ChevronUp, ImagePlus, X, Loader2, Film } from 'lucide-react';
+import { Sparkles, RefreshCw, Download, ChevronDown, ChevronUp, Loader2, Film } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -17,12 +17,12 @@ import { NodeHeader } from '@/features/canvas/ui/NodeHeader';
 import { useNodeExpanded } from './shared/useNodeExpanded';
 import { NodeTypeBadge } from '@/features/canvas/ui/NodeTypeBadge';
 import { useVideoGenForm, type PickerAnchor } from './videoGen/useVideoGenForm';
+import { VideoGenFramePicker } from './videoGen/VideoGenFramePicker';
 
 import { canvasVideoAiGateway } from '@/features/canvas/application/canvasServices';
 import { resolveErrorContent, showErrorDialog } from '@/features/canvas/application/errorDialog';
 import {
   prepareNodeImageFromFile,
-  resolveImageDisplayUrl,
 } from '@/features/canvas/application/imageData';
 import {
   findReferenceTokens,
@@ -693,156 +693,28 @@ function VideoGenNodeComponent({
             {/* Frame Selection */}
             {!data.isGenerating && (
               <div className="flex shrink-0 gap-3 px-1">
-                {/* Start Frame Slot */}
-                <div className="relative flex-1">
-                  <div className="mb-1.5 text-xs text-[var(--canvas-node-fg-muted)]">{t('node.videoGen.startFrame')}</div>
-                  {data.startFrameUrl ? (
-                    <div className="relative aspect-video overflow-hidden rounded-lg border-2 border-accent ring-2 ring-accent/30">
-                      <img
-                        src={resolveImageDisplayUrl(data.startFrameUrl)}
-                        alt={t('node.videoGen.startFrame')}
-                        className="h-full w-full object-cover"
-                      />
-                      <button
-                        className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-white transition-colors hover:bg-black/80"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          updateNodeData(id, { startFrameUrl: null });
-                        }}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] transition-colors hover:border-[var(--canvas-node-hover-border)] hover:bg-[var(--canvas-drop-zone-hover-bg)]"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (incomingImageItems.length > 0) {
-                          setStartFramePickerOpen(!startFramePickerOpen);
-                          setEndFramePickerOpen(false);
-                        } else {
-                          setFrameUploadTarget('start');
-                          frameUploadRef.current?.click();
-                        }
-                      }}
-                    >
-                      <ImagePlus className="h-5 w-5 text-[var(--canvas-node-fg-muted)]/60" />
-                    </button>
-                  )}
-                  {startFramePickerOpen && incomingImageItems.length > 0 && !data.startFrameUrl && (
-                    <div
-                      className="nowheel absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
-                      onMouseDown={(e) => e.stopPropagation()}
-                    >
-                      <div className="ui-scrollbar nowheel max-h-[200px] overflow-y-auto p-1.5">
-                        {incomingImageItems.map((item, index) => (
-                          <button
-                            key={`start-pick-${index}`}
-                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              updateNodeData(id, { startFrameUrl: item.imageUrl });
-                              setStartFramePickerOpen(false);
-                            }}
-                          >
-                            <img src={item.displayUrl} alt={item.label} className="h-8 w-8 rounded object-cover" draggable={false} />
-                            <span>{item.label}</span>
-                          </button>
-                        ))}
-                        <button
-                          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setStartFramePickerOpen(false);
-                            setFrameUploadTarget('start');
-                            frameUploadRef.current?.click();
-                          }}
-                        >
-                          <ImagePlus className="h-4 w-4" />
-                          <span>{t('node.videoGen.uploadImage')}</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* End Frame Slot */}
-                <div className="relative flex-1">
-                  <div className="mb-1.5 text-xs text-[var(--canvas-node-fg-muted)]">
-                    {t('node.videoGen.endFrame')}
-                    <span className="ml-1 text-[10px] text-[var(--canvas-node-fg-muted)]/60">({t('node.videoGen.optional')})</span>
-                  </div>
-                  {data.endFrameUrl ? (
-                    <div className="relative aspect-video overflow-hidden rounded-lg border-2 border-accent ring-2 ring-accent/30">
-                      <img
-                        src={resolveImageDisplayUrl(data.endFrameUrl)}
-                        alt={t('node.videoGen.endFrame')}
-                        className="h-full w-full object-cover"
-                      />
-                      <button
-                        className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-white transition-colors hover:bg-black/80"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          updateNodeData(id, { endFrameUrl: null });
-                        }}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] transition-colors hover:border-[var(--canvas-node-hover-border)] hover:bg-[var(--canvas-drop-zone-hover-bg)]"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (incomingImageItems.length > 0) {
-                          setEndFramePickerOpen(!endFramePickerOpen);
-                          setStartFramePickerOpen(false);
-                        } else {
-                          setFrameUploadTarget('end');
-                          frameUploadRef.current?.click();
-                        }
-                      }}
-                    >
-                      <ImagePlus className="h-5 w-5 text-[var(--canvas-node-fg-muted)]/60" />
-                    </button>
-                  )}
-                  {endFramePickerOpen && incomingImageItems.length > 0 && !data.endFrameUrl && (
-                    <div
-                      className="nowheel absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
-                      onMouseDown={(e) => e.stopPropagation()}
-                    >
-                      <div className="ui-scrollbar nowheel max-h-[200px] overflow-y-auto p-1.5">
-                        {incomingImageItems.map((item, index) => (
-                          <button
-                            key={`end-pick-${index}`}
-                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              updateNodeData(id, { endFrameUrl: item.imageUrl });
-                              setEndFramePickerOpen(false);
-                            }}
-                          >
-                            <img src={item.displayUrl} alt={item.label} className="h-8 w-8 rounded object-cover" draggable={false} />
-                            <span>{item.label}</span>
-                          </button>
-                        ))}
-                        <button
-                          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEndFramePickerOpen(false);
-                            setFrameUploadTarget('end');
-                            frameUploadRef.current?.click();
-                          }}
-                        >
-                          <ImagePlus className="h-4 w-4" />
-                          <span>{t('node.videoGen.uploadImage')}</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <VideoGenFramePicker
+                  position="start"
+                  frameUrl={data.startFrameUrl ?? null}
+                  incomingImages={incomingImageItems}
+                  pickerOpen={startFramePickerOpen}
+                  onPickerOpenChange={setStartFramePickerOpen}
+                  onClosedOther={() => setEndFramePickerOpen(false)}
+                  onPickFromUpstream={(imageUrl) => updateNodeData(id, { startFrameUrl: imageUrl })}
+                  onPickFromUpload={() => { setFrameUploadTarget('start'); frameUploadRef.current?.click(); }}
+                  onClear={() => updateNodeData(id, { startFrameUrl: null })}
+                />
+                <VideoGenFramePicker
+                  position="end"
+                  frameUrl={data.endFrameUrl ?? null}
+                  incomingImages={incomingImageItems}
+                  pickerOpen={endFramePickerOpen}
+                  onPickerOpenChange={setEndFramePickerOpen}
+                  onClosedOther={() => setStartFramePickerOpen(false)}
+                  onPickFromUpstream={(imageUrl) => updateNodeData(id, { endFrameUrl: imageUrl })}
+                  onPickFromUpload={() => { setFrameUploadTarget('end'); frameUploadRef.current?.click(); }}
+                  onClear={() => updateNodeData(id, { endFrameUrl: null })}
+                />
 
                 <input
                   ref={frameUploadRef}
