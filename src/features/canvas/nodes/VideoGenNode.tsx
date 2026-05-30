@@ -37,7 +37,7 @@ import {
   NODE_CONTROL_PARAMS_CHIP_CLASS,
   NODE_CONTROL_PRIMARY_BUTTON_CLASS,
 } from '@/features/canvas/ui/nodeControlStyles';
-import { VideoParamsControls } from '@/features/canvas/ui/VideoParamsControls';
+import { VideoGenSettings } from './videoGen/VideoGenSettings';
 import { UiButton } from '@/components/ui';
 import { useCanvasStore } from '@/stores/canvasStore';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -930,7 +930,7 @@ function VideoGenNodeComponent({
           {/* Controls */}
           <div className="mt-2 flex shrink-0 flex-col gap-3">
             <div className="flex items-center gap-1.5">
-              <VideoParamsControls
+              <VideoGenSettings
                 videoModels={videoModels}
                 selectedModel={selectedModel}
                 selectedDuration={selectedDuration}
@@ -973,10 +973,6 @@ function VideoGenNodeComponent({
                     },
                   });
                 }}
-                triggerSize="sm"
-                chipClassName={NODE_CONTROL_CHIP_CLASS}
-                modelChipClassName={NODE_CONTROL_MODEL_CHIP_CLASS}
-                paramsChipClassName={NODE_CONTROL_PARAMS_CHIP_CLASS}
               />
 
               <div className="ml-auto" />
