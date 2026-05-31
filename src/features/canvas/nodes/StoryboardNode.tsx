@@ -17,13 +17,9 @@ import {
   useViewport,
   type NodeProps,
 } from '@xyflow/react';
-import { FolderOpen, ImagePlus, SquareArrowOutUpRight } from 'lucide-react';
+import { ImagePlus, SquareArrowOutUpRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 // Web version: Tauri dialog/opener/path replaced with browser APIs
-
-import {
-  saveImageSourceToDirectory,
-} from '@/commands/image';
 import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canvas/ui/NodeHeader';
 
 import { CanvasNodeImage } from '@/features/canvas/ui/CanvasNodeImage';
@@ -44,16 +40,10 @@ import {
   resolveImageDisplayUrl,
   shouldUseOriginalImageByZoom,
 } from '@/features/canvas/application/imageData';
-import { UiButton, UiPanel } from '@/components/ui';
-import {
-  NODE_CONTROL_ICON_CLASS,
-  NODE_CONTROL_PRIMARY_BUTTON_CLASS,
-} from '@/features/canvas/ui/nodeControlStyles';
 import { useCanvasStore } from '@/stores/canvasStore';
-import { useProjectStore } from '@/stores/projectStore';
-import { useSettingsStore } from '@/stores/settingsStore';
 import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker';
 import { StoryboardExportPanel } from './storyboard/StoryboardExportPanel';
+import { StoryboardPackControls } from './storyboard/StoryboardPackControls';
 
 type StoryboardNodeProps = NodeProps & {
   id: string;
@@ -86,28 +76,6 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-function sanitizePathSegment(raw: string, fallback: string): string {
-  const trimmed = raw.trim();
-  if (!trimmed) {
-    return fallback;
-  }
-
-  const sanitized = Array.from(trimmed)
-    .filter((ch) => !/[<>:"/\\|?*]/.test(ch) && ch >= ' ')
-    .join('')
-    .trim()
-    .replace(/\.+$/g, '');
-
-  return sanitized || fallback;
-}
-
-function sanitizeExportLabel(raw: string, maxLength = 50): string {
-  const compact = sanitizePathSegment(raw, '').replace(/\s+/g, ' ').trim();
-  if (!compact) {
-    return '';
-  }
-  return compact.slice(0, maxLength);
-}
 
 function toCssAspectRatio(aspectRatio: string): string {
   const [rawWidth = '1', rawHeight = '1'] = aspectRatio.split(':');
@@ -331,15 +299,10 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
   const addEdge = useCanvasStore((state) => state.addEdge);
   const updateStoryboardFrame = useCanvasStore((state) => state.updateStoryboardFrame);
   const updateNodeData = useCanvasStore((state) => state.updateNodeData);
-  const currentProjectName = useProjectStore((state) => state.currentProject?.name);
-  const downloadPresetPaths = useSettingsStore((state) => state.downloadPresetPaths);
-
   const [pickerState, setPickerState] = useState<{ frameId: string; x: number; y: number } | null>(null);
   const [isExportBusy, setIsExportBusy] = useState(false);
   const [isPackingSingleImages, setIsPackingSingleImages] = useState(false);
-  const [packError, setPackError] = useState<string | null>(null);
-  const [isPackDoneDialogOpen, setIsPackDoneDialogOpen] = useState(false);
-  const [packOutputDir, setPackOutputDir] = useState<string>('');
+  const [nodeError, setNodeError] = useState<string | null>(null);
 
 
   const orderedFrames = useMemo(
@@ -484,7 +447,7 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
       try {
         const sourceImage = frame.imageUrl ?? frame.previewImageUrl;
         if (!sourceImage) {
-          setPackError('该分镜没有可编辑图片');
+          setNodeError('该分镜没有可编辑图片');
           return;
         }
         const frameIndex = orderedFrames.findIndex((item) => item.id === frame.id);
@@ -507,87 +470,11 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
           addEdge(id, createdNodeId);
         }
       } catch (error) {
-        setPackError(error instanceof Error ? error.message : '创建编辑节点失败');
+        setNodeError(error instanceof Error ? error.message : '创建编辑节点失败');
       }
     },
     [addDerivedExportNode, addEdge, id, orderedFrames]
   );
-
-  const resolvePackRootDir = useCallback(async (): Promise<string | null> => {
-    const presetPath = downloadPresetPaths.find((path) => path.trim().length > 0)?.trim() ?? '';
-    if (presetPath) {
-      return presetPath;
-    }
-
-    // Web version: no folder picker; return a placeholder to trigger browser download.
-    return 'downloads';
-  }, [downloadPresetPaths]);
-
-  const handlePackSingleImages = useCallback(async () => {
-    if (isExportBusy || isPackingSingleImages) {
-      return;
-    }
-
-    setPackError(null);
-    setIsPackingSingleImages(true);
-
-    try {
-      const frameEntries = orderedFrames
-        .map((frame, index) => ({
-          source: frame.imageUrl ?? frame.previewImageUrl ?? '',
-          index,
-          note: frame.note ?? '',
-        }))
-        .filter((item) => item.source.length > 0);
-
-      if (frameEntries.length === 0) {
-        throw new Error('该分镜没有可导出的图片');
-      }
-
-      const rootDir = await resolvePackRootDir();
-      if (!rootDir) {
-        return;
-      }
-
-      const normalizedProjectName = sanitizePathSegment(currentProjectName ?? '', '未命名项目');
-      const outputDir = `${rootDir}/${normalizedProjectName}`;
-      const fileProjectName = sanitizeExportLabel(normalizedProjectName, 40) || '项目';
-      let firstSavedFilePath = '';
-
-      for (const item of frameEntries) {
-        const frameNo = String(item.index + 1).padStart(2, '0');
-        const noteLabel = sanitizeExportLabel(item.note, 60);
-        const fileStem = noteLabel
-          ? `${fileProjectName}_${frameNo}_${noteLabel}`
-          : `${fileProjectName}_${frameNo}`;
-        const savedPath = await saveImageSourceToDirectory(item.source, outputDir, fileStem);
-        if (!firstSavedFilePath) {
-          firstSavedFilePath = savedPath;
-        }
-      }
-
-      setPackOutputDir(outputDir);
-
-      setIsPackDoneDialogOpen(true);
-    } catch (error) {
-      setPackError(error instanceof Error ? error.message : '打包下载失败');
-    } finally {
-      setIsPackingSingleImages(false);
-    }
-  }, [
-    currentProjectName,
-    isExportBusy,
-    isPackingSingleImages,
-    orderedFrames,
-    resolvePackRootDir,
-  ]);
-
-  const handleOpenPackFolder = useCallback(async () => {
-    // Web version: no folder opener; this button is a no-op.
-    console.info('[StoryboardNode] handleOpenPackFolder: not available in web version.');
-  }, []);
-
-  const isAnyExporting = isExportBusy || isPackingSingleImages;
 
   const handleTogglePicker = useCallback((frameId: string, x: number, y: number) => {
     setPickerState((previous) => {
@@ -600,7 +487,7 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
 
   const handleReplaceFromInput = useCallback(
     (frameId: string, imageUrl: string) => {
-      setPackError(null);
+      setNodeError(null);
       const matched = incomingImageItems.find((item) => item.imageUrl === imageUrl);
       updateStoryboardFrame(id, frameId, {
         imageUrl: matched?.imageUrl ?? imageUrl,
@@ -774,58 +661,16 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
               </div>
             </div>
 
-            <div className="flex min-w-0 items-center gap-2">
-              <UiButton
-                size="sm"
-                variant="muted"
-                className={`nodrag ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  void handlePackSingleImages();
-                }}
-                disabled={isAnyExporting}
-              >
-                <FolderOpen className={NODE_CONTROL_ICON_CLASS} />
-                {isPackingSingleImages ? '打包中...' : '打包下载'}
-              </UiButton>
-            </div>
+            <StoryboardPackControls
+              nodeId={id}
+              frames={orderedFrames}
+              exportOptions={exportOptions}
+              isExportBusy={isExportBusy}
+              onPackingChange={setIsPackingSingleImages}
+            />
           </div>
 
-          {packError && <div className="mt-2 shrink-0 text-xs text-red-400">{packError}</div>}
-
-          {typeof document !== 'undefined' && isPackDoneDialogOpen
-            ? createPortal(
-              <div className="fixed inset-0 z-[220] flex items-center justify-center">
-                <div className="absolute inset-0 bg-black/55" />
-                <UiPanel className="relative w-[440px] p-4">
-                  <div className="text-sm font-medium text-[var(--canvas-node-fg)]">导出完成</div>
-                  <div className="mt-2 text-xs text-[var(--canvas-node-fg-muted)]">图片已导出到以下路径：</div>
-                  <div className="mt-1 break-all rounded border border-[rgba(255,255,255,0.12)] bg-bg-dark/70 px-2 py-1.5 text-xs text-[var(--canvas-node-fg)]">
-                    {packOutputDir}
-                  </div>
-                  <div className="mt-4 flex justify-end gap-2">
-                    <UiButton
-                      size="sm"
-                      variant="muted"
-                      onClick={() => {
-                        void handleOpenPackFolder();
-                      }}
-                    >
-                      打开文件夹
-                    </UiButton>
-                    <UiButton
-                      size="sm"
-                      variant="primary"
-                      onClick={() => setIsPackDoneDialogOpen(false)}
-                    >
-                      确定
-                    </UiButton>
-                  </div>
-                </UiPanel>
-              </div>,
-              document.body
-            )
-            : null}
+          {nodeError && <div className="mt-2 shrink-0 text-xs text-red-400">{nodeError}</div>}
         </div>
       )}
 
