@@ -29,6 +29,7 @@ const eslintConfig = defineConfig([
       "react-hooks/refs": "warn",
       "react-hooks/purity": "warn",
       "react-hooks/preserve-manual-memoization": "warn",
+      "react-hooks/immutability": "warn",
       // Allow intentionally-unused function parameters prefixed with _ (e.g. _request, _args).
       // Keep args:"after-used" (Next.js default) to avoid flagging additional pre-existing args.
       "@typescript-eslint/no-unused-vars": [
