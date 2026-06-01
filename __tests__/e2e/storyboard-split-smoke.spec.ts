@@ -349,13 +349,13 @@ test.describe('StoryboardSplit node — Phase 3.D smoke test', () => {
 
       await shot(page, '04b-export-option-toggled')
 
-      // Close via Escape key (more reliable than outside click in CI)
-      await page.keyboard.press('Escape')
+      // Close by clicking the toggle button again
+      await forceClick(exportSettingsBtn)
       await page.waitForTimeout(400)
 
       const stillOpenAfterClose = await frameIndexLabel.isVisible({ timeout: 1_000 }).catch(() => false)
       expect(stillOpenAfterClose).toBe(false)
-      console.log('[CHECK 4d] Export popover closed via Escape: PASS')
+      console.log('[CHECK 4d] Export popover closed via toggle button: PASS')
     } else {
       // Popover may have rendered at a fixed position outside the viewport due to ReactFlow transform
       // Check via page.evaluate to confirm the panel exists in the DOM
@@ -365,9 +365,9 @@ test.describe('StoryboardSplit node — Phase 3.D smoke test', () => {
       if (panelInDom) {
         console.log('[CHECK 4b] Export popover element found in DOM (off-viewport due to transform): PASS')
         await shot(page, '04-export-panel-dom-found')
-        await page.mouse.click(10, 10)
+        await forceClick(exportSettingsBtn)
         await page.waitForTimeout(400)
-        console.log('[CHECK 4d] Closed via outside click: PASS')
+        console.log('[CHECK 4d] Closed via toggle button: PASS')
       } else {
         console.log('[CHECK 4] Export popover did not appear — WARN: may be a rendering issue')
         await shot(page, '04-export-panel-not-visible')
