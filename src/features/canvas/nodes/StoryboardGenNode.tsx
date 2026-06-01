@@ -518,7 +518,7 @@ function generateGridImageDataUrl(
   return canvas.toDataURL('image/png');
 }
 
-export const StoryboardGenNode = memo(({ id, data, selected, width, height }: StoryboardGenNodeProps) => {
+export const StoryboardGenNode = memo(({ id, data, selected, width }: StoryboardGenNodeProps) => {
   const { t } = useTranslation();
   const { zoom } = useViewport();
   const updateNodeInternals = useUpdateNodeInternals();
@@ -587,10 +587,10 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
     baseFrameLayout.nodeWidth,
     Math.round(width ?? baseFrameLayout.nodeWidth)
   );
-  const resolvedNodeHeight = Math.max(
-    baseFrameLayout.nodeHeight,
-    Math.round(height ?? baseFrameLayout.nodeHeight)
-  );
+  // Do NOT clamp with React Flow's `height` prop here.
+  // `height` is the total node height (preview card + settings panel), so using it
+  // as the settings panel height creates an unbounded growth loop on each render.
+  const resolvedNodeHeight = baseFrameLayout.nodeHeight;
 
   const { expanded, expand, collapse } = useNodeExpanded();
 
