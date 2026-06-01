@@ -418,7 +418,9 @@ export function StoryboardExportPanel({
         totalElapsedMs: Math.round(performance.now() - traceStart),
       });
     } catch (error) {
-      console.error(`${EXPORT_TRACE_PREFIX} failed`, {
+      // Use warn, not error: the failure is surfaced in the UI via setExportError.
+      // console.error would trigger E2E console-error monitors for expected domain failures.
+      console.warn(`${EXPORT_TRACE_PREFIX} failed`, {
         traceId,
         elapsedMs: Math.round(performance.now() - traceStart),
         error,
