@@ -218,14 +218,19 @@ PATCH /api/projects/[id]/draft/viewport
 const menuNodeTypes = ['uploadNode', 'imageNode', 'videoGenNode']
 
 ✅ 正确示例：
-function getConnectMenuNodeTypes(direction: 'source' | 'target') {
-  return Object.entries(NODE_REGISTRY)
-    .filter(([_, def]) => 
-      direction === 'source' 
-        ? def.connectivity.connectMenu.fromSource
-        : def.connectivity.connectMenu.fromTarget
-    )
-    .map(([type, _]) => type)
+// connectionValidator.ts — 候选节点完全由 data-type 兼容性推导
+function getConnectMenuNodeTypes(
+  handleType: 'source' | 'target',
+  anchorNodeType: CanvasNodeType,
+) {
+  if (handleType === 'source') {
+    return Object.values(canvasNodeDefinitions)
+      .filter((def) => isValidConnectionByDataType(anchorNodeType, def.type))
+      .map((def) => def.type);
+  }
+  return Object.values(canvasNodeDefinitions)
+    .filter((def) => isValidConnectionByDataType(def.type, anchorNodeType))
+    .map((def) => def.type);
 }
 ```
 

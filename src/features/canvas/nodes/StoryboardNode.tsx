@@ -7,6 +7,7 @@ import {
   useRef,
 } from 'react';
 import { useNodeExpanded } from './shared/useNodeExpanded';
+import { useStoryboardSort } from './storyboard/useStoryboardSort';
 import { NodeTypeBadge } from '@/features/canvas/ui/NodeTypeBadge';
 import { createPortal } from 'react-dom';
 import {
@@ -16,16 +17,9 @@ import {
   useViewport,
   type NodeProps,
 } from '@xyflow/react';
-import { Download, FolderOpen, ImagePlus, SlidersHorizontal, SquareArrowOutUpRight } from 'lucide-react';
+import { ImagePlus, SquareArrowOutUpRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 // Web version: Tauri dialog/opener/path replaced with browser APIs
-
-import {
-  embedStoryboardImageMetadata,
-  mergeStoryboardImages,
-  saveImageSourceToDirectory,
-  type MergeStoryboardImagesResult,
-} from '@/commands/image';
 import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canvas/ui/NodeHeader';
 
 import { CanvasNodeImage } from '@/features/canvas/ui/CanvasNodeImage';
@@ -42,24 +36,14 @@ import {
 } from '@/features/canvas/domain/canvasNodes';
 import { resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
 import {
-  canvasToDataUrl,
-  loadImageElement,
   prepareNodeImage,
-  persistImageLocally,
-  reduceAspectRatio,
   resolveImageDisplayUrl,
   shouldUseOriginalImageByZoom,
 } from '@/features/canvas/application/imageData';
-import { UiButton, UiCheckbox, UiChipButton, UiInput, UiPanel, UiSelect } from '@/components/ui';
-import {
-  NODE_CONTROL_CHIP_CLASS,
-  NODE_CONTROL_ICON_CLASS,
-  NODE_CONTROL_PRIMARY_BUTTON_CLASS,
-} from '@/features/canvas/ui/nodeControlStyles';
 import { useCanvasStore } from '@/stores/canvasStore';
-import { useProjectStore } from '@/stores/projectStore';
-import { useSettingsStore } from '@/stores/settingsStore';
 import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker';
+import { StoryboardExportPanel } from './storyboard/StoryboardExportPanel';
+import { StoryboardPackControls } from './storyboard/StoryboardPackControls';
 
 type StoryboardNodeProps = NodeProps & {
   id: string;
@@ -70,8 +54,6 @@ type StoryboardNodeProps = NodeProps & {
 const STORYBOARD_NODE_WIDTH_PX = 318;
 const STORYBOARD_NODE_MIN_HEIGHT_PX = 320;
 const STORYBOARD_GRID_GAP_PX = 1;
-const EXPORT_MAX_DIMENSION = 4096;
-const EXPORT_TRACE_PREFIX = '[StoryboardExport]';
 const STORYBOARD_SPLIT_HEADER_ADJUST = { x: 0, y: 0, scale: 1 };
 const STORYBOARD_SPLIT_ICON_ADJUST = { x: 0, y: 0, scale: 1 };
 const STORYBOARD_SPLIT_TITLE_ADJUST = { x: 0, y: 0, scale: 1 };
@@ -94,28 +76,6 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-function sanitizePathSegment(raw: string, fallback: string): string {
-  const trimmed = raw.trim();
-  if (!trimmed) {
-    return fallback;
-  }
-
-  const sanitized = Array.from(trimmed)
-    .filter((ch) => !/[<>:"/\\|?*]/.test(ch) && ch >= ' ')
-    .join('')
-    .trim()
-    .replace(/\.+$/g, '');
-
-  return sanitized || fallback;
-}
-
-function sanitizeExportLabel(raw: string, maxLength = 50): string {
-  const compact = sanitizePathSegment(raw, '').replace(/\s+/g, ' ').trim();
-  if (!compact) {
-    return '';
-  }
-  return compact.slice(0, maxLength);
-}
 
 function toCssAspectRatio(aspectRatio: string): string {
   const [rawWidth = '1', rawHeight = '1'] = aspectRatio.split(':');
@@ -161,112 +121,6 @@ function resolveExportOptions(options: StoryboardSplitNodeData['exportOptions'])
   };
 }
 
-function trimTextToWidth(
-  context: CanvasRenderingContext2D,
-  text: string,
-  maxWidth: number
-): string {
-  const safeText = text.trim();
-  if (!safeText) {
-    return '';
-  }
-
-  if (context.measureText(safeText).width <= maxWidth) {
-    return safeText;
-  }
-
-  let content = safeText;
-  while (content.length > 1) {
-    content = content.slice(0, -1);
-    const withEllipsis = `${content}...`;
-    if (context.measureText(withEllipsis).width <= maxWidth) {
-      return withEllipsis;
-    }
-  }
-
-  return '...';
-}
-
-async function applyStoryboardTextOverlay(
-  imageSource: string,
-  frames: StoryboardFrameItem[],
-  options: StoryboardExportOptions,
-  rows: number,
-  cols: number,
-  layout: MergeStoryboardImagesResult
-): Promise<string> {
-  if (!options.showFrameIndex && !options.showFrameNote) {
-    return imageSource;
-  }
-
-  const image = await loadImageElement(imageSource);
-  const canvas = document.createElement('canvas');
-  canvas.width = layout.canvasWidth;
-  canvas.height = layout.canvasHeight;
-
-  const context = canvas.getContext('2d');
-  if (!context) {
-    throw new Error('导出画布初始化失败');
-  }
-
-  context.drawImage(image, 0, 0, canvas.width, canvas.height);
-  context.textBaseline = 'middle';
-  context.textAlign = 'left';
-  context.font = `${Math.max(500, Math.round(layout.fontSize * 1.2))} ${layout.fontSize}px sans-serif`;
-
-  for (let index = 0; index < frames.length; index += 1) {
-    const frame = frames[index];
-    const row = Math.floor(index / Math.max(1, cols));
-    const col = index % Math.max(1, cols);
-    if (row >= rows) {
-      break;
-    }
-
-    const x = layout.padding + col * (layout.cellWidth + layout.gap);
-    const y = layout.padding + row * (layout.cellHeight + layout.noteHeight + layout.gap);
-
-    if (options.showFrameIndex) {
-      const label = `${options.frameIndexPrefix || 'S'}${index + 1}`;
-      const badgePaddingX = Math.max(6, Math.round(layout.fontSize * 0.35));
-      const badgeHeight = Math.max(18, Math.round(layout.fontSize * 1.15));
-      const textWidth = context.measureText(label).width;
-      const badgeWidth = Math.round(textWidth + badgePaddingX * 2);
-
-      context.fillStyle = 'rgba(0,0,0,0.65)';
-      context.fillRect(x + 6, y + 6, badgeWidth, badgeHeight);
-      context.fillStyle = options.textColor;
-      context.fillText(label, x + 6 + badgePaddingX, y + 6 + badgeHeight / 2);
-    }
-
-    if (options.showFrameNote) {
-      const note = trimTextToWidth(
-        context,
-        frame.note || '',
-        Math.max(20, layout.cellWidth - 14)
-      );
-
-      if (!note) {
-        continue;
-      }
-
-      if (options.notePlacement === 'overlay') {
-        const overlayHeight = Math.max(18, Math.round(layout.fontSize * 1.35));
-        const overlayY = y + layout.cellHeight - overlayHeight;
-        context.fillStyle = 'rgba(0, 0, 0, 0.6)';
-        context.fillRect(x, overlayY, layout.cellWidth, overlayHeight);
-        context.fillStyle = options.textColor;
-        context.fillText(note, x + 7, overlayY + overlayHeight / 2);
-      } else if (layout.noteHeight > 0) {
-        const noteY = y + layout.cellHeight + layout.noteHeight / 2;
-        context.fillStyle = options.textColor;
-        context.fillText(note, x + 4, noteY);
-      }
-    }
-  }
-
-  return canvasToDataUrl(canvas);
-}
-
 interface FrameCardProps {
   nodeId: string;
   frame: StoryboardFrameItem;
@@ -287,11 +141,6 @@ interface IncomingImageItem {
   previewImageUrl: string | null;
   displayUrl: string;
   label: string;
-}
-
-interface PanelAnchor {
-  left: number;
-  top: number;
 }
 
 const FrameCard = memo(
@@ -442,8 +291,6 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
   const updateNodeInternals = useUpdateNodeInternals();
   const rootRef = useRef<HTMLDivElement>(null);
   const pickerMenuRef = useRef<HTMLDivElement>(null);
-  const exportSettingsTriggerRef = useRef<HTMLDivElement>(null);
-  const exportSettingsPanelRef = useRef<HTMLDivElement>(null);
   const setSelectedNode = useCanvasStore((state) => state.setSelectedNode);
   const nodes = useCanvasStore((state) => state.nodes);
   const edges = useCanvasStore((state) => state.edges);
@@ -452,20 +299,10 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
   const addEdge = useCanvasStore((state) => state.addEdge);
   const updateStoryboardFrame = useCanvasStore((state) => state.updateStoryboardFrame);
   const updateNodeData = useCanvasStore((state) => state.updateNodeData);
-  const currentProjectName = useProjectStore((state) => state.currentProject?.name);
-  const downloadPresetPaths = useSettingsStore((state) => state.downloadPresetPaths);
-
-  const [draggedFrameId, setDraggedFrameId] = useState<string | null>(null);
-  const [dropTargetFrameId, setDropTargetFrameId] = useState<string | null>(null);
   const [pickerState, setPickerState] = useState<{ frameId: string; x: number; y: number } | null>(null);
-  const [isExporting, setIsExporting] = useState(false);
+  const [isExportBusy, setIsExportBusy] = useState(false);
   const [isPackingSingleImages, setIsPackingSingleImages] = useState(false);
-  const [exportError, setExportError] = useState<string | null>(null);
-  const [isExportPanelOpen, setIsExportPanelOpen] = useState(false);
-  const [isExportPanelVisible, setIsExportPanelVisible] = useState(false);
-  const [exportPanelAnchor, setExportPanelAnchor] = useState<PanelAnchor | null>(null);
-  const [isPackDoneDialogOpen, setIsPackDoneDialogOpen] = useState(false);
-  const [packOutputDir, setPackOutputDir] = useState<string>('');
+  const [nodeError, setNodeError] = useState<string | null>(null);
 
 
   const orderedFrames = useMemo(
@@ -579,15 +416,9 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
       const target = event.target as Node;
       const insideRoot = rootRef.current.contains(target);
       const insidePickerMenu = pickerMenuRef.current?.contains(target) ?? false;
-      const insideExportPanel = exportSettingsPanelRef.current?.contains(target) ?? false;
-      const insideExportTrigger = exportSettingsTriggerRef.current?.contains(target) ?? false;
 
       if (!insideRoot && !insidePickerMenu) {
         setPickerState(null);
-      }
-
-      if (!insideExportPanel && !insideExportTrigger) {
-        setIsExportPanelOpen(false);
       }
     };
 
@@ -597,110 +428,26 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
     };
   }, []);
 
-  useEffect(() => {
-    if (!isExportPanelOpen) {
-      setIsExportPanelVisible(false);
-      return;
-    }
-
-    let raf2: number | null = null;
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => {
-        setIsExportPanelVisible(true);
-      });
-    });
-
-    return () => {
-      cancelAnimationFrame(raf1);
-      if (raf2 !== null) {
-        cancelAnimationFrame(raf2);
-      }
-    };
-  }, [isExportPanelOpen]);
-
-  const getPanelAnchor = useCallback((triggerElement: HTMLDivElement | null): PanelAnchor | null => {
-    if (!triggerElement) {
-      return null;
-    }
-    const rect = triggerElement.getBoundingClientRect();
-    return {
-      left: rect.left + rect.width / 2,
-      top: rect.top - 8,
-    };
-  }, []);
-
-  const patchExportOptions = useCallback(
-    (patch: Partial<StoryboardExportOptions>) => {
-      updateNodeData(id, {
-        exportOptions: {
-          ...exportOptions,
-          ...patch,
-        },
-      });
-    },
-    [exportOptions, id, updateNodeData]
-  );
-
-  const handleSortStart = useCallback((frameId: string) => {
-    setDraggedFrameId(frameId);
-    setDropTargetFrameId(frameId);
+  const onSortDragStart = useCallback(() => {
     setPickerState(null);
   }, []);
 
-  const handleSortHover = useCallback(
-    (frameId: string) => {
-      if (!draggedFrameId) {
-        return;
-      }
-      setDropTargetFrameId(frameId);
+  const onReorder = useCallback(
+    (draggedId: string, dropTargetId: string) => {
+      reorderStoryboardFrame(id, draggedId, dropTargetId);
     },
-    [draggedFrameId]
+    [id, reorderStoryboardFrame]
   );
 
-  const finalizeSort = useCallback(() => {
-    if (!draggedFrameId) {
-      return;
-    }
-
-    if (dropTargetFrameId && dropTargetFrameId !== draggedFrameId) {
-      reorderStoryboardFrame(id, draggedFrameId, dropTargetFrameId);
-    }
-
-    setDraggedFrameId(null);
-    setDropTargetFrameId(null);
-  }, [draggedFrameId, dropTargetFrameId, id, reorderStoryboardFrame]);
-
-  useEffect(() => {
-    if (!draggedFrameId) {
-      return;
-    }
-
-    const handlePointerUp = () => {
-      finalizeSort();
-    };
-
-    const previousUserSelect = document.body.style.userSelect;
-    const previousCursor = document.body.style.cursor;
-    document.body.style.userSelect = 'none';
-    document.body.style.cursor = 'grabbing';
-
-    window.addEventListener('pointerup', handlePointerUp);
-    window.addEventListener('pointercancel', handlePointerUp);
-
-    return () => {
-      document.body.style.userSelect = previousUserSelect;
-      document.body.style.cursor = previousCursor;
-      window.removeEventListener('pointerup', handlePointerUp);
-      window.removeEventListener('pointercancel', handlePointerUp);
-    };
-  }, [draggedFrameId, finalizeSort]);
+  const { draggedFrameId, dropTargetFrameId, handleSortStart, handleSortHover } =
+    useStoryboardSort({ onReorder, onDragStart: onSortDragStart });
 
   const handleEditFrame = useCallback(
     async (frame: StoryboardFrameItem) => {
       try {
         const sourceImage = frame.imageUrl ?? frame.previewImageUrl;
         if (!sourceImage) {
-          setExportError('该分镜没有可编辑图片');
+          setNodeError('该分镜没有可编辑图片');
           return;
         }
         const frameIndex = orderedFrames.findIndex((item) => item.id === frame.id);
@@ -723,271 +470,11 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
           addEdge(id, createdNodeId);
         }
       } catch (error) {
-        setExportError(error instanceof Error ? error.message : '创建编辑节点失败');
+        setNodeError(error instanceof Error ? error.message : '创建编辑节点失败');
       }
     },
     [addDerivedExportNode, addEdge, id, orderedFrames]
   );
-
-  const handleExport = useCallback(async () => {
-    if (isExporting) {
-      return;
-    }
-
-    const traceId = `${id}-${Date.now()}`;
-    const traceStart = performance.now();
-    console.info(`${EXPORT_TRACE_PREFIX} start`, {
-      traceId,
-      nodeId: id,
-      rows: gridRows,
-      cols: gridCols,
-      frameCount: orderedFrames.length,
-    });
-
-    setIsExporting(true);
-    setExportError(null);
-
-    try {
-      const stageFrameStart = performance.now();
-      const frameSources = orderedFrames.map(
-        (frame) => frame.imageUrl ?? frame.previewImageUrl ?? ''
-      );
-      if (frameSources.every((source) => !source)) {
-        throw new Error('没有可导出的图片');
-      }
-      console.info(`${EXPORT_TRACE_PREFIX} frame-sources-ready`, {
-        traceId,
-        elapsedMs: Math.round(performance.now() - stageFrameStart),
-        nonEmptyFrames: frameSources.filter((source) => source.length > 0).length,
-      });
-
-      const options = exportOptions;
-      const rawGap = clamp(Math.round(options.cellGap), 0, 120);
-      const rawPadding = 0;
-      const fontPercent = clamp(Number.isFinite(options.fontSize) ? options.fontSize : 4, 1, 20);
-      const firstFrameSource = frameSources.find((source) => source.length > 0) ?? null;
-      let referenceFrameHeight = 1024;
-      if (firstFrameSource) {
-        const fontProbeStart = performance.now();
-        try {
-          const referenceImage = await loadImageElement(firstFrameSource);
-          referenceFrameHeight = Math.max(
-            64,
-            referenceImage.naturalHeight || referenceImage.height || referenceFrameHeight
-          );
-        } catch {
-          // Keep fallback size when reference frame cannot be read.
-        }
-        console.info(`${EXPORT_TRACE_PREFIX} font-reference-resolved`, {
-          traceId,
-          elapsedMs: Math.round(performance.now() - fontProbeStart),
-          referenceFrameHeight,
-        });
-      }
-      const rawFontSize = clamp(
-        Math.round(referenceFrameHeight * (fontPercent / 100)),
-        10,
-        240
-      );
-      const rawNoteHeight =
-        options.showFrameNote && options.notePlacement === 'bottom'
-          ? Math.max(Math.round(rawFontSize * 1.7), 24)
-          : 0;
-
-      const mergeStart = performance.now();
-      const mergeResult = await mergeStoryboardImages({
-        frameSources,
-        rows: gridRows,
-        cols: gridCols,
-        cellGap: rawGap,
-        outerPadding: rawPadding,
-        noteHeight: rawNoteHeight,
-        fontSize: rawFontSize,
-        backgroundColor: options.backgroundColor,
-        maxDimension: EXPORT_MAX_DIMENSION,
-        showFrameIndex: options.showFrameIndex,
-        showFrameNote: options.showFrameNote,
-        notePlacement: options.notePlacement,
-        imageFit: options.imageFit,
-        frameIndexPrefix: options.frameIndexPrefix,
-        textColor: options.textColor,
-        frameNotes: orderedFrames.map((frame) => frame.note ?? ''),
-      });
-      console.info(`${EXPORT_TRACE_PREFIX} merge-done`, {
-        traceId,
-        elapsedMs: Math.round(performance.now() - mergeStart),
-        canvasWidth: mergeResult.canvasWidth,
-        canvasHeight: mergeResult.canvasHeight,
-        textOverlayApplied: mergeResult.textOverlayApplied,
-      });
-
-      const aspectRatio = reduceAspectRatio(mergeResult.canvasWidth, mergeResult.canvasHeight);
-      const needsOverlay = (options.showFrameIndex || options.showFrameNote) && !mergeResult.textOverlayApplied;
-      let finalImagePath = mergeResult.imagePath;
-      let finalPreviewPath = mergeResult.imagePath;
-
-      if (needsOverlay) {
-        const overlayStart = performance.now();
-        const mergedBlob = await applyStoryboardTextOverlay(
-          mergeResult.imagePath,
-          orderedFrames,
-          options,
-          gridRows,
-          gridCols,
-          mergeResult
-        );
-        console.info(`${EXPORT_TRACE_PREFIX} overlay-done`, {
-          traceId,
-          elapsedMs: Math.round(performance.now() - overlayStart),
-          dataUrlLength: mergedBlob.length,
-        });
-        const persistStart = performance.now();
-        finalImagePath = await persistImageLocally(mergedBlob);
-        finalPreviewPath = finalImagePath;
-        console.info(`${EXPORT_TRACE_PREFIX} overlay-persisted`, {
-          traceId,
-          elapsedMs: Math.round(performance.now() - persistStart),
-          persistedPath: finalImagePath,
-        });
-      }
-
-      const metadataStart = performance.now();
-      const metadataFrameNotes = orderedFrames.map((frame) => frame.note ?? '');
-      const imagePathWithMetadata = await embedStoryboardImageMetadata(finalImagePath, {
-        gridRows,
-        gridCols,
-        frameNotes: metadataFrameNotes,
-      }).catch((error) => {
-        console.warn('[StoryboardMetadata] embed failed on storyboard export', error);
-        return finalImagePath;
-      });
-      finalImagePath = imagePathWithMetadata;
-      finalPreviewPath = imagePathWithMetadata;
-      console.info(`${EXPORT_TRACE_PREFIX} metadata-embedded`, {
-        traceId,
-        elapsedMs: Math.round(performance.now() - metadataStart),
-        imagePath: finalImagePath,
-      });
-
-      const createNodeStart = performance.now();
-      const createdNodeId = addDerivedExportNode(
-        id,
-        finalImagePath,
-        aspectRatio,
-        finalPreviewPath,
-        {
-          defaultTitle: '切割导出',
-        }
-      );
-      console.info(`${EXPORT_TRACE_PREFIX} derived-node-created`, {
-        traceId,
-        elapsedMs: Math.round(performance.now() - createNodeStart),
-        createdNodeId,
-      });
-
-      if (createdNodeId) {
-        addEdge(id, createdNodeId);
-      }
-      console.info(`${EXPORT_TRACE_PREFIX} done`, {
-        traceId,
-        totalElapsedMs: Math.round(performance.now() - traceStart),
-      });
-    } catch (error) {
-      console.error(`${EXPORT_TRACE_PREFIX} failed`, {
-        traceId,
-        elapsedMs: Math.round(performance.now() - traceStart),
-        error,
-      });
-      setExportError(error instanceof Error ? error.message : '导出失败');
-    } finally {
-      setIsExporting(false);
-    }
-  }, [
-    addDerivedExportNode,
-    addEdge,
-    exportOptions,
-    gridCols,
-    gridRows,
-    id,
-    isExporting,
-    orderedFrames,
-  ]);
-
-  const resolvePackRootDir = useCallback(async (): Promise<string | null> => {
-    const presetPath = downloadPresetPaths.find((path) => path.trim().length > 0)?.trim() ?? '';
-    if (presetPath) {
-      return presetPath;
-    }
-
-    // Web version: no folder picker; return a placeholder to trigger browser download.
-    return 'downloads';
-  }, [downloadPresetPaths]);
-
-  const handlePackSingleImages = useCallback(async () => {
-    if (isExporting || isPackingSingleImages) {
-      return;
-    }
-
-    setExportError(null);
-    setIsPackingSingleImages(true);
-
-    try {
-      const frameEntries = orderedFrames
-        .map((frame, index) => ({
-          source: frame.imageUrl ?? frame.previewImageUrl ?? '',
-          index,
-          note: frame.note ?? '',
-        }))
-        .filter((item) => item.source.length > 0);
-
-      if (frameEntries.length === 0) {
-        throw new Error('该分镜没有可导出的图片');
-      }
-
-      const rootDir = await resolvePackRootDir();
-      if (!rootDir) {
-        return;
-      }
-
-      const normalizedProjectName = sanitizePathSegment(currentProjectName ?? '', '未命名项目');
-      const outputDir = `${rootDir}/${normalizedProjectName}`;
-      const fileProjectName = sanitizeExportLabel(normalizedProjectName, 40) || '项目';
-      let firstSavedFilePath = '';
-
-      for (const item of frameEntries) {
-        const frameNo = String(item.index + 1).padStart(2, '0');
-        const noteLabel = sanitizeExportLabel(item.note, 60);
-        const fileStem = noteLabel
-          ? `${fileProjectName}_${frameNo}_${noteLabel}`
-          : `${fileProjectName}_${frameNo}`;
-        const savedPath = await saveImageSourceToDirectory(item.source, outputDir, fileStem);
-        if (!firstSavedFilePath) {
-          firstSavedFilePath = savedPath;
-        }
-      }
-
-      setPackOutputDir(outputDir);
-
-      setIsPackDoneDialogOpen(true);
-    } catch (error) {
-      setExportError(error instanceof Error ? error.message : '打包下载失败');
-    } finally {
-      setIsPackingSingleImages(false);
-    }
-  }, [
-    currentProjectName,
-    isExporting,
-    isPackingSingleImages,
-    orderedFrames,
-    resolvePackRootDir,
-  ]);
-
-  const handleOpenPackFolder = useCallback(async () => {
-    // Web version: no folder opener; this button is a no-op.
-    console.info('[StoryboardNode] handleOpenPackFolder: not available in web version.');
-  }, []);
-
-  const isAnyExporting = isExporting || isPackingSingleImages;
 
   const handleTogglePicker = useCallback((frameId: string, x: number, y: number) => {
     setPickerState((previous) => {
@@ -1000,7 +487,7 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
 
   const handleReplaceFromInput = useCallback(
     (frameId: string, imageUrl: string) => {
-      setExportError(null);
+      setNodeError(null);
       const matched = incomingImageItems.find((item) => item.imageUrl === imageUrl);
       updateStoryboardFrame(id, frameId, {
         imageUrl: matched?.imageUrl ?? imageUrl,
@@ -1158,222 +645,32 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
 
           <div className="mt-2 flex shrink-0 items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
-              <div ref={exportSettingsTriggerRef} className="nodrag relative flex">
-                <UiChipButton
-                  active={isExportPanelOpen}
-                  className={NODE_CONTROL_CHIP_CLASS}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    if (isExportPanelOpen) {
-                      setIsExportPanelOpen(false);
-                      return;
-                    }
-                    setExportPanelAnchor(getPanelAnchor(exportSettingsTriggerRef.current));
-                    setIsExportPanelOpen(true);
-                  }}
-                >
-                  <SlidersHorizontal className={`${NODE_CONTROL_ICON_CLASS} shrink-0`} />
-                  <span>导出设置</span>
-                </UiChipButton>
-              </div>
+              <StoryboardExportPanel
+                nodeId={id}
+                frames={orderedFrames}
+                exportOptions={exportOptions}
+                gridRows={gridRows}
+                gridCols={gridCols}
+                onExportOptionsChange={(patch) => updateNodeData(id, { exportOptions: { ...exportOptions, ...patch } })}
+                onExportingChange={setIsExportBusy}
+                siblingExporting={isPackingSingleImages}
+              />
 
               <div className="truncate text-[11px] text-[var(--canvas-node-fg-muted)]/80">
                 {gridRows} x {gridCols} | {totalFrames} 格
               </div>
             </div>
 
-            <div className="flex min-w-0 items-center gap-2">
-              <UiButton
-                size="sm"
-                variant="muted"
-                className={`nodrag ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  void handlePackSingleImages();
-                }}
-                disabled={isAnyExporting}
-              >
-                <FolderOpen className={NODE_CONTROL_ICON_CLASS} />
-                {isPackingSingleImages ? '打包中...' : '打包下载'}
-              </UiButton>
-              <UiButton
-                size="sm"
-                variant="primary"
-                className={`nodrag ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  void handleExport();
-                }}
-                disabled={isAnyExporting}
-              >
-                <Download className={NODE_CONTROL_ICON_CLASS} />
-                {isExporting ? '导出中...' : '合并分镜'}
-              </UiButton>
-            </div>
+            <StoryboardPackControls
+              nodeId={id}
+              frames={orderedFrames}
+              exportOptions={exportOptions}
+              isExportBusy={isExportBusy}
+              onPackingChange={setIsPackingSingleImages}
+            />
           </div>
 
-          {typeof document !== 'undefined' && isExportPanelOpen && createPortal(
-            <div
-              ref={exportSettingsPanelRef}
-              className={`fixed z-[120] w-[340px] transition-opacity duration-200 ease-out ${isExportPanelVisible ? 'opacity-100' : 'pointer-events-none opacity-0'
-                }`}
-              style={exportPanelAnchor
-                ? {
-                  left: exportPanelAnchor.left,
-                  top: exportPanelAnchor.top,
-                  transform: 'translateX(-50%) translateY(-100%)',
-                }
-                : undefined}
-              onMouseDown={(event) => event.stopPropagation()}
-            >
-              <UiPanel className="p-2.5">
-                <div className="space-y-2 text-xs text-[var(--canvas-node-fg-muted)]">
-                  <label className="flex items-center gap-2">
-                    <UiCheckbox
-                      checked={exportOptions.showFrameIndex}
-                      onCheckedChange={(checked) => patchExportOptions({ showFrameIndex: checked })}
-                    />
-                    显示分镜序号
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <UiCheckbox
-                      checked={exportOptions.showFrameNote}
-                      onCheckedChange={(checked) => patchExportOptions({ showFrameNote: checked })}
-                    />
-                    显示分镜描述
-                  </label>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <div className="mb-1">图片填充</div>
-                      <UiSelect
-                        value={exportOptions.imageFit}
-                        onChange={(event) =>
-                          patchExportOptions({
-                            imageFit: event.target.value === 'contain' ? 'contain' : 'cover',
-                          })
-                        }
-                      >
-                        <option value="cover">填充满格子</option>
-                        <option value="contain">完整显示</option>
-                      </UiSelect>
-                    </div>
-                    <div>
-                      <div className="mb-1">序号前缀</div>
-                      <UiInput
-                        value={exportOptions.frameIndexPrefix}
-                        maxLength={4}
-                        className="h-8"
-                        onChange={(event) => patchExportOptions({ frameIndexPrefix: event.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <div className="mb-1">描述位置</div>
-                      <UiSelect
-                        value={exportOptions.notePlacement}
-                        onChange={(event) =>
-                          patchExportOptions({
-                            notePlacement: event.target.value === 'bottom' ? 'bottom' : 'overlay',
-                          })
-                        }
-                      >
-                        <option value="overlay">图上遮罩</option>
-                        <option value="bottom">图下文字</option>
-                      </UiSelect>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <div className="mb-1">间距</div>
-                      <UiInput
-                        type="number"
-                        min={0}
-                        max={120}
-                        value={exportOptions.cellGap}
-                        className="h-8"
-                        onChange={(event) =>
-                          patchExportOptions({ cellGap: Number(event.target.value) || 0 })
-                        }
-                      />
-                    </div>
-                    <div>
-                      <div className="mb-1">字号(%)</div>
-                      <UiInput
-                        type="number"
-                        min={1}
-                        max={20}
-                        value={exportOptions.fontSize}
-                        className="h-8"
-                        onChange={(event) =>
-                          patchExportOptions({ fontSize: Number(event.target.value) || 4 })
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <label className="flex items-center gap-2">
-                      <span>背景</span>
-                      <input
-                        type="color"
-                        value={exportOptions.backgroundColor}
-                        onChange={(event) => patchExportOptions({ backgroundColor: event.target.value })}
-                        className="h-7 w-full rounded border border-[rgba(255,255,255,0.14)] bg-transparent"
-                      />
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <span>文字</span>
-                      <input
-                        type="color"
-                        value={exportOptions.textColor}
-                        onChange={(event) => patchExportOptions({ textColor: event.target.value })}
-                        className="h-7 w-full rounded border border-[rgba(255,255,255,0.14)] bg-transparent"
-                      />
-                    </label>
-                  </div>
-                </div>
-              </UiPanel>
-            </div>,
-            document.body
-          )}
-
-          {exportError && <div className="mt-2 shrink-0 text-xs text-red-400">{exportError}</div>}
-
-          {typeof document !== 'undefined' && isPackDoneDialogOpen
-            ? createPortal(
-              <div className="fixed inset-0 z-[220] flex items-center justify-center">
-                <div className="absolute inset-0 bg-black/55" />
-                <UiPanel className="relative w-[440px] p-4">
-                  <div className="text-sm font-medium text-[var(--canvas-node-fg)]">导出完成</div>
-                  <div className="mt-2 text-xs text-[var(--canvas-node-fg-muted)]">图片已导出到以下路径：</div>
-                  <div className="mt-1 break-all rounded border border-[rgba(255,255,255,0.12)] bg-bg-dark/70 px-2 py-1.5 text-xs text-[var(--canvas-node-fg)]">
-                    {packOutputDir}
-                  </div>
-                  <div className="mt-4 flex justify-end gap-2">
-                    <UiButton
-                      size="sm"
-                      variant="muted"
-                      onClick={() => {
-                        void handleOpenPackFolder();
-                      }}
-                    >
-                      打开文件夹
-                    </UiButton>
-                    <UiButton
-                      size="sm"
-                      variant="primary"
-                      onClick={() => setIsPackDoneDialogOpen(false)}
-                    >
-                      确定
-                    </UiButton>
-                  </div>
-                </UiPanel>
-              </div>,
-              document.body
-            )
-            : null}
+          {nodeError && <div className="mt-2 shrink-0 text-xs text-red-400">{nodeError}</div>}
         </div>
       )}
 

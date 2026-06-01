@@ -44,10 +44,6 @@ describe('NovelInputNode registration', () => {
       targetHandle: false,
       outputDataType: 'text',
       inputDataTypes: [],
-      connectMenu: {
-        fromSource: true,
-        fromTarget: false,
-      },
     });
   });
 

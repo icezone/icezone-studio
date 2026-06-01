@@ -1,6 +1,5 @@
 import {
   type KeyboardEvent as ReactKeyboardEvent,
-  type MouseEvent as ReactMouseEvent,
   type ReactNode,
   memo,
   useMemo,
@@ -10,7 +9,7 @@ import {
   useRef,
 } from 'react';
 import { Handle, Position, useUpdateNodeInternals, useViewport } from '@xyflow/react';
-import { Film, Images, Minus, Plus, Sparkles, Zap, Loader2, LayoutTemplate } from 'lucide-react';
+import { Film, Images, Minus, Plus, Sparkles, Loader2, LayoutTemplate } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -68,26 +67,19 @@ import {
 import { GRSAI_NANO_BANANA_PRO_MODEL_ID } from '@/features/canvas/models/image/grsai/nanoBananaPro';
 import { FAL_NANO_BANANA_2_MODEL_ID } from '@/features/canvas/models/image/fal/nanoBanana2';
 import { KIE_NANO_BANANA_2_MODEL_ID } from '@/features/canvas/models/image/kie/nanoBanana2';
-import { ModelParamsControls } from '@/features/canvas/ui/ModelParamsControls';
 import { CanvasNodeImage } from '@/features/canvas/ui/CanvasNodeImage';
-import {
-  UiButton,
-} from '@/components/ui';
+import { StoryboardGenBatchControls } from './storyboardGen/StoryboardGenBatchControls';
 import { NodeHeader, NODE_HEADER_FLOATING_POSITION_CLASS } from '@/features/canvas/ui/NodeHeader';
 
 import { FrameReferenceEditor } from '@/features/canvas/ui/FrameReferenceEditor';
 import { useNodeExpanded } from './shared/useNodeExpanded';
+import { useStoryboardGenForm } from './storyboardGen/useStoryboardGenForm';
+import type { PickerAnchor, AspectRatioChoice } from './storyboardGen/useStoryboardGenForm';
+import { StoryboardGenSettings } from './storyboardGen/StoryboardGenSettings';
 import { NodeTypeBadge } from '@/features/canvas/ui/NodeTypeBadge';
 import { FrameControlEditor } from '@/features/canvas/ui/FrameControlEditor';
 import { PresetPickerButton } from '@/features/preset-prompts/PresetPicker';
 import type { StoryboardFrameMode } from '@/features/canvas/domain/canvasNodes';
-import {
-  NODE_CONTROL_CHIP_CLASS,
-  NODE_CONTROL_ICON_CLASS,
-  NODE_CONTROL_MODEL_CHIP_CLASS,
-  NODE_CONTROL_PARAMS_CHIP_CLASS,
-  NODE_CONTROL_PRIMARY_BUTTON_CLASS,
-} from '@/features/canvas/ui/nodeControlStyles';
 
 type StoryboardGenNodeProps = {
   id: string;
@@ -97,20 +89,6 @@ type StoryboardGenNodeProps = {
   height?: number;
 };
 
-interface AspectRatioChoice {
-  value: string;
-  label: string;
-}
-
-interface PickerAnchor {
-  left: number;
-  top: number;
-}
-
-const AUTO_ASPECT_RATIO_OPTION: AspectRatioChoice = {
-  value: AUTO_REQUEST_ASPECT_RATIO,
-  label: '自动',
-};
 const PICKER_FALLBACK_ANCHOR: PickerAnchor = { left: 8, top: 8 };
 
 const STORYBOARD_NODE_HORIZONTAL_PADDING_PX = 24;
@@ -130,14 +108,10 @@ const GRID_CONTROL_BUTTON_CLASS = 'flex h-3 w-3 items-center justify-center roun
 const GRID_CONTROL_ICON_CLASS = 'h-1.5 w-1.5';
 const GRID_CONTROL_VALUE_CLASS = 'min-w-[14px] text-center text-[9px] font-semibold text-[var(--canvas-node-fg)]';
 const GRID_SUMMARY_CLASS = 'flex h-5 items-center rounded-full border border-[var(--canvas-node-border)] bg-[var(--canvas-node-section-bg)] px-1.5 text-[9px] text-[var(--canvas-node-fg-muted)]';
-const FRAME_GRID_GAP_PX = 2;
 const CONTROL_ROW_HEIGHT_PX = 20;
 const CONTROL_ROW_MARGIN_BOTTOM_PX = 10;
-const FRAME_GRID_MARGIN_BOTTOM_PX = 8;
 const PARAM_ROW_HEIGHT_PX = 20;
 const NODE_VERTICAL_PADDING_PX = 24;
-const FRAME_CELL_MIN_WIDTH_PX = 24;
-const FRAME_CELL_MIN_HEIGHT_PX = 16;
 const GRID_LINE_THICKNESS_PERCENT = 0.4;
 const RATIO_CONTROL_MODE_BUTTON_CLASS =
   'flex h-5 items-center rounded-full border px-1.5 text-[9px] transition-colors';
@@ -572,153 +546,36 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
   const showStoryboardGenAdvancedRatioControls = useSettingsStore(
     (state) => state.showStoryboardGenAdvancedRatioControls
   );
-  const [error, setError] = useState<string | null>(null);
-  const [batchProgress, setBatchProgress] = useState<BatchProgress | null>(null);
-  const isBatchGenerating = batchProgress !== null && batchProgress.completed < batchProgress.total;
-  const rootRef = useRef<HTMLDivElement>(null);
-  const activeFrameTextareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const [activeReferenceEditorFrameIndex, setActiveReferenceEditorFrameIndex] = useState<number | null>(null);
-  const [activeFrameControlEditorFrameIndex, setActiveFrameControlEditorFrameIndex] = useState<number | null>(null);
-  const [showImagePicker, setShowImagePicker] = useState(false);
-  const [pickerFrameIndex, setPickerFrameIndex] = useState<number | null>(null);
-  const [pickerCursor, setPickerCursor] = useState<number | null>(null);
-  const [pickerActiveIndex, setPickerActiveIndex] = useState(0);
-  const [pickerAnchor, setPickerAnchor] = useState<PickerAnchor>(PICKER_FALLBACK_ANCHOR);
-  const lastPointerAnchorRef = useRef<{ frameIndex: number; anchor: PickerAnchor } | null>(null);
-  const frameTextareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
-  const frameHighlightRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const nodeData = data as StoryboardGenNodeData;
-  const [frameDescriptionDrafts, setFrameDescriptionDrafts] = useState<Record<string, string>>(() =>
-    buildFrameDescriptionDrafts(nodeData.frames)
-  );
-  const frameDescriptionDraftsRef = useRef(frameDescriptionDrafts);
-  const resolvedTitle = useMemo(
-    () => resolveNodeDisplayName(CANVAS_NODE_TYPES.storyboardGen, nodeData, t),
-    [nodeData, t]
-  );
 
-  const incomingImages = useMemo(
-    () => graphImageResolver.collectInputImages(id, nodes, edges),
-    [id, nodes, edges]
-  );
-  const incomingImageItems = useMemo(
-    () =>
-      incomingImages.map((imageUrl, index) => ({
-        imageUrl,
-        displayUrl: resolveImageDisplayUrl(imageUrl),
-        label: `图${index + 1}`,
-      })),
-    [incomingImages]
-  );
-  const incomingImageViewerList = useMemo(
-    () => incomingImageItems.map((item) => resolveImageDisplayUrl(item.imageUrl)),
-    [incomingImageItems]
-  );
+  const form = useStoryboardGenForm({ id, data, selected });
+  const {
+    error, setError, batchProgress, setBatchProgress,
+    rootRef, activeFrameTextareaRef, frameTextareaRefs, frameHighlightRefs, lastPointerAnchorRef,
+    activeReferenceEditorFrameIndex, setActiveReferenceEditorFrameIndex,
+    activeFrameControlEditorFrameIndex, setActiveFrameControlEditorFrameIndex,
+    showImagePicker, setShowImagePicker,
+    pickerFrameIndex, setPickerFrameIndex,
+    pickerCursor, setPickerCursor,
+    pickerActiveIndex, setPickerActiveIndex,
+    pickerAnchor, setPickerAnchor,
+    frameDescriptionDrafts, setFrameDescriptionDrafts, frameDescriptionDraftsRef,
+    resolvedTitle, incomingImages, incomingImageItems, incomingImageViewerList,
+    imageModels, selectedModel, effectiveExtraParams,
+    resolutionOptions, selectedResolution,
+    aspectRatioOptions, selectedAspectRatio,
+    controlAspectRatioValue, resolvedAspectRatios,
+    baseFrameLayout, supportedAspectRatioValues, mappedOverallRequestAspectRatio,
+    totalFrames,
+  } = form;
 
-  const imageModels = useMemo(() => listImageModels(), []);
-
-  const selectedModel = useMemo(() => {
-    const modelId = nodeData.model ?? DEFAULT_IMAGE_MODEL_ID;
-    return getImageModel(modelId);
-  }, [nodeData.model]);
+  const isBatchGenerating = batchProgress !== null && batchProgress.completed < batchProgress.total;
   const providerApiKey = apiKeys[selectedModel.providerId] ?? '';
-  const effectiveExtraParams = useMemo(
-    () => ({
-      ...(nodeData.extraParams ?? {}),
-      ...(selectedModel.id === GRSAI_NANO_BANANA_PRO_MODEL_ID
-        ? { grsai_pro_model: grsaiNanoBananaProModel }
-        : {}),
-    }),
-    [grsaiNanoBananaProModel, nodeData.extraParams, selectedModel.id]
-  );
-  const resolutionOptions = useMemo(
-    () => resolveImageModelResolutions(selectedModel, { extraParams: effectiveExtraParams }),
-    [effectiveExtraParams, selectedModel]
-  );
-
-  const selectedResolution = useMemo((): AspectRatioChoice => {
-    return resolveImageModelResolution(selectedModel, nodeData.size, {
-      extraParams: effectiveExtraParams,
-    });
-  }, [effectiveExtraParams, nodeData.size, selectedModel]);
-
-  const aspectRatioOptions = useMemo<AspectRatioChoice[]>(
-    () => [AUTO_ASPECT_RATIO_OPTION, ...selectedModel.aspectRatios],
-    [selectedModel.aspectRatios]
-  );
-
-  const selectedAspectRatio = useMemo((): AspectRatioChoice => {
-    const nodeAspectRatio = nodeData.requestAspectRatio;
-    const found = nodeAspectRatio ? aspectRatioOptions.find((item) => item.value === nodeAspectRatio) : undefined;
-    return found ?? AUTO_ASPECT_RATIO_OPTION;
-  }, [aspectRatioOptions, nodeData.requestAspectRatio]);
-
   const ratioControlMode: StoryboardRatioControlMode = showStoryboardGenAdvancedRatioControls
     ? (nodeData.ratioControlMode === 'overall' ? 'overall' : 'cell')
     : 'cell';
-  const controlAspectRatioValue = useMemo(() => {
-    if (selectedAspectRatio.value === AUTO_REQUEST_ASPECT_RATIO) {
-      return nodeData.aspectRatio || DEFAULT_ASPECT_RATIO;
-    }
-    return selectedAspectRatio.value || DEFAULT_ASPECT_RATIO;
-  }, [nodeData.aspectRatio, selectedAspectRatio.value]);
-  const resolvedAspectRatios = useMemo(
-    () => resolveStoryboardAspectRatios(
-      ratioControlMode,
-      parseAspectRatio(controlAspectRatioValue),
-      nodeData.gridRows,
-      nodeData.gridCols
-    ),
-    [controlAspectRatioValue, nodeData.gridCols, nodeData.gridRows, ratioControlMode]
-  );
   const frameAspectRatioValue = resolvedAspectRatios.cellAspectRatio;
-
-  const baseFrameLayout = useMemo(() => {
-    const aspectRatio = Math.max(0.1, parseAspectRatio(frameAspectRatioValue));
-    let cellWidth = STORYBOARD_GRID_BASE_CELL_HEIGHT_PX * aspectRatio;
-    let gridWidth = nodeData.gridCols * cellWidth + Math.max(0, nodeData.gridCols - 1) * STORYBOARD_GRID_GAP_PX;
-
-    if (gridWidth > STORYBOARD_GRID_MAX_WIDTH_PX) {
-      const scale = STORYBOARD_GRID_MAX_WIDTH_PX / gridWidth;
-      cellWidth *= scale;
-      gridWidth =
-        nodeData.gridCols * cellWidth + Math.max(0, nodeData.gridCols - 1) * STORYBOARD_GRID_GAP_PX;
-    }
-
-    const roundedCellWidth = Math.max(FRAME_CELL_MIN_WIDTH_PX, Math.round(cellWidth));
-    const roundedCellHeight = Math.max(FRAME_CELL_MIN_HEIGHT_PX, Math.round(roundedCellWidth / aspectRatio));
-    const roundedGridWidth =
-      nodeData.gridCols * roundedCellWidth + Math.max(0, nodeData.gridCols - 1) * STORYBOARD_GRID_GAP_PX;
-    const roundedGridHeight =
-      nodeData.gridRows * roundedCellHeight + Math.max(0, nodeData.gridRows - 1) * FRAME_GRID_GAP_PX;
-    const nodeInnerWidth = Math.max(
-      STORYBOARD_CONTROL_ROW_WIDTH_PX,
-      STORYBOARD_PARAMS_ROW_WIDTH_PX,
-      roundedGridWidth
-    );
-    const nodeWidth = Math.max(
-      STORYBOARD_GEN_NODE_MIN_WIDTH_PX,
-      Math.round(nodeInnerWidth + STORYBOARD_NODE_HORIZONTAL_PADDING_PX)
-    );
-    const nodeHeight = Math.max(
-      STORYBOARD_GEN_NODE_MIN_HEIGHT_PX,
-      Math.round(
-        NODE_VERTICAL_PADDING_PX +
-        CONTROL_ROW_HEIGHT_PX +
-        CONTROL_ROW_MARGIN_BOTTOM_PX +
-        roundedGridHeight +
-        FRAME_GRID_MARGIN_BOTTOM_PX +
-        PARAM_ROW_HEIGHT_PX
-      )
-    );
-
-    return {
-      nodeWidth,
-      nodeHeight,
-    };
-  }, [frameAspectRatioValue, nodeData.gridCols, nodeData.gridRows]);
-
   const requestResolution = selectedModel.resolveRequest({
     referenceImageCount: incomingImages.length,
   });
@@ -726,23 +583,6 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
     selectedModel.id === FAL_NANO_BANANA_2_MODEL_ID ||
     selectedModel.id === KIE_NANO_BANANA_2_MODEL_ID;
   const webSearchEnabled = Boolean(nodeData.extraParams?.enable_web_search);
-  const supportedAspectRatioValues = useMemo(
-    () => selectedModel.aspectRatios.map((item) => item.value),
-    [selectedModel.aspectRatios]
-  );
-  const mappedOverallRequestAspectRatio = useMemo(
-    () =>
-      pickClosestAspectRatio(
-        resolvedAspectRatios.overallRatioValue,
-        supportedAspectRatioValues
-      ),
-    [resolvedAspectRatios.overallRatioValue, supportedAspectRatioValues]
-  );
-
-  const totalFrames = useMemo(
-    () => (nodeData.gridRows ?? 1) * (nodeData.gridCols ?? 1),
-    [nodeData.gridRows, nodeData.gridCols]
-  );
   const resolvedNodeWidth = Math.max(
     baseFrameLayout.nodeWidth,
     Math.round(width ?? baseFrameLayout.nodeWidth)
@@ -762,17 +602,6 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
   useEffect(() => {
     updateNodeInternals(id);
   }, [expanded, id, updateNodeInternals]);
-
-  useEffect(() => {
-    frameDescriptionDraftsRef.current = frameDescriptionDrafts;
-  }, [frameDescriptionDrafts]);
-
-  useEffect(() => {
-    const nextDrafts = buildFrameDescriptionDrafts(nodeData.frames);
-    setFrameDescriptionDrafts((previous) =>
-      areFrameDescriptionDraftsEqual(previous, nextDrafts) ? previous : nextDrafts
-    );
-  }, [nodeData.frames]);
 
   useEffect(() => {
     updateNodeInternals(id);
@@ -799,18 +628,6 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
     selectedAspectRatio.value,
     updateNodeData,
   ]);
-
-  useEffect(() => {
-    if (incomingImages.length === 0) {
-      setShowImagePicker(false);
-      setPickerFrameIndex(null);
-      setPickerCursor(null);
-      setPickerActiveIndex(0);
-      return;
-    }
-
-    setPickerActiveIndex((previous) => Math.min(previous, incomingImages.length - 1));
-  }, [incomingImages.length]);
 
   useEffect(() => {
     const handleOutsidePointerDown = (event: PointerEvent) => {
@@ -1793,17 +1610,17 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
           <div
             className="relative w-full mt-auto flex shrink-0 items-center justify-between"
           >
-            <ModelParamsControls
+            <StoryboardGenSettings
               imageModels={imageModels}
               selectedModel={selectedModel}
+              onModelChange={(modelId) => updateNodeData(id, { model: modelId })}
               resolutionOptions={resolutionOptions}
               selectedResolution={selectedResolution}
-              selectedAspectRatio={selectedAspectRatio}
-              aspectRatioOptions={aspectRatioOptions}
-              onModelChange={(modelId) => updateNodeData(id, { model: modelId })}
               onResolutionChange={(resolution) =>
                 updateNodeData(id, { size: resolution as ImageSize })
               }
+              aspectRatioOptions={aspectRatioOptions}
+              selectedAspectRatio={selectedAspectRatio}
               onAspectRatioChange={(aspectRatio) =>
                 updateNodeData(id, { requestAspectRatio: aspectRatio })
               }
@@ -1826,46 +1643,15 @@ export const StoryboardGenNode = memo(({ id, data, selected, width, height }: St
                   },
                 })
               }
-              triggerSize="sm"
-              chipClassName={NODE_CONTROL_CHIP_CLASS}
-              modelChipClassName={NODE_CONTROL_MODEL_CHIP_CLASS}
-              paramsChipClassName={NODE_CONTROL_PARAMS_CHIP_CLASS}
-              modelPanelAlign="center"
-              paramsPanelAlign="center"
-              modelPanelClassName="inline-block min-w-[300px] max-w-[calc(100vw-32px)] p-2"
-              paramsPanelClassName="w-[420px] p-3"
             />
 
-            <div className="flex shrink-0 items-center gap-1">
-              <UiButton
-                onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
-                  event.stopPropagation();
-                  const previewGridOnly =
-                    enableStoryboardGenGridPreviewShortcut && event.ctrlKey && event.altKey && event.shiftKey;
-                  void handleGenerate(previewGridOnly);
-                }}
-                variant="primary"
-                size="sm"
-                className={`!min-w-0 shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
-              >
-                <Sparkles className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
-                {t('canvas.generate')}
-              </UiButton>
-
-              <UiButton
-                onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
-                  event.stopPropagation();
-                  void handleBatchGenerate();
-                }}
-                variant="primary"
-                size="sm"
-                disabled={isBatchGenerating}
-                className={`!min-w-0 shrink-0 ${NODE_CONTROL_PRIMARY_BUTTON_CLASS}`}
-              >
-                <Zap className={NODE_CONTROL_ICON_CLASS} strokeWidth={2.8} />
-                {t('node.storyboardGen.batchGenerate', { count: totalFrames })}
-              </UiButton>
-            </div>
+            <StoryboardGenBatchControls
+              totalFrames={totalFrames}
+              isBatchGenerating={isBatchGenerating}
+              enablePreviewShortcut={enableStoryboardGenGridPreviewShortcut}
+              onGenerate={(previewGridOnly) => { void handleGenerate(previewGridOnly); }}
+              onBatchGenerate={() => { void handleBatchGenerate(); }}
+            />
           </div>
 
           {/* Batch progress bar */}

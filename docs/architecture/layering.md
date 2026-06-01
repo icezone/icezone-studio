@@ -152,10 +152,8 @@ export const NODE_REGISTRY: NodeRegistry = {
     connectivity: {
       sourceHandle: true,
       targetHandle: true,
-      connectMenu: {
-        fromSource: true,
-        fromTarget: true
-      }
+      outputDataType: 'image',
+      inputDataTypes: ['image', 'text']
     }
   }
 }

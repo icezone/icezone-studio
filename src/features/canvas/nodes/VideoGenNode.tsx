@@ -2,33 +2,27 @@ import React from 'react';
 import {
   type KeyboardEvent,
   memo,
-  useMemo,
-  useState,
   useCallback,
   useEffect,
-  useRef,
 } from 'react';
 import { Handle, Position, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
-import { Sparkles, RefreshCw, Download, ChevronDown, ChevronUp, ImagePlus, X, Loader2, Film } from 'lucide-react';
+import { Sparkles, RefreshCw, Download, ChevronDown, ChevronUp, Loader2, Film } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
   CANVAS_NODE_TYPES,
   type VideoGenNodeData,
 } from '@/features/canvas/domain/canvasNodes';
-import { resolveNodeDisplayName } from '@/features/canvas/domain/nodeDisplay';
 import { NodeHeader } from '@/features/canvas/ui/NodeHeader';
 import { useNodeExpanded } from './shared/useNodeExpanded';
 import { NodeTypeBadge } from '@/features/canvas/ui/NodeTypeBadge';
+import { useVideoGenForm, type PickerAnchor } from './videoGen/useVideoGenForm';
+import { VideoGenFramePicker } from './videoGen/VideoGenFramePicker';
 
-import {
-  canvasVideoAiGateway,
-  graphImageResolver,
-} from '@/features/canvas/application/canvasServices';
+import { canvasVideoAiGateway } from '@/features/canvas/application/canvasServices';
 import { resolveErrorContent, showErrorDialog } from '@/features/canvas/application/errorDialog';
 import {
   prepareNodeImageFromFile,
-  resolveImageDisplayUrl,
 } from '@/features/canvas/application/imageData';
 import {
   findReferenceTokens,
@@ -37,18 +31,13 @@ import {
   resolveReferenceAwareDeleteRange,
 } from '@/features/canvas/application/referenceTokenEditing';
 import {
-  DEFAULT_VIDEO_MODEL_ID,
-  getVideoModel,
-  listVideoModels,
-} from '@/features/canvas/models';
-import {
   NODE_CONTROL_CHIP_CLASS,
   NODE_CONTROL_ICON_CLASS,
   NODE_CONTROL_MODEL_CHIP_CLASS,
   NODE_CONTROL_PARAMS_CHIP_CLASS,
   NODE_CONTROL_PRIMARY_BUTTON_CLASS,
 } from '@/features/canvas/ui/nodeControlStyles';
-import { VideoParamsControls } from '@/features/canvas/ui/VideoParamsControls';
+import { VideoGenSettings } from './videoGen/VideoGenSettings';
 import { UiButton } from '@/components/ui';
 import { useCanvasStore } from '@/stores/canvasStore';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -60,12 +49,6 @@ type VideoGenNodeProps = NodeProps & {
   selected?: boolean;
 };
 
-interface PickerAnchor {
-  left: number;
-  top: number;
-}
-
-const PICKER_FALLBACK_ANCHOR: PickerAnchor = { left: 8, top: 8 };
 const PICKER_Y_OFFSET_PX = 8;
 const VIDEO_GEN_NODE_MIN_WIDTH = 420;
 const VIDEO_GEN_NODE_MIN_HEIGHT = 400
@@ -73,7 +56,6 @@ const VIDEO_GEN_NODE_MAX_WIDTH = 1600;
 const VIDEO_GEN_NODE_MAX_HEIGHT = 1400;
 const VIDEO_GEN_NODE_DEFAULT_WIDTH = 560;
 const VIDEO_GEN_NODE_DEFAULT_HEIGHT = 560;
-const POLL_INTERVAL_MS = 3000;
 
 function getTextareaCaretOffset(
   textarea: HTMLTextAreaElement,
@@ -122,30 +104,48 @@ function VideoGenNodeComponent({
   width,
 }: VideoGenNodeProps): React.JSX.Element {
   const { t } = useTranslation();
-  const [promptDraft, setPromptDraft] = useState(data.prompt);
-  const [error, setError] = useState<string | null>(null);
-  const [showImagePicker, setShowImagePicker] = useState(false);
-  const [pickerAnchor, setPickerAnchor] = useState<PickerAnchor>(PICKER_FALLBACK_ANCHOR);
-  const [pickerActiveIndex, setPickerActiveIndex] = useState(0);
-  const [pollingProgress, setPollingProgress] = useState(0);
-  const [downloading, setDownloading] = useState(false);
-  const [promptCollapsed, setPromptCollapsed] = useState(false);
-
-  const promptRef = useRef<HTMLTextAreaElement>(null);
-  const promptHighlightRef = useRef<HTMLDivElement>(null);
-  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const form = useVideoGenForm({ id, data });
+  const {
+    promptDraft,
+    setPromptDraft,
+    error,
+    setError,
+    showImagePicker,
+    setShowImagePicker,
+    pickerAnchor,
+    setPickerAnchor,
+    pickerActiveIndex,
+    setPickerActiveIndex,
+    pollingProgress,
+    downloading,
+    setDownloading,
+    promptCollapsed,
+    setPromptCollapsed,
+    promptRef,
+    promptHighlightRef,
+    frameUploadRef,
+    frameUploadTarget,
+    setFrameUploadTarget,
+    startFramePickerOpen,
+    setStartFramePickerOpen,
+    endFramePickerOpen,
+    setEndFramePickerOpen,
+    videoModels,
+    selectedModel,
+    incomingImages,
+    incomingImageItems,
+    resolvedTitle,
+    durationOptions,
+    aspectRatioOptions,
+    selectedDuration,
+    selectedAspectRatio,
+  } = form;
 
   const nodes = useCanvasStore((state) => state.nodes);
-  const edges = useCanvasStore((state) => state.edges);
   const updateNodeData = useCanvasStore((state) => state.updateNodeData);
   const setSelectedNode = useCanvasStore((state) => state.setSelectedNode);
   const addNode = useCanvasStore((state) => state.addNode);
   const addEdge = useCanvasStore((state) => state.addEdge);
-
-  const frameUploadRef = useRef<HTMLInputElement>(null);
-  const [frameUploadTarget, setFrameUploadTarget] = useState<'start' | 'end' | null>(null);
-  const [startFramePickerOpen, setStartFramePickerOpen] = useState(false);
-  const [endFramePickerOpen, setEndFramePickerOpen] = useState(false);
   const apiKeys = useSettingsStore((state) => state.apiKeys);
   const videoDownloadPresetPaths = useSettingsStore((state) => state.videoDownloadPresetPaths);
 
@@ -162,32 +162,6 @@ function VideoGenNodeComponent({
     })
   }
 
-  const videoModels = useMemo(() => listVideoModels(), []);
-  const selectedModel = useMemo(
-    () => getVideoModel(data.model || DEFAULT_VIDEO_MODEL_ID),
-    [data.model]
-  );
-
-  const incomingImages = useMemo(
-    () => graphImageResolver.collectInputImages(id, nodes, edges),
-    [id, nodes, edges]
-  );
-
-  const incomingImageItems = useMemo(
-    () =>
-      incomingImages.map((imageUrl, index) => ({
-        imageUrl,
-        displayUrl: resolveImageDisplayUrl(imageUrl),
-        label: `${t('canvas.reference')} ${index + 1}`,
-      })),
-    [incomingImages, t]
-  );
-
-  const resolvedTitle = useMemo(
-    () => resolveNodeDisplayName(CANVAS_NODE_TYPES.videoGen, data, t),
-    [data, t]
-  );
-
   const resolvedWidth = Math.max(
     VIDEO_GEN_NODE_MIN_WIDTH,
     Math.round(width ?? VIDEO_GEN_NODE_DEFAULT_WIDTH)
@@ -197,144 +171,6 @@ function VideoGenNodeComponent({
   useEffect(() => {
     updateNodeInternals(id);
   }, [id, resolvedWidth, updateNodeInternals]);
-
-  // Auto-collapse sections when video generation starts or completes
-  useEffect(() => {
-    if (data.isGenerating || data.videoUrl) {
-      setPromptCollapsed(true);
-    }
-  }, [data.isGenerating, data.videoUrl]);
-
-  // Cleanup polling on unmount or when generation completes
-  useEffect(() => {
-    return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
-      }
-    };
-  }, []);
-
-  // Polling effect
-  useEffect(() => {
-    if (!data.isGenerating || !data.jobId) {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
-      }
-      setPollingProgress(0);
-      return;
-    }
-
-    const pollStatus = async () => {
-      try {
-        const status = await canvasVideoAiGateway.pollJobStatus(
-          data.jobId!,
-          data.model
-        );
-
-        if (process.env.NODE_ENV === 'development') {
-          console.log('[VideoGenNode] Poll status:', {
-            jobId: data.jobId,
-            state: status.state,
-            videoUrl: status.videoUrl,
-            progress: status.progress,
-            errorMessage: status.errorMessage,
-          });
-        }
-
-        if (status.state === 'completed' && status.videoUrl) {
-          if (pollIntervalRef.current) {
-            clearInterval(pollIntervalRef.current);
-            pollIntervalRef.current = null;
-          }
-
-          const generationDurationMs = data.generationStartedAt
-            ? Date.now() - data.generationStartedAt
-            : 0;
-
-          // videoGen already owns its result on its own data; no child exportImage to mirror.
-          updateNodeData(id, {
-            videoUrl: status.videoUrl,
-            isGenerating: false,
-            generationStartedAt: null,
-            generationDurationMs,
-            jobId: null,
-            errorMessage: null,
-          });
-          setError(null);
-          setPollingProgress(0);
-        } else if (status.state === 'failed') {
-          if (pollIntervalRef.current) {
-            clearInterval(pollIntervalRef.current);
-            pollIntervalRef.current = null;
-          }
-
-          const errorMsg = status.errorMessage || t('videoErrors.generation_failed');
-          updateNodeData(id, {
-            isGenerating: false,
-            generationStartedAt: null,
-            jobId: null,
-            errorMessage: errorMsg,
-          });
-          setError(errorMsg);
-          setPollingProgress(0);
-        } else if (status.state === 'timeout') {
-          if (pollIntervalRef.current) {
-            clearInterval(pollIntervalRef.current);
-            pollIntervalRef.current = null;
-          }
-
-          const errorMsg = t('videoErrors.job_timeout');
-          updateNodeData(id, {
-            isGenerating: false,
-            generationStartedAt: null,
-            jobId: null,
-            errorMessage: errorMsg,
-          });
-          setError(errorMsg);
-          setPollingProgress(0);
-        } else {
-          // Update progress estimate
-          if (data.generationStartedAt && selectedModel.expectedDurationMs) {
-            const elapsed = Date.now() - data.generationStartedAt;
-            const progress = Math.min((elapsed / selectedModel.expectedDurationMs) * 100, 95);
-            setPollingProgress(progress);
-          }
-        }
-      } catch (pollError) {
-        console.error('[VideoGenNode] Polling error:', pollError);
-        // Don't stop polling on network errors, just log
-      }
-    };
-
-    // Initial poll
-    void pollStatus();
-
-    // Set up interval
-    pollIntervalRef.current = setInterval(() => {
-      void pollStatus();
-    }, POLL_INTERVAL_MS);
-
-    return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
-      }
-    };
-  }, [
-    data.isGenerating,
-    data.jobId,
-    data.model,
-    data.generationStartedAt,
-    data.prompt,
-    data.duration,
-    data.aspectRatio,
-    selectedModel.expectedDurationMs,
-    id,
-    updateNodeData,
-    t,
-  ]);
 
   const commitPromptDraft = useCallback(
     (nextPrompt: string) => {
@@ -677,26 +513,6 @@ function VideoGenNodeComponent({
     promptHighlightRef.current.scrollLeft = promptRef.current.scrollLeft;
   };
 
-  const durationOptions = useMemo(
-    () => selectedModel.durations.map((d) => ({ value: d.value, label: d.label })),
-    [selectedModel.durations]
-  );
-
-  const aspectRatioOptions = useMemo(
-    () => selectedModel.aspectRatios.map((ar) => ({ value: ar.value, label: ar.label })),
-    [selectedModel.aspectRatios]
-  );
-
-  const selectedDuration = useMemo(
-    () => durationOptions.find((opt) => opt.value === data.duration) ?? durationOptions[0],
-    [durationOptions, data.duration]
-  );
-
-  const selectedAspectRatio = useMemo(
-    () => aspectRatioOptions.find((opt) => opt.value === data.aspectRatio) ?? aspectRatioOptions[0],
-    [aspectRatioOptions, data.aspectRatio]
-  );
-
   const { expanded, expand, collapse } = useNodeExpanded();
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
   useEffect(() => {
@@ -877,156 +693,28 @@ function VideoGenNodeComponent({
             {/* Frame Selection */}
             {!data.isGenerating && (
               <div className="flex shrink-0 gap-3 px-1">
-                {/* Start Frame Slot */}
-                <div className="relative flex-1">
-                  <div className="mb-1.5 text-xs text-[var(--canvas-node-fg-muted)]">{t('node.videoGen.startFrame')}</div>
-                  {data.startFrameUrl ? (
-                    <div className="relative aspect-video overflow-hidden rounded-lg border-2 border-accent ring-2 ring-accent/30">
-                      <img
-                        src={resolveImageDisplayUrl(data.startFrameUrl)}
-                        alt={t('node.videoGen.startFrame')}
-                        className="h-full w-full object-cover"
-                      />
-                      <button
-                        className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-white transition-colors hover:bg-black/80"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          updateNodeData(id, { startFrameUrl: null });
-                        }}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] transition-colors hover:border-[var(--canvas-node-hover-border)] hover:bg-[var(--canvas-drop-zone-hover-bg)]"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (incomingImageItems.length > 0) {
-                          setStartFramePickerOpen(!startFramePickerOpen);
-                          setEndFramePickerOpen(false);
-                        } else {
-                          setFrameUploadTarget('start');
-                          frameUploadRef.current?.click();
-                        }
-                      }}
-                    >
-                      <ImagePlus className="h-5 w-5 text-[var(--canvas-node-fg-muted)]/60" />
-                    </button>
-                  )}
-                  {startFramePickerOpen && incomingImageItems.length > 0 && !data.startFrameUrl && (
-                    <div
-                      className="nowheel absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
-                      onMouseDown={(e) => e.stopPropagation()}
-                    >
-                      <div className="ui-scrollbar nowheel max-h-[200px] overflow-y-auto p-1.5">
-                        {incomingImageItems.map((item, index) => (
-                          <button
-                            key={`start-pick-${index}`}
-                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              updateNodeData(id, { startFrameUrl: item.imageUrl });
-                              setStartFramePickerOpen(false);
-                            }}
-                          >
-                            <img src={item.displayUrl} alt={item.label} className="h-8 w-8 rounded object-cover" draggable={false} />
-                            <span>{item.label}</span>
-                          </button>
-                        ))}
-                        <button
-                          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setStartFramePickerOpen(false);
-                            setFrameUploadTarget('start');
-                            frameUploadRef.current?.click();
-                          }}
-                        >
-                          <ImagePlus className="h-4 w-4" />
-                          <span>{t('node.videoGen.uploadImage')}</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* End Frame Slot */}
-                <div className="relative flex-1">
-                  <div className="mb-1.5 text-xs text-[var(--canvas-node-fg-muted)]">
-                    {t('node.videoGen.endFrame')}
-                    <span className="ml-1 text-[10px] text-[var(--canvas-node-fg-muted)]/60">({t('node.videoGen.optional')})</span>
-                  </div>
-                  {data.endFrameUrl ? (
-                    <div className="relative aspect-video overflow-hidden rounded-lg border-2 border-accent ring-2 ring-accent/30">
-                      <img
-                        src={resolveImageDisplayUrl(data.endFrameUrl)}
-                        alt={t('node.videoGen.endFrame')}
-                        className="h-full w-full object-cover"
-                      />
-                      <button
-                        className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-white transition-colors hover:bg-black/80"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          updateNodeData(id, { endFrameUrl: null });
-                        }}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      className="nodrag flex aspect-video w-full items-center justify-center rounded-lg border-2 border-dashed border-[var(--canvas-drop-zone-border)] transition-colors hover:border-[var(--canvas-node-hover-border)] hover:bg-[var(--canvas-drop-zone-hover-bg)]"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (incomingImageItems.length > 0) {
-                          setEndFramePickerOpen(!endFramePickerOpen);
-                          setStartFramePickerOpen(false);
-                        } else {
-                          setFrameUploadTarget('end');
-                          frameUploadRef.current?.click();
-                        }
-                      }}
-                    >
-                      <ImagePlus className="h-5 w-5 text-[var(--canvas-node-fg-muted)]/60" />
-                    </button>
-                  )}
-                  {endFramePickerOpen && incomingImageItems.length > 0 && !data.endFrameUrl && (
-                    <div
-                      className="nowheel absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-xl border border-[var(--canvas-node-border)] bg-[var(--canvas-menu-bg)] shadow-xl"
-                      onMouseDown={(e) => e.stopPropagation()}
-                    >
-                      <div className="ui-scrollbar nowheel max-h-[200px] overflow-y-auto p-1.5">
-                        {incomingImageItems.map((item, index) => (
-                          <button
-                            key={`end-pick-${index}`}
-                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              updateNodeData(id, { endFrameUrl: item.imageUrl });
-                              setEndFramePickerOpen(false);
-                            }}
-                          >
-                            <img src={item.displayUrl} alt={item.label} className="h-8 w-8 rounded object-cover" draggable={false} />
-                            <span>{item.label}</span>
-                          </button>
-                        ))}
-                        <button
-                          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-[var(--canvas-node-fg-muted)] transition-colors hover:bg-[var(--canvas-menu-item-hover)]"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEndFramePickerOpen(false);
-                            setFrameUploadTarget('end');
-                            frameUploadRef.current?.click();
-                          }}
-                        >
-                          <ImagePlus className="h-4 w-4" />
-                          <span>{t('node.videoGen.uploadImage')}</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <VideoGenFramePicker
+                  position="start"
+                  frameUrl={data.startFrameUrl ?? null}
+                  incomingImages={incomingImageItems}
+                  pickerOpen={startFramePickerOpen}
+                  onPickerOpenChange={setStartFramePickerOpen}
+                  onClosedOther={() => setEndFramePickerOpen(false)}
+                  onPickFromUpstream={(imageUrl) => updateNodeData(id, { startFrameUrl: imageUrl })}
+                  onPickFromUpload={() => { setFrameUploadTarget('start'); frameUploadRef.current?.click(); }}
+                  onClear={() => updateNodeData(id, { startFrameUrl: null })}
+                />
+                <VideoGenFramePicker
+                  position="end"
+                  frameUrl={data.endFrameUrl ?? null}
+                  incomingImages={incomingImageItems}
+                  pickerOpen={endFramePickerOpen}
+                  onPickerOpenChange={setEndFramePickerOpen}
+                  onClosedOther={() => setStartFramePickerOpen(false)}
+                  onPickFromUpstream={(imageUrl) => updateNodeData(id, { endFrameUrl: imageUrl })}
+                  onPickFromUpload={() => { setFrameUploadTarget('end'); frameUploadRef.current?.click(); }}
+                  onClear={() => updateNodeData(id, { endFrameUrl: null })}
+                />
 
                 <input
                   ref={frameUploadRef}
@@ -1114,7 +802,7 @@ function VideoGenNodeComponent({
           {/* Controls */}
           <div className="mt-2 flex shrink-0 flex-col gap-3">
             <div className="flex items-center gap-1.5">
-              <VideoParamsControls
+              <VideoGenSettings
                 videoModels={videoModels}
                 selectedModel={selectedModel}
                 selectedDuration={selectedDuration}
@@ -1157,10 +845,6 @@ function VideoGenNodeComponent({
                     },
                   });
                 }}
-                triggerSize="sm"
-                chipClassName={NODE_CONTROL_CHIP_CLASS}
-                modelChipClassName={NODE_CONTROL_MODEL_CHIP_CLASS}
-                paramsChipClassName={NODE_CONTROL_PARAMS_CHIP_CLASS}
               />
 
               <div className="ml-auto" />

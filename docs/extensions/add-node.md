@@ -70,12 +70,10 @@ export const NODE_REGISTRY: NodeRegistry = {
     
     // 连线能力
     connectivity: {
-      sourceHandle: true,    // 是否有输出端口
-      targetHandle: true,    // 是否有输入端口
-      connectMenu: {
-        fromSource: true,    // 从输出端拉线时是否出现在菜单
-        fromTarget: true     // 从输入端拉线时是否出现在菜单
-      }
+      sourceHandle: true,                // 是否有输出端口
+      targetHandle: true,                // 是否有输入端口
+      outputDataType: 'image',           // 输出端口产生的数据类型
+      inputDataTypes: ['image', 'text']  // 输入端口接受的数据类型
     }
   }
 }
@@ -130,33 +128,15 @@ export const CustomNode = memo(({ id, data, selected }: NodeProps<CustomNodeType
 
 ### 4. 明确手动创建策略
 
-**可手动创建**（配置 `connectMenu`）:
+菜单可见性由 `connectivity` 数据类型字段自动派生 —— 无需任何手动开关。
 
-```typescript
-connectivity: {
-  connectMenu: {
-    fromSource: true,
-    fromTarget: true
-  }
-}
-```
+**画布空白处的"添加节点"菜单**：由 `visibleInMenu: true` 控制。
 
-这样节点会出现在：
-- 画布空白处的"添加节点"菜单
-- 从节点输出端拉线时的"创建节点"菜单
+**拉线后的"创建节点"菜单**：由数据类型兼容性决定。`connectionValidator.getConnectMenuNodeTypes(handleType, anchorNodeType)` 会筛选出与拖拽端口数据类型兼容的节点：
+- 从输出端拉线 → 列出 `inputDataTypes` 包含锚点 `outputDataType` 的节点
+- 从输入端拉线 → 列出 `outputDataType` 被锚点 `inputDataTypes` 接受的节点
 
-**仅流程创建**（关闭 `connectMenu`）:
-
-```typescript
-connectivity: {
-  connectMenu: {
-    fromSource: false,
-    fromTarget: false
-  }
-}
-```
-
-这样节点只能由应用流程自动创建（如 `exportImageNode`、`groupNode`）。
+**仅流程创建**（如 `groupNode`）：将 `sourceHandle` 与 `targetHandle` 都设为 `false`，节点自然从派生菜单中排除，只能由应用流程自动创建。
 
 ### 5. 验证删除、解组、连线清理与历史快照
 
@@ -317,10 +297,9 @@ export const NODE_REGISTRY: NodeRegistry = {
     connectivity: {
       sourceHandle: true,
       targetHandle: false,
-      connectMenu: {
-        fromSource: true,
-        fromTarget: false
-      }
+      // 音频暂未纳入 CanvasDataType；新增类型时同步扩展 union。
+      outputDataType: null,
+      inputDataTypes: []
     }
   }
 }
@@ -469,7 +448,7 @@ describe('TextToSpeechNode', () => {
 - [ ] 在 `nodeRegistry.ts` 注册定义
 - [ ] 在 `nodes/index.ts` 注册组件
 - [ ] 创建节点组件文件
-- [ ] 配置 `connectivity` 和 `connectMenu`
+- [ ] 配置 `connectivity`（`sourceHandle` / `targetHandle` / `outputDataType` / `inputDataTypes`）
 - [ ] 添加 i18n 翻译
 - [ ] 编写单元测试
 - [ ] 验证删除、解组、连线清理

@@ -237,27 +237,31 @@ function ImageEditNode() {
 
 ```typescript
 connectivity: {
-  sourceHandle: boolean,    // 是否具备输出端口
-  targetHandle: boolean,    // 是否具备输入端口
-  connectMenu: {
-    fromSource: boolean,    // 从输出端拉线时，是否出现在创建菜单
-    fromTarget: boolean     // 从输入端拉线时，是否出现在创建菜单
-  }
+  sourceHandle: boolean,           // 是否具备输出端口
+  targetHandle: boolean,           // 是否具备输入端口
+  outputDataType: CanvasDataType | null, // 输出端口产生的数据类型
+  inputDataTypes: CanvasDataType[]       // 输入端口接受的数据类型清单
 }
 ```
 
 ### 菜单候选节点推导
 
+候选节点完全由 `outputDataType` / `inputDataTypes` 兼容性派生，不允许任何手动开关。
+
 ```typescript
-✅ 正确示例（从注册表推导）：
-function getConnectMenuNodeTypes(direction: 'source' | 'target') {
-  return Object.entries(NODE_REGISTRY)
-    .filter(([_, def]) => 
-      direction === 'source' 
-        ? def.connectivity.connectMenu.fromSource
-        : def.connectivity.connectMenu.fromTarget
-    )
-    .map(([type, _]) => type)
+✅ 正确示例（domain/connectionValidator.ts）：
+function getConnectMenuNodeTypes(
+  handleType: 'source' | 'target',
+  anchorNodeType: CanvasNodeType,
+) {
+  if (handleType === 'source') {
+    return Object.values(canvasNodeDefinitions)
+      .filter((def) => isValidConnectionByDataType(anchorNodeType, def.type))
+      .map((def) => def.type);
+  }
+  return Object.values(canvasNodeDefinitions)
+    .filter((def) => isValidConnectionByDataType(def.type, anchorNodeType))
+    .map((def) => def.type);
 }
 
 ❌ 错误示例（UI 层硬编码）：
@@ -266,7 +270,7 @@ const menuNodeTypes = ['uploadNode', 'imageNode', 'videoGenNode']
 
 ### 内部衍生节点
 
-内部衍生节点（如 `exportImageNode`、`groupNode`）默认 `connectMenu` 关闭，只能由应用流程自动创建。
+内部衍生节点（如 `groupNode`）将 `sourceHandle` / `targetHandle` 均设为 `false`，自然被菜单派生函数排除，只能由应用流程自动创建。
 
 ## 文档边界
 

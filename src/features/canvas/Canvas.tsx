@@ -45,11 +45,13 @@ import {
 } from '@/features/canvas/application/generationErrorReport';
 import { showErrorDialog } from '@/features/canvas/application/errorDialog';
 import {
-  getConnectMenuNodeTypes,
   nodeHasSourceHandle,
   nodeHasTargetHandle,
 } from '@/features/canvas/domain/nodeRegistry';
-import { isValidConnectionByDataType } from '@/features/canvas/domain/connectionValidator';
+import {
+  getConnectMenuNodeTypes,
+  isValidConnectionByDataType,
+} from '@/features/canvas/domain/connectionValidator';
 import { embedStoryboardImageMetadata } from '@/commands/image';
 import { listModelProviders } from '@/features/canvas/models';
 import { nodeTypes } from './nodes';
@@ -190,9 +192,6 @@ function resolveClipboardImageFile(event: ClipboardEvent): File | null {
   return null;
 }
 
-function resolveAllowedNodeTypes(handleType: HandleType): CanvasNodeType[] {
-  return getConnectMenuNodeTypes(handleType);
-}
 
 // Phase 6: connection validity is now data-type aware (see connectionValidator).
 // Any node with sourceHandle:true can start a drag — semantic checks happen on drop.
@@ -1548,7 +1547,16 @@ function CanvasInner() {
         }
       }
 
-      const allowedTypes = resolveAllowedNodeTypes(pendingConnectStart.handleType);
+      const anchorNode = nodes.find((node) => node.id === pendingConnectStart.nodeId);
+      if (!anchorNode) {
+        setPendingConnectStart(null);
+        setPreviewConnectionVisual(null);
+        return;
+      }
+      const allowedTypes = getConnectMenuNodeTypes(
+        pendingConnectStart.handleType,
+        anchorNode.type as CanvasNodeType,
+      );
       if (allowedTypes.length === 0) {
         setPendingConnectStart(null);
         setPreviewConnectionVisual(null);

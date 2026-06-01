@@ -49,22 +49,20 @@
 
 ```typescript
 connectivity: {
-  sourceHandle: boolean,    // 是否具备输出端口
-  targetHandle: boolean,    // 是否具备输入端口
-  connectMenu: {
-    fromSource: boolean,    // 从输出端拉线时，是否出现在创建菜单
-    fromTarget: boolean     // 从输入端拉线时，是否出现在创建菜单
-  }
+  sourceHandle: boolean,                  // 是否具备输出端口
+  targetHandle: boolean,                  // 是否具备输入端口
+  outputDataType: CanvasDataType | null,  // 输出端口产生的数据类型
+  inputDataTypes: CanvasDataType[]        // 输入端口接受的数据类型
 }
 ```
 
 ### 菜单候选节点
 
-菜单候选节点必须由注册表函数统一推导（如 `getConnectMenuNodeTypes`），禁止在 UI 层手写类型白名单。
+菜单候选节点完全由 `outputDataType` / `inputDataTypes` 兼容性派生。`connectionValidator.getConnectMenuNodeTypes(handleType, anchorNodeType)` 是唯一推导入口，禁止在 UI 层手写类型白名单。
 
 ### 内部衍生节点
 
-内部衍生节点（如 `exportImageNode`、`groupNode`）默认 `connectMenu` 关闭，只能由应用流程自动创建。
+内部衍生节点（如 `groupNode`）将 `sourceHandle` 与 `targetHandle` 都设为 `false`，从而被派生函数自然排除，只能由应用流程自动创建。
 
 ## 节点详细说明
 

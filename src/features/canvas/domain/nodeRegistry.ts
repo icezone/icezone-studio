@@ -34,10 +34,6 @@ export interface CanvasNodeConnectivity {
   outputDataType: CanvasDataType | null;
   /** Data types accepted by this node's target handle. Empty = data source only. */
   inputDataTypes: CanvasDataType[];
-  connectMenu: {
-    fromSource: boolean;
-    fromTarget: boolean;
-  };
 }
 
 export interface CanvasNodeDefinition<TData extends CanvasNodeData = CanvasNodeData> {
@@ -64,10 +60,6 @@ const uploadNodeDefinition: CanvasNodeDefinition<UploadImageNodeData> = {
     targetHandle: false,
     outputDataType: 'image',
     inputDataTypes: [],
-    connectMenu: {
-      fromSource: false,
-      fromTarget: true,
-    },
   },
   createDefaultData: () => ({
     displayName: DEFAULT_NODE_DISPLAY_NAME[CANVAS_NODE_TYPES.upload],
@@ -93,10 +85,6 @@ const imageEditNodeDefinition: CanvasNodeDefinition<ImageEditNodeData> = {
     targetHandle: true,
     outputDataType: 'image',
     inputDataTypes: ['image', 'text'],
-    connectMenu: {
-      fromSource: true,
-      fromTarget: false,
-    },
   },
   createDefaultData: () => ({
     displayName: DEFAULT_NODE_DISPLAY_NAME[CANVAS_NODE_TYPES.imageEdit],
@@ -129,10 +117,6 @@ const groupNodeDefinition: CanvasNodeDefinition<GroupNodeData> = {
     targetHandle: false,
     outputDataType: null,
     inputDataTypes: [],
-    connectMenu: {
-      fromSource: false,
-      fromTarget: false,
-    },
   },
   createDefaultData: () => ({
     displayName: DEFAULT_NODE_DISPLAY_NAME[CANVAS_NODE_TYPES.group],
@@ -154,10 +138,6 @@ const textAnnotationNodeDefinition: CanvasNodeDefinition<TextAnnotationNodeData>
     targetHandle: false,
     outputDataType: null,
     inputDataTypes: [],
-    connectMenu: {
-      fromSource: false,
-      fromTarget: false,
-    },
   },
   createDefaultData: () => ({
     displayName: DEFAULT_NODE_DISPLAY_NAME[CANVAS_NODE_TYPES.textAnnotation],
@@ -179,10 +159,6 @@ const storyboardSplitDefinition: CanvasNodeDefinition<StoryboardSplitNodeData> =
     targetHandle: true,
     outputDataType: 'image-set',
     inputDataTypes: ['image'],
-    connectMenu: {
-      fromSource: false,
-      fromTarget: false,
-    },
   },
   createDefaultData: () => ({
     displayName: DEFAULT_NODE_DISPLAY_NAME[CANVAS_NODE_TYPES.storyboardSplit],
@@ -220,10 +196,6 @@ const storyboardGenNodeDefinition: CanvasNodeDefinition<StoryboardGenNodeData> =
     targetHandle: true,
     outputDataType: 'image-set',
     inputDataTypes: ['text', 'image'],
-    connectMenu: {
-      fromSource: true,
-      fromTarget: false,
-    },
   },
   createDefaultData: () => ({
     displayName: DEFAULT_NODE_DISPLAY_NAME[CANVAS_NODE_TYPES.storyboardGen],
@@ -258,10 +230,6 @@ const videoGenNodeDefinition: CanvasNodeDefinition<import('./canvasNodes').Video
     targetHandle: true,
     outputDataType: 'video',
     inputDataTypes: ['image', 'text'],
-    connectMenu: {
-      fromSource: true,
-      fromTarget: false,
-    },
   },
   createDefaultData: () => ({
     displayName: DEFAULT_NODE_DISPLAY_NAME[CANVAS_NODE_TYPES.videoGen],
@@ -299,10 +267,6 @@ const novelInputNodeDefinition: CanvasNodeDefinition<NovelInputNodeData> = {
     targetHandle: false,
     outputDataType: 'text',
     inputDataTypes: [],
-    connectMenu: {
-      fromSource: true,
-      fromTarget: false,
-    },
   },
   createDefaultData: () => ({
     displayName: DEFAULT_NODE_DISPLAY_NAME[CANVAS_NODE_TYPES.novelInput],
@@ -332,10 +296,6 @@ const videoAnalysisNodeDefinition: CanvasNodeDefinition<VideoAnalysisNodeData> =
     targetHandle: true,
     outputDataType: 'image-set',
     inputDataTypes: ['video'],
-    connectMenu: {
-      fromSource: true,
-      fromTarget: true,
-    },
   },
   createDefaultData: () => ({
     displayName: DEFAULT_NODE_DISPLAY_NAME[CANVAS_NODE_TYPES.videoAnalysis],
@@ -380,16 +340,4 @@ export function nodeHasSourceHandle(type: CanvasNodeType): boolean {
 
 export function nodeHasTargetHandle(type: CanvasNodeType): boolean {
   return canvasNodeDefinitions[type].connectivity.targetHandle;
-}
-
-export function getConnectMenuNodeTypes(handleType: 'source' | 'target'): CanvasNodeType[] {
-  const fromSource = handleType === 'source';
-  return Object.values(canvasNodeDefinitions)
-    .filter((definition) => (fromSource
-      ? definition.connectivity.connectMenu.fromSource
-      : definition.connectivity.connectMenu.fromTarget))
-    .filter((definition) => (fromSource
-      ? definition.connectivity.targetHandle
-      : definition.connectivity.sourceHandle))
-    .map((definition) => definition.type);
 }
