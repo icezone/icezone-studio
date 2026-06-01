@@ -29,6 +29,9 @@
 - `src/features/canvas/nodes/*.tsx` - 所有节点组件
 - `src/features/canvas/nodes/ImageEditNode.tsx` - 图片编辑节点
 - `src/features/canvas/nodes/GroupNode.tsx` - 编组节点
+- `src/features/canvas/nodes/storyboardGen/` - StoryboardGenNode 子模块（useStoryboardGenForm hook、StoryboardGenSettings、StoryboardGenBatchControls）
+- `src/features/canvas/nodes/videoGen/` - VideoGenNode 子模块（useVideoGenForm hook、VideoGenSettings、VideoGenFramePicker）
+- `src/features/canvas/nodes/storyboard/` - StoryboardNode 子模块（useStoryboardSort hook、StoryboardExportPanel、StoryboardPackControls）
 - `src/features/canvas/ui/SelectedNodeOverlay.tsx` - 选中覆盖层
 - `src/features/canvas/ui/NodeActionToolbar.tsx` - 节点操作工具条
 - `src/features/canvas/ui/NodeToolDialog.tsx` - 节点工具对话框
