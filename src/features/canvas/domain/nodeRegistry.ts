@@ -149,7 +149,7 @@ const storyboardSplitDefinition: CanvasNodeDefinition<StoryboardSplitNodeData> =
   type: CANVAS_NODE_TYPES.storyboardSplit,
   menuLabelKey: 'node.menu.storyboard',
   menuIcon: 'layout',
-  visibleInMenu: true,
+  visibleInMenu: false,
   capabilities: {
     toolbar: false,
     promptInput: false,

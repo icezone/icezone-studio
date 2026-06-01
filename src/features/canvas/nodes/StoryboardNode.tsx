@@ -643,8 +643,20 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
             )
             : null}
 
-          <div className="mt-2 flex shrink-0 items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
+          <div className="mt-2 flex shrink-0 flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <div className="truncate text-[11px] text-[var(--canvas-node-fg-muted)]/80">
+                {gridRows} x {gridCols} | {totalFrames} 格
+              </div>
+              <StoryboardPackControls
+                nodeId={id}
+                frames={orderedFrames}
+                exportOptions={exportOptions}
+                isExportBusy={isExportBusy}
+                onPackingChange={setIsPackingSingleImages}
+              />
+            </div>
+            <div className="flex items-center gap-2">
               <StoryboardExportPanel
                 nodeId={id}
                 frames={orderedFrames}
@@ -655,19 +667,7 @@ export const StoryboardNode = memo(({ id, data, selected, width, height }: Story
                 onExportingChange={setIsExportBusy}
                 siblingExporting={isPackingSingleImages}
               />
-
-              <div className="truncate text-[11px] text-[var(--canvas-node-fg-muted)]/80">
-                {gridRows} x {gridCols} | {totalFrames} 格
-              </div>
             </div>
-
-            <StoryboardPackControls
-              nodeId={id}
-              frames={orderedFrames}
-              exportOptions={exportOptions}
-              isExportBusy={isExportBusy}
-              onPackingChange={setIsPackingSingleImages}
-            />
           </div>
 
           {nodeError && <div className="mt-2 shrink-0 text-xs text-red-400">{nodeError}</div>}
