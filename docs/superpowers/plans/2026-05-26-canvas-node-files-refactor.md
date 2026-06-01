@@ -906,14 +906,14 @@ git commit -m "refactor(canvas/storyboard): extract StoryboardPackControls compo
 
 ### Task D.4: Phase 3.D sanity check
 
-- [ ] **Step 1: Line count**
+- [x] **Step 1: Line count**
 
 ```
 wc -l src/features/canvas/nodes/StoryboardNode.tsx src/features/canvas/nodes/storyboard/*.{ts,tsx}
 ```
 Expected: `StoryboardNode.tsx` ≈ 700 lines (FrameCard kept inline), sub-modules ≈ 600-700 lines.
 
-- [ ] **Step 2: Regression smoke**
+- [x] **Step 2: Regression smoke**
 
 - Drop a storyboardSplit node. Drop an upload upstream connected.
 - Verify frames render in the grid.
@@ -929,15 +929,15 @@ Phase 3.D done.
 
 After all three phases land:
 
-- [ ] **Step 1: Run the full smoke checklist**
+- [x] **Step 1: Run the full smoke checklist**
 
 End-to-end: novelInput → storyboardGen → storyboardSplit → exported file. Also videoGen → videoAnalysis loop.
 
-- [ ] **Step 2: Update CODEMAP / module docs**
+- [x] **Step 2: Update CODEMAP / module docs**
 
 If `docs/architecture/codebase-guide.md` lists per-file LOC or module ownership, update the storyboardGen, videoGen, storyboard sub-directories with one line each. The pattern is described in [docs/extensions/add-node.md](../../extensions/add-node.md).
 
-- [ ] **Step 3: Final commit**
+- [x] **Step 3: Final commit**
 
 ```
 git add docs/architecture/codebase-guide.md
