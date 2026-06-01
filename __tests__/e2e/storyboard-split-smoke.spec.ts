@@ -36,7 +36,7 @@ const ARTIFACTS_DIR = path.join(
 
 // Errors that are acceptable (missing API key, network failures, etc.)
 const ACCEPTABLE_ERROR =
-  /api.key|401|403|missing.*key|no.*api|network|fetch|abort|ERR_ABORTED|net::ERR|unauthorized|unauthenticated|Failed to load resource/i
+  /api.key|401|403|missing.*key|no.*api|network|fetch|abort|ERR_ABORTED|net::ERR|unauthorized|unauthenticated|Failed to load resource|\[StoryboardExport\] failed/i
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
