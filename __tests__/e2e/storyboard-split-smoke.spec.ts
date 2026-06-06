@@ -137,22 +137,16 @@ test.describe('StoryboardSplit node — Phase 3.D smoke test', () => {
   test('full storyboardSplit node smoke checklist', async ({ page }) => {
     test.setTimeout(180_000)
 
-    // ── Add storyboardSplit node — menu label is "分镜" (exact, not "分镜生成") ─
-    // Use getByText with exact match to avoid matching "分镜生成"
-    await page.click('[data-testid="add-node-button"]')
+    // ── Add storyboardSplit node programmatically ─────────────────────────────
+    // storyboardSplit is a result node (visibleInMenu: false) — it is created by
+    // the split action, not via the canvas add-menu. We inject it directly through
+    // the store which is exposed on window.__canvasStore on localhost for E2E use.
+    await page.evaluate(() => {
+      const store = (window as any).__canvasStore
+      if (!store) throw new Error('__canvasStore not found — Canvas.tsx test hook missing')
+      store.getState().addNode('storyboardSplit', { x: 400, y: 300 })
+    })
     await page.waitForTimeout(500)
-    // Use exact text match: the storyboardSplit entry is exactly "分镜", not "分镜生成"
-    const splitOption = page.getByText('分镜', { exact: true }).first()
-    const splitOptionVisible = await splitOption.isVisible({ timeout: 5_000 }).catch(() => false)
-    if (splitOptionVisible) {
-      await splitOption.click()
-    } else {
-      // Fallback: look for item whose full text content is exactly "分镜"
-      const allMenuItems = page.locator('[role="menuitem"], li, button').filter({ hasText: /^分镜$/ })
-      await allMenuItems.first().click()
-    }
-    await page.keyboard.press('Escape')
-    await page.waitForTimeout(300)
 
     // ── CHECK 1: Node renders ─────────────────────────────────────────────────
     // The root div has data-testid="node-storyboard" (confirmed in StoryboardNode.tsx line 502)

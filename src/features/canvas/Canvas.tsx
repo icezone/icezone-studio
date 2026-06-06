@@ -371,6 +371,12 @@ function CanvasInner() {
   );
 
   useEffect(() => {
+    if (window.location.hostname === 'localhost') {
+      (window as any).__canvasStore = useCanvasStore;
+    }
+  }, []);
+
+  useEffect(() => {
     const unsubscribeOpen = canvasEventBus.subscribe('tool-dialog/open', (payload) => {
       openToolDialog(payload);
     });
