@@ -145,7 +145,7 @@ test.describe('StoryboardSplit node — Phase 3.D smoke test', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const store = (window as any).__canvasStore
       if (!store) throw new Error('__canvasStore not found — Canvas.tsx test hook missing')
-      store.getState().addNode('storyboardSplit', { x: 400, y: 300 })
+      store.getState().addNode('storyboardNode', { x: 400, y: 300 })
     })
     await page.waitForTimeout(500)
 
