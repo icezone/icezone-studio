@@ -142,6 +142,7 @@ test.describe('StoryboardSplit node — Phase 3.D smoke test', () => {
     // the split action, not via the canvas add-menu. We inject it directly through
     // the store which is exposed on window.__canvasStore on localhost for E2E use.
     await page.evaluate(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const store = (window as any).__canvasStore
       if (!store) throw new Error('__canvasStore not found — Canvas.tsx test hook missing')
       store.getState().addNode('storyboardSplit', { x: 400, y: 300 })
