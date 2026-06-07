@@ -141,13 +141,18 @@ test.describe('StoryboardSplit node — Phase 3.D smoke test', () => {
     // storyboardSplit is a result node (visibleInMenu: false) — it is created by
     // the split action, not via the canvas add-menu. We inject it directly through
     // the store which is exposed on window.__canvasStore on localhost for E2E use.
+    //
+    // Wait for networkidle first: canvas loads persisted data via an API call after
+    // mount, and setCanvasData() would overwrite a node injected before that call
+    // completes (race condition).
+    await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {})
     await page.evaluate(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const store = (window as any).__canvasStore
       if (!store) throw new Error('__canvasStore not found — Canvas.tsx test hook missing')
       store.getState().addNode('storyboardNode', { x: 400, y: 300 })
     })
-    await page.waitForTimeout(500)
+    await page.waitForTimeout(800)
 
     // ── CHECK 1: Node renders ─────────────────────────────────────────────────
     // The root div has data-testid="node-storyboard" (confirmed in StoryboardNode.tsx line 502)
