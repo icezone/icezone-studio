@@ -374,8 +374,10 @@ function CanvasInner() {
     if (window.location.hostname === 'localhost') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).__canvasStore = useCanvasStore;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).__canvasFitView = () => reactFlowInstance.fitView({ padding: 0.15 });
     }
-  }, []);
+  }, [reactFlowInstance]);
 
   useEffect(() => {
     const unsubscribeOpen = canvasEventBus.subscribe('tool-dialog/open', (payload) => {

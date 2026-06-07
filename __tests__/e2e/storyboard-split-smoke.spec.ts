@@ -152,14 +152,15 @@ test.describe('StoryboardSplit node — Phase 3.D smoke test', () => {
       if (!store) throw new Error('__canvasStore not found — Canvas.tsx test hook missing')
       store.getState().addNode('storyboardNode', { x: 400, y: 300 })
     })
-    // React Flow 12 culls nodes outside the viewport from the DOM.
-    // Click the "适应视图" toolbar button to bring the injected node into view.
+    // React Flow 12 culls nodes outside the viewport (onlyRenderVisibleElements).
+    // Call fitView() via the exposed instance so the injected node enters the viewport
+    // and React Flow renders its DOM element.
     await page.waitForTimeout(300)
-    const fitViewBtn = page.locator('button[title="适应视图"]')
-    if (await fitViewBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await fitViewBtn.click()
-    }
-    await page.waitForTimeout(500)
+    await page.evaluate(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(window as any).__canvasFitView?.()
+    })
+    await page.waitForTimeout(600)
 
     // ── CHECK 1: Node renders ─────────────────────────────────────────────────
     // The root div has data-testid="node-storyboard" (confirmed in StoryboardNode.tsx line 502)
