@@ -145,27 +145,32 @@ test.describe('StoryboardSplit node — Phase 3.D smoke test', () => {
     // Wait for networkidle first: canvas loads persisted data via an API call after
     // mount, and setCanvasData() would overwrite a node injected before that call
     // completes (race condition).
+    // The canvas reloads data via Supabase real-time after the initial HTTP load,
+    // which calls setCanvasData({nodes:[]}) and wipes any injected node.
+    // Strategy: inject the node AND subscribe to re-inject whenever nodes are cleared,
+    // then wait for the element to appear in the DOM (stable after real-time settles).
     await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {})
+    // Supabase real-time fires an initial canvas-data event via WebSocket ~1-2s after
+    // page load. That event calls setCanvasData({nodes:[]}) and would overwrite a node
+    // injected before it arrives. Waiting 4s ensures the WebSocket has settled before
+    // we inject — no subscription-based re-inject needed.
+    await page.waitForTimeout(4_000)
+
     await page.evaluate(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const store = (window as any).__canvasStore
       if (!store) throw new Error('__canvasStore not found — Canvas.tsx test hook missing')
       store.getState().addNode('storyboardNode', { x: 400, y: 300 })
-    })
-    // React Flow 12 culls nodes outside the viewport (onlyRenderVisibleElements).
-    // Call fitView() via the exposed instance so the injected node enters the viewport
-    // and React Flow renders its DOM element.
-    await page.waitForTimeout(300)
-    await page.evaluate(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ;(window as any).__canvasFitView?.()
+      setTimeout(() => (window as any).__canvasFitView?.(), 300)
     })
-    await page.waitForTimeout(600)
 
     // ── CHECK 1: Node renders ─────────────────────────────────────────────────
     // The root div has data-testid="node-storyboard" (confirmed in StoryboardNode.tsx line 502)
+    // Use waitForSelector (15s) to handle the real-time re-inject cycle.
+    await page.waitForSelector('[data-testid="node-storyboard"]', { timeout: 15_000 })
     const node = page.locator('[data-testid="node-storyboard"]').first()
-    await expect(node).toBeVisible({ timeout: 10_000 })
+    await expect(node).toBeVisible({ timeout: 5_000 })
     await shot(page, '01-node-added')
     console.log('[CHECK 1] data-testid="node-storyboard" visible, no blank area: PASS')
 
